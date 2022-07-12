@@ -22,7 +22,7 @@ fun TrainerSelector(trainers: List<Trainer>, changeScreen: (id: Int) -> Unit) {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+        verticalArrangement = Arrangement.SpaceEvenly,
 
         modifier = Modifier.fillMaxSize(),
     ) {
