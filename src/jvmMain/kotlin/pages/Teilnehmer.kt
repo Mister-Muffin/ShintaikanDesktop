@@ -34,6 +34,9 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
             searchStudents.add(student)
         }
     }
+
+    val checked = remember { mutableStateListOf<String>() }
+
     Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -94,13 +97,13 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                     }
                 })
             }
-            val farbe = remember { mutableStateOf("") }
             LazyColumn {
                 val farben = arrayOf("Weiß", "Gelb", "Rot", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
-
                 items(farben) { c ->
+
                     fun handleChecked() {
-                        if (farbe.value == c) farbe.value = "" else farbe.value = c
+                        //if (farbe.value == c) farbe.value = "" else farbe.value = c
+                        if (checked.contains(c)) checked.remove(c) else checked.add(c)
                     }
 
                     Box(
@@ -108,7 +111,7 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                             .clickable { handleChecked() }) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(
-                                checked = farbe.value == c,
+                                checked = checked.contains(c),
                                 colors = CheckboxDefaults.colors(checkedColor = Color.Gray),
                                 onCheckedChange = { handleChecked() })
                             Text(text = c)
