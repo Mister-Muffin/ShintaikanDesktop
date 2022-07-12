@@ -4,9 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Divider
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -16,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import models.Student
@@ -41,25 +40,6 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
             modifier = Modifier.width(250.dp)
         ) {
             LazyColumn {
-                item {
-                    TextField(searchQuery.value, onValueChange = { newVal ->
-                        searchQuery.value = newVal
-                        searchStudents.clear()
-                        for (student in allStudents) {
-                            searchStudents.add(student)
-                        }
-                        if (newVal.isNotEmpty()) {
-                            val filtered = searchStudents.filter {
-                                it.prename.toLowerCase().contains(newVal.toLowerCase()) ||
-                                        it.surname.toLowerCase().contains(newVal.toLowerCase())
-                            }
-                            searchStudents.clear()
-                            for (student in filtered) {
-                                searchStudents.add(student)
-                            }
-                        }
-                    })
-                }
                 items(searchStudents) { student ->
                     Box(
                         modifier = Modifier.width(250.dp).height(25.dp).background(boxColor(student)).clickable {
@@ -88,6 +68,45 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                 }
             }
         }
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.width(250.dp).fillMaxHeight()
+        ) {
+            Column {
+                Text("Suchen:")
+                TextField(searchQuery.value, onValueChange = { newVal ->
+                    searchQuery.value = newVal
+                    searchStudents.clear()
+                    for (student in allStudents) {
+                        searchStudents.add(student)
+                    }
+                    if (newVal.isNotEmpty()) {
+                        val filtered = searchStudents.filter {
+                            it.prename.toLowerCase().contains(newVal.toLowerCase()) ||
+                                    it.surname.toLowerCase().contains(newVal.toLowerCase())
+                        }
+                        searchStudents.clear()
+                        for (student in filtered) {
+                            searchStudents.add(student)
+                        }
+                    }
+                })
+            }
+
+            Button(
+                enabled = newStudents.isNotEmpty(),
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
+                modifier = Modifier.fillMaxWidth().height(60.dp),
+                onClick = {}) {
+                Text(
+                    textAlign = TextAlign.Center,
+                    text = if (newStudents.isEmpty()) "Teilnehmen aus der ersten Spalte auswählen" else "Eingabe bestätigen!"
+                )
+            }
+
+        }
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
