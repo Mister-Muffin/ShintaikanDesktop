@@ -28,11 +28,12 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
     val newStudents = remember { mutableStateListOf<Student>() }
     val allStudents = remember { mutableStateListOf<Student>() }
     val searchStudents = remember { mutableStateListOf<Student>() }
-    for (student in students) {
-        allStudents.add(student)
-        searchStudents.add(student)
+    remember {
+        for (student in students) {
+            allStudents.add(student)
+            searchStudents.add(student)
+        }
     }
-
     Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -118,6 +119,8 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                         modifier = Modifier.width(250.dp).height(25.dp).background(boxColor(student)).clickable {
                             allStudents.add(student)
                             allStudents.sortedByDescending { it.level }
+                            searchStudents.add(student)
+                            searchStudents.sortedByDescending { it.level }
                             newStudents.remove(student)
                         },
                         contentAlignment = Alignment.CenterStart,
