@@ -94,6 +94,28 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                     }
                 })
             }
+            val farbe = remember { mutableStateOf("") }
+            LazyColumn {
+                val farben = arrayOf("Weiß", "Gelb", "Rot", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
+
+                items(farben) { c ->
+                    fun handleChecked() {
+                        if (farbe.value == c) farbe.value = "" else farbe.value = c
+                    }
+
+                    Box(
+                        modifier = Modifier.width(200.dp)
+                            .clickable { handleChecked() }) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                checked = farbe.value == c,
+                                colors = CheckboxDefaults.colors(checkedColor = Color.Gray),
+                                onCheckedChange = { handleChecked() })
+                            Text(text = c)
+                        }
+                    }
+                }
+            }
 
             Button(
                 enabled = newStudents.isNotEmpty(),
