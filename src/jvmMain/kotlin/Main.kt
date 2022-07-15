@@ -11,6 +11,7 @@ import androidx.compose.ui.window.application
 import models.loadStudents
 import models.loadTrainers
 import org.jetbrains.exposed.sql.Database
+import pages.TeilnehmerSelector
 
 fun main() {
     application {

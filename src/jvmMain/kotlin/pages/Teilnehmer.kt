@@ -1,4 +1,5 @@
-import androidx.compose.foundation.ExperimentalFoundationApi
+package pages
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -20,7 +21,6 @@ import androidx.compose.ui.unit.sp
 import models.Student
 import java.util.*
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit) {
 
@@ -45,7 +45,7 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
             modifier = Modifier.width(250.dp)
         ) {
             LazyColumn {
-                items(searchStudents) { student ->
+                items(searchStudents) { /* linke spalte */ student ->
                     Box(
                         modifier = Modifier.width(250.dp).height(25.dp).background(boxColor(student)).clickable {
                             newStudents.add(student)
@@ -78,7 +78,7 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
             verticalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier.width(250.dp).fillMaxHeight()
         ) {
-            Column {
+            Column { // search column
                 Text("Suchen:")
                 TextField(searchQuery.value, onValueChange = { newVal ->
                     searchQuery.value = newVal
@@ -89,7 +89,8 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                     if (newVal.isNotEmpty()) {
                         val filtered = searchStudents.filter {
                             it.prename.lowercase(Locale.getDefault()).contains(newVal.lowercase(Locale.getDefault())) ||
-                                    it.surname.lowercase(Locale.getDefault()).contains(newVal.lowercase(Locale.getDefault()))
+                                    it.surname.lowercase(Locale.getDefault())
+                                        .contains(newVal.lowercase(Locale.getDefault()))
                         }
                         searchStudents.clear()
                         for (student in filtered) {
@@ -98,7 +99,7 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                     }
                 })
             }
-            LazyColumn {
+            LazyColumn { // filter
                 val farben = arrayOf("Weiß", "Gelb", "Rot", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
                 items(farben) { c ->
 
@@ -121,7 +122,7 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                 }
             }
 
-            Button(
+            Button( // eingabe bestätigen
                 enabled = newStudents.isNotEmpty(),
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
                 modifier = Modifier.fillMaxWidth().height(60.dp),
