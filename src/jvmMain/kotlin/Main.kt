@@ -34,9 +34,7 @@ fun main() {
                         TrainerSelector(trainers) { screenID = it }
                     }
                     1 -> {
-                        TeilnehmerSelector(students) {
-                            screenID = it
-                        }
+                        TeilnehmerSelector(students) { screenID = it }
                     }
                     else -> Text("Missing page", modifier = Modifier.clickable { screenID = 0 })
                 }
