@@ -38,6 +38,10 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
 
     val checked = remember { mutableStateListOf<String>() }
 
+    fun findMatch(s: String, strings: List<String>): Boolean {
+        return strings.any { a -> s.contains(a.lowercase(Locale.getDefault())) }
+    }
+
     Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -45,7 +49,12 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
             modifier = Modifier.width(250.dp)
         ) {
             LazyColumn {
-                items(searchStudents) { /* linke spalte */ student ->
+                items(if (checked.isNotEmpty()) searchStudents.filter { s ->
+                    findMatch(
+                        s.level,
+                        checked
+                    )
+                } else searchStudents) { /* linke spalte */ student ->
                     Box(
                         modifier = Modifier.width(250.dp).height(25.dp).background(boxColor(student)).clickable {
                             newStudents.add(student)
@@ -100,7 +109,7 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                 })
             }
             LazyColumn { // filter
-                val farben = arrayOf("Weiß", "Gelb", "Rot", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
+                val farben = arrayOf("Weiss", "Gelb", "Rot", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
                 items(farben) { c ->
 
                     fun handleChecked() {
