@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import models.Student
+import java.util.*
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -87,8 +88,8 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                     }
                     if (newVal.isNotEmpty()) {
                         val filtered = searchStudents.filter {
-                            it.prename.toLowerCase().contains(newVal.toLowerCase()) ||
-                                    it.surname.toLowerCase().contains(newVal.toLowerCase())
+                            it.prename.lowercase(Locale.getDefault()).contains(newVal.lowercase(Locale.getDefault())) ||
+                                    it.surname.lowercase(Locale.getDefault()).contains(newVal.lowercase(Locale.getDefault()))
                         }
                         searchStudents.clear()
                         for (student in filtered) {
