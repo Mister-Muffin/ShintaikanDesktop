@@ -54,7 +54,19 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                         s.level,
                         checked
                     )
-                } else searchStudents) { /* linke spalte */ student ->
+                }
+                    .filter {
+                        it.prename.lowercase(Locale.getDefault()).contains(searchQuery.value) ||
+                                it.surname.lowercase(Locale.getDefault()).contains(searchQuery.value)
+                    } else searchStudents.filter {
+                    it.prename.lowercase(Locale.getDefault()).contains(searchQuery.value) ||
+                            it.surname.lowercase(Locale.getDefault()).contains(searchQuery.value) ||
+                            arrayListOf<String>(
+                                it.prename.lowercase(Locale.getDefault()),
+                                it.surname.lowercase(Locale.getDefault())
+                            ).joinToString()
+                                .contains(searchQuery.value.split(" ").joinToString())
+                }) { /* linke spalte */ student ->
                     Box(
                         modifier = Modifier.width(250.dp).height(25.dp).background(boxColor(student)).clickable {
                             newStudents.add(student)
@@ -90,8 +102,8 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
             Column { // search column
                 Text("Suchen:")
                 TextField(searchQuery.value, onValueChange = { newVal ->
-                    searchQuery.value = newVal
-                    searchStudents.clear()
+                    searchQuery.value = newVal.lowercase(Locale.getDefault())
+/*                    searchStudents.clear()
                     for (student in allStudents) {
                         searchStudents.add(student)
                     }
@@ -105,7 +117,7 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                         for (student in filtered) {
                             searchStudents.add(student)
                         }
-                    }
+                    }*/
                 })
             }
             LazyColumn { // filter
