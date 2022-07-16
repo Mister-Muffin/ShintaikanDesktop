@@ -49,23 +49,15 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
             modifier = Modifier.width(250.dp)
         ) {
             LazyColumn {
-                items(if (checked.isNotEmpty()) searchStudents.filter { s ->
-                    findMatch(
-                        s.level,
-                        checked
-                    )
-                }
-                    .filter {
-                        it.prename.lowercase(Locale.getDefault()).contains(searchQuery.value) ||
-                                it.surname.lowercase(Locale.getDefault()).contains(searchQuery.value)
-                    } else searchStudents.filter {
-                    it.prename.lowercase(Locale.getDefault()).contains(searchQuery.value) ||
-                            it.surname.lowercase(Locale.getDefault()).contains(searchQuery.value) ||
-                            arrayListOf<String>(
-                                it.prename.lowercase(Locale.getDefault()),
-                                it.surname.lowercase(Locale.getDefault())
-                            ).joinToString()
-                                .contains(searchQuery.value.split(" ").joinToString())
+                items((if (checked.isNotEmpty()) searchStudents.filter { s -> // filter checkboxes ->
+                    findMatch(s.level, checked)
+                } // <- filter checkboxes
+                else searchStudents).filter { // filter again for search ->
+                    arrayListOf<String>(
+                        it.prename.lowercase(Locale.getDefault()),
+                        it.surname.lowercase(Locale.getDefault())
+                    ).joinToString()
+                        .contains(searchQuery.value.split(" ").joinToString()) // <- filter again for search
                 }) { /* linke spalte */ student ->
                     Box(
                         modifier = Modifier.width(250.dp).height(25.dp).background(boxColor(student)).clickable {
