@@ -53,7 +53,7 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                     findMatch(s.level, checked)
                 } // <- filter checkboxes
                 else searchStudents).filter { // filter again for search ->
-                    arrayListOf<String>(
+                    arrayListOf(
                         it.prename.lowercase(Locale.getDefault()),
                         it.surname.lowercase(Locale.getDefault())
                     ).joinToString()
