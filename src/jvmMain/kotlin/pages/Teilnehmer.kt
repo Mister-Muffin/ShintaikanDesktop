@@ -103,21 +103,6 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                 Text("Suchen:")
                 TextField(searchQuery.value, onValueChange = { newVal ->
                     searchQuery.value = newVal.lowercase(Locale.getDefault())
-/*                    searchStudents.clear()
-                    for (student in allStudents) {
-                        searchStudents.add(student)
-                    }
-                    if (newVal.isNotEmpty()) {
-                        val filtered = searchStudents.filter {
-                            it.prename.lowercase(Locale.getDefault()).contains(newVal.lowercase(Locale.getDefault())) ||
-                                    it.surname.lowercase(Locale.getDefault())
-                                        .contains(newVal.lowercase(Locale.getDefault()))
-                        }
-                        searchStudents.clear()
-                        for (student in filtered) {
-                            searchStudents.add(student)
-                        }
-                    }*/
                 })
             }
             LazyColumn { // filter
