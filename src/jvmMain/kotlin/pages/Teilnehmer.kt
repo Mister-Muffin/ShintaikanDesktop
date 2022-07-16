@@ -58,7 +58,8 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                         it.surname.lowercase(Locale.getDefault())
                     ).joinToString()
                         .contains(searchQuery.value.split(" ").joinToString()) // <- filter again for search
-                }) { /* linke spalte */ student ->
+                }.sortedByDescending { it.level })
+                { /* linke spalte */ student ->
                     Box(
                         modifier = Modifier.width(250.dp).height(25.dp).background(boxColor(student)).clickable {
                             newStudents.add(student)
