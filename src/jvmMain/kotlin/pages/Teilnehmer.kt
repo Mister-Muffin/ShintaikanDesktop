@@ -125,7 +125,7 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                 enabled = newStudents.isNotEmpty(),
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
                 modifier = Modifier.fillMaxWidth().height(60.dp),
-                onClick = {}) {
+                onClick = { changeScreen(2) }) {
                 Text(
                     textAlign = TextAlign.Center,
                     text = if (newStudents.isEmpty()) "Teilnehmen aus der ersten Spalte auswählen" else "Eingabe bestätigen!"
