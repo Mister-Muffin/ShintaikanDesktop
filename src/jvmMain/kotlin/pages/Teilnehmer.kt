@@ -58,7 +58,7 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                         it.surname.lowercase(Locale.getDefault())
                     ).joinToString()
                         .contains(searchQuery.value.split(" ").joinToString()) // <- filter again for search
-                }.sortedByDescending { it.level })
+                }.sortedByDescending { it.id }.sortedByDescending { it.level })
                 { /* linke spalte */ student ->
                     Box(
                         modifier = Modifier.width(250.dp).height(25.dp).background(boxColor(student)).clickable {
@@ -144,9 +144,7 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                     Box(
                         modifier = Modifier.width(250.dp).height(25.dp).background(boxColor(student)).clickable {
                             allStudents.add(student)
-                            allStudents.sortedByDescending { it.level }
                             searchStudents.add(student)
-                            searchStudents.sortedByDescending { it.level }
                             newStudents.remove(student)
                         },
                         contentAlignment = Alignment.CenterStart,
