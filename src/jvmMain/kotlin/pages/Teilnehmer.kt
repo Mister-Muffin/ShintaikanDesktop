@@ -56,8 +56,8 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                     arrayListOf(
                         it.prename.lowercase(Locale.getDefault()),
                         it.surname.lowercase(Locale.getDefault())
-                    ).joinToString()
-                        .contains(searchQuery.value.split(" ").joinToString()) // <- filter again for search
+                    ).joinToString(" ") // "prename surname"
+                        .contains(searchQuery.value) // <- filter again for search
                 }.sortedByDescending { it.id }.sortedByDescending { it.level })
                 { /* linke spalte */ student ->
                     Box(
