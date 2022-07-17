@@ -142,11 +142,15 @@ fun TeilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
             LazyColumn {
                 items(newStudents) { student ->
                     Box(
-                        modifier = Modifier.width(250.dp).height(25.dp).background(boxColor(student)).clickable {
-                            allStudents.add(student)
-                            searchStudents.add(student)
-                            newStudents.remove(student)
-                        },
+                        modifier = Modifier
+                            .width(250.dp)
+                            .height(25.dp)
+                            .background(boxColor(student))
+                            .clickable {
+                                allStudents.add(student)
+                                searchStudents.add(student)
+                                newStudents.remove(student)
+                            },
                         contentAlignment = Alignment.CenterStart,
                     ) {
                         Text(
