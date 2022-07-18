@@ -9,11 +9,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import models.Trainer
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -26,13 +22,6 @@ fun TrainerSelector(trainers: List<Trainer>, changeScreen: (id: Int) -> Unit) {
 
         modifier = Modifier.fillMaxSize(),
     ) {
-        Text(
-            "Willkommen!",
-            style = TextStyle(color = Color(0xffff8f06), fontSize = 30.sp),
-            fontWeight = FontWeight.Light,
-            fontFamily = FontFamily.Monospace,
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
         Text("Wer bist du?")
         var selectedTrainer: Trainer? by remember { mutableStateOf(null) }
         var selectedCotrainer: Trainer? by remember { mutableStateOf(null) }
