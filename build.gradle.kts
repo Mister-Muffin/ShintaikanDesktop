@@ -26,6 +26,7 @@ kotlin {
         val jvmMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
+                implementation("org.slf4j:slf4j-simple:1.7.36")
                 implementation("org.jetbrains.exposed:exposed-core:0.38.1")
                 implementation("org.jetbrains.exposed:exposed-jdbc:0.38.1")
                 implementation("org.jetbrains.exposed:exposed-java-time:0.38.1")
