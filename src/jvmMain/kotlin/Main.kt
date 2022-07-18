@@ -39,7 +39,7 @@ fun main() {
                 val loopId = 0
                 when (screenID) {
                     0 -> {
-                        StartPage(trainers) { screenID = it }
+                        StartPage(students) { screenID = it }
                     }
                     1 -> {
                         TrainerSelector(trainers) { screenID = it }
