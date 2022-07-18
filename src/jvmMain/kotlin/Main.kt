@@ -11,6 +11,7 @@ import androidx.compose.ui.window.application
 import models.loadStudents
 import models.loadTrainers
 import org.jetbrains.exposed.sql.Database
+import pages.StartPage
 import pages.teilnehmerSelector
 
 fun main() {
@@ -38,9 +39,12 @@ fun main() {
                 val loopId = 0
                 when (screenID) {
                     0 -> {
-                        TrainerSelector(trainers) { screenID = it }
+                        StartPage(trainers) { screenID = it }
                     }
                     1 -> {
+                        TrainerSelector(trainers) { screenID = it }
+                    }
+                    2 -> {
                         teilnehmerSelector(students) { screenID = it }
                     }
                     else -> Text("Missing page", modifier = Modifier.clickable { screenID = 0 })
