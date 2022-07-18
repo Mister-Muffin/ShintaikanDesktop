@@ -1,8 +1,10 @@
 package models
 
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.time.LocalDate
 
 object StudentTable : Table("teilnahme") {
     val id = integer("id")
@@ -10,10 +12,9 @@ object StudentTable : Table("teilnahme") {
     val prename = text("prename")
     val group = text("group")
     val level = text("level")
-
-    //val sessions = time("sessions")
     val sum_years = text("sum_years")
     val total = integer("total")
+    val birthday = date("birthday")
 }
 
 data class Student(
@@ -24,7 +25,8 @@ data class Student(
     val level: String,
     //val sessions: LocalTime,
     val sum_years: String,
-    val total: Int
+    val total: Int,
+    val birthday: LocalDate?
 )
 
 fun loadStudents(): List<Student> {
@@ -36,9 +38,9 @@ fun loadStudents(): List<Student> {
                 prename = it[StudentTable.prename],
                 group = it[StudentTable.group],
                 level = it[StudentTable.level],
-                //sessions = it[StudentTable.sessions],
                 sum_years = it[StudentTable.sum_years],
                 total = it[StudentTable.total],
+                birthday = it[StudentTable.birthday],
             )
         }
     }
