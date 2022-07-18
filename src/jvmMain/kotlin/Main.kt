@@ -11,7 +11,7 @@ import androidx.compose.ui.window.application
 import models.loadStudents
 import models.loadTrainers
 import org.jetbrains.exposed.sql.Database
-import pages.TeilnehmerSelector
+import pages.teilnehmerSelector
 
 fun main() {
     application {
@@ -41,7 +41,7 @@ fun main() {
                         TrainerSelector(trainers) { screenID = it }
                     }
                     1 -> {
-                        TeilnehmerSelector(students) { screenID = it }
+                        teilnehmerSelector(students) { screenID = it }
                     }
                     else -> Text("Missing page", modifier = Modifier.clickable { screenID = 0 })
                 }
