@@ -19,7 +19,9 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.rememberDialogState
 import models.Message
 import models.Student
 import models.addMessage
@@ -50,14 +52,14 @@ fun StartPage(students: List<Student>, messages: List<Message>, changeScreen: (i
     val newMessage = remember { mutableStateOf("") }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
-        if (showDeleteMessageDialog.value) alertDialog(
+        if (showDeleteMessageDialog.value) deleteDialog(
             messages = allMessages,
             onDismiss = { showDeleteMessageDialog.value = false })
-        if (showDeleteMessageDialog.value) {
+        /*if (showDeleteMessageDialog.value) {
             Window(onCloseRequest = { showDeleteMessageDialog.value = false }) {
                 Text("Hello, World!")
             }
-        }
+        }*/
         Text(
             "Willkommen!",
             style = TextStyle(color = Color(0xffff8f06), fontSize = 30.sp),
@@ -152,17 +154,15 @@ fun StartPage(students: List<Student>, messages: List<Message>, changeScreen: (i
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun alertDialog(messages: MutableList<Message>, onDismiss: () -> Unit) {
-    AlertDialog(onDismissRequest = { },
-        title = { Text("Hello title") },
-        confirmButton = { },
-        dismissButton = {
-            Button(onClick = onDismiss) {
-                Text("Schließen")
-            }
-        },
-        text = {
-            LazyColumn(modifier = Modifier.height(500.dp).width(500.dp)) {
+private fun deleteDialog(messages: MutableList<Message>, onDismiss: () -> Unit) {
+    Dialog(
+        state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 750.dp, height = 600.dp),
+        title = "Nachrichten löschen",
+        onCloseRequest = onDismiss
+    ) {
+        Column(modifier = Modifier.fillMaxSize().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            headerText("Nachichten löschen")
+            LazyColumn(horizontalAlignment = Alignment.Start) {
                 items(messages) {
                     Row {
                         Text(text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(it.dateCreated).toString() + ": ")
@@ -177,7 +177,8 @@ fun alertDialog(messages: MutableList<Message>, onDismiss: () -> Unit) {
                     Divider()
                 }
             }
-        })
+        }
+    }
 
 }
 
