@@ -191,7 +191,7 @@ private fun deleteDialog(messages: MutableList<Message>, onDismiss: () -> Unit) 
 private fun message(message: Message) {
     Row {
         Text(text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(message.dateCreated).toString() + ": ")
-        Text(text = message.message + " " + message.id)
+        Text(text = message.message)
     }
 }
 
