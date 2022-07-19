@@ -92,11 +92,16 @@ fun StartPage(students: List<Student>, messages: List<Message>, changeScreen: (i
                             //style = TextStyle(color = Color(0xffff8f06), fontSize = 30.sp),
                             fontWeight = FontWeight.Normal,
                         )
+                        @Suppress("KotlinConstantConditions")
                         Text(
                             text = if (period < 0) {
+                                "gestern"
+                            } else if (period < -1) {
                                 "vor ${period * (-1)} Tagen"
                             } else if (period > 0) {
-                                "in $period Tagen"
+                                "morgen"
+                            } else if (period > 1) {
+                                "vor ${period * (-1)} Tagen"
                             } else {
                                 "heute"
                             },
