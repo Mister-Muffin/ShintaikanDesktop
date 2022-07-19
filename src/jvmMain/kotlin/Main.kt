@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import models.loadMessages
 import models.loadStudents
 import models.loadTrainers
 import org.jetbrains.exposed.sql.Database
@@ -32,6 +33,7 @@ fun main() {
 
         val trainers = loadTrainers()
         val students = loadStudents()
+        val messages = loadMessages()
 
         Window(onCloseRequest = ::exitApplication) {
             var screenID by remember { mutableStateOf(0) }
@@ -39,7 +41,7 @@ fun main() {
                 val loopId = 0
                 when (screenID) {
                     0 -> {
-                        StartPage(students) { screenID = it }
+                        StartPage(students, messages) { screenID = it }
                     }
                     1 -> {
                         TrainerSelector(trainers) { screenID = it }
