@@ -49,7 +49,7 @@ fun main() {
 
         Window(
             onCloseRequest = ::exitApplication,
-            title = "Shintaikan",
+            title = "Teilnahme",
             icon = BitmapPainter(image = imageBitmap),
             state = rememberWindowState(width = 1152.dp, height = 864.dp),
         ) {
