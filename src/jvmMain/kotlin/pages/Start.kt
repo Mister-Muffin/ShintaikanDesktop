@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Window
 import models.Message
 import models.Student
 import models.addMessage
@@ -50,8 +51,13 @@ fun StartPage(students: List<Student>, messages: List<Message>, changeScreen: (i
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
         if (showDeleteMessageDialog.value) alertDialog(
-            messages = messages,
+            messages = allMessages,
             onDismiss = { showDeleteMessageDialog.value = false })
+        if (showDeleteMessageDialog.value) {
+            Window(onCloseRequest = { showDeleteMessageDialog.value = false }) {
+                Text("Hello, World!")
+            }
+        }
         Text(
             "Willkommen!",
             style = TextStyle(color = Color(0xffff8f06), fontSize = 30.sp),
@@ -99,42 +105,46 @@ fun StartPage(students: List<Student>, messages: List<Message>, changeScreen: (i
                 }
             }
             Divider(modifier = Modifier.fillMaxHeight().width(1.dp))
-            LazyColumn(
-                modifier = Modifier.fillMaxHeight().fillMaxWidth(),
+            Column(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                item { headerText("Kurznachrichten") }
-                item {
-                    Row {
-                        OutlinedTextField(
-                            value = newMessage.value,
-                            modifier = Modifier.fillMaxWidth(0.8F),
-                            trailingIcon = {
-                                IconButton(onClick = {
-                                    val newMessageObj = Message(-1, newMessage.value, "", LocalDate.now())
-                                    val id = addMessage(newMessageObj)
-                                    allMessages.add(
-                                        Message(
-                                            id = id,
-                                            message = newMessage.value,
-                                            short = "",
-                                            newMessageObj.dateCreated
-                                        )
+                headerText(text = "Kurznachrichten")
+
+                Row {
+                    OutlinedTextField(
+                        value = newMessage.value,
+                        modifier = Modifier.fillMaxWidth(0.8F),
+                        trailingIcon = {
+                            IconButton(onClick = {
+                                val newMessageObj = Message(-1, newMessage.value, "", LocalDate.now())
+                                val id = addMessage(newMessageObj)
+                                allMessages.add(
+                                    Message(
+                                        id = id,
+                                        message = newMessage.value,
+                                        short = "",
+                                        newMessageObj.dateCreated
                                     )
-                                    newMessage.value = ""
-                                }) {
-                                    Icon(Icons.Default.Add, contentDescription = null)
-                                }
-                            },
-                            singleLine = true,
-                            onValueChange = { newMessage.value = it }
-                        )
-                        IconButton(onClick = { showDeleteMessageDialog.value = true }) {
-                            Icon(Icons.Default.Delete, contentDescription = null)
-                        }
+                                )
+                                newMessage.value = ""
+                            }) {
+                                Icon(Icons.Default.Add, contentDescription = null)
+                            }
+                        },
+                        singleLine = true,
+                        onValueChange = { newMessage.value = it }
+                    )
+                    IconButton(onClick = { showDeleteMessageDialog.value = true }) {
+                        Icon(Icons.Default.Delete, contentDescription = null)
                     }
                 }
-                items(allMessages.sortedByDescending { it.dateCreated }) { message(it) }
+                LazyColumn(
+                    modifier = Modifier.fillMaxWidth().padding(top = 24.dp, start = 24.dp),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    items(allMessages.sortedBy { it.dateCreated }) { message(it) }
+                }
             }
         }
     }
@@ -142,25 +152,29 @@ fun StartPage(students: List<Student>, messages: List<Message>, changeScreen: (i
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun alertDialog(messages: List<Message>, onDismiss: () -> Unit) {
+fun alertDialog(messages: MutableList<Message>, onDismiss: () -> Unit) {
     AlertDialog(onDismissRequest = { },
         title = { Text("Hello title") },
         confirmButton = { },
         dismissButton = {
-            Button(onClick = { }) {
+            Button(onClick = onDismiss) {
                 Text("Schließen")
             }
         },
         text = {
-            LazyColumn(modifier = Modifier.height(500.dp)) {
+            LazyColumn(modifier = Modifier.height(500.dp).width(500.dp)) {
                 items(messages) {
                     Row {
                         Text(text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(it.dateCreated).toString() + ": ")
-                        Text(text = it.message.slice(0..5))
-                        IconButton(onClick = { deleteMessage(it.id) }) {
+                        Text(text = it.message.slice(0 until it.message.length.coerceAtMost(30)) + "...")
+                        IconButton(modifier = Modifier.size(20.dp), onClick = {
+                            deleteMessage(it.id)
+                            messages.remove(it)
+                        }) {
                             Icon(Icons.Default.Delete, contentDescription = null)
                         }
                     }
+                    Divider()
                 }
             }
         })
