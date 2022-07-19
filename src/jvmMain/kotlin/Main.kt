@@ -6,14 +6,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.res.loadImageBitmap
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import models.loadMessages
 import models.loadStudents
 import models.loadTrainers
 import org.jetbrains.exposed.sql.Database
 import pages.StartPage
 import pages.teilnehmerSelector
+import java.io.File
 
 fun main() {
     application {
@@ -35,7 +41,18 @@ fun main() {
         val students = loadStudents()
         val messages = loadMessages()
 
-        Window(onCloseRequest = ::exitApplication) {
+        val file = File("src/jvmMain/resources/pelli2.jpg")
+        val imageBitmap: ImageBitmap = remember(file) {
+            loadImageBitmap(file.inputStream())
+        }
+
+
+        Window(
+            onCloseRequest = ::exitApplication,
+            title = "Shintaikan",
+            icon = BitmapPainter(image = imageBitmap),
+            state = rememberWindowState(width = 1152.dp, height = 864.dp),
+        ) {
             var screenID by remember { mutableStateOf(0) }
             MaterialTheme {
                 val loopId = 0
