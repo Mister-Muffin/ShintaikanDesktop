@@ -4,7 +4,7 @@
 
 - [ ] Startseite
     - [ ] Geburtstage
-    - [ ] Kurznachichten
+    - [x] Kurznachichten
 - [ ] Menüleiste
 - [ ] Teilnehmereingabe
     - Prüfung oder Training?
