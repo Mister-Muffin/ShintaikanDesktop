@@ -6,8 +6,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,8 +21,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import models.Message
 import models.Student
+import models.addMessage
+import models.deleteMessage
 import java.time.LocalDate
 import java.time.Period
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun StartPage(students: List<Student>, messages: List<Message>, changeScreen: (id: Int) -> Unit) {
@@ -31,9 +36,22 @@ fun StartPage(students: List<Student>, messages: List<Message>, changeScreen: (i
             allStudents.add(student)
         }
     }
+    val allMessages = remember { mutableStateListOf<Message>() }
+    remember {
+        for (message in messages) {
+            allMessages.add(message)
+        }
+    }
+    val showDeleteMessageDialog = remember { mutableStateOf(false) }
+
     val birthdays = remember { loadBirthdays(students) }
 
+    val newMessage = remember { mutableStateOf("") }
+
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
+        if (showDeleteMessageDialog.value) alertDialog(
+            messages = messages,
+            onDismiss = { showDeleteMessageDialog.value = false })
         Text(
             "Willkommen!",
             style = TextStyle(color = Color(0xffff8f06), fontSize = 30.sp),
@@ -87,27 +105,74 @@ fun StartPage(students: List<Student>, messages: List<Message>, changeScreen: (i
             ) {
                 item { headerText("Kurznachrichten") }
                 item {
-                    OutlinedTextField(
-                        value = "Testtext",
-                        modifier = Modifier.fillMaxWidth(0.8F),
-                        trailingIcon = {
-                            IconButton(onClick = { changeScreen(1) }) {
-                                Icon(Icons.Default.Add, contentDescription = null)
-                            }
-                        },
-                        singleLine = true,
-                        onValueChange = {}
-                    )
+                    Row {
+                        OutlinedTextField(
+                            value = newMessage.value,
+                            modifier = Modifier.fillMaxWidth(0.8F),
+                            trailingIcon = {
+                                IconButton(onClick = {
+                                    val newMessageObj = Message(-1, newMessage.value, "", LocalDate.now())
+                                    val id = addMessage(newMessageObj)
+                                    allMessages.add(
+                                        Message(
+                                            id = id,
+                                            message = newMessage.value,
+                                            short = "",
+                                            newMessageObj.dateCreated
+                                        )
+                                    )
+                                    newMessage.value = ""
+                                }) {
+                                    Icon(Icons.Default.Add, contentDescription = null)
+                                }
+                            },
+                            singleLine = true,
+                            onValueChange = { newMessage.value = it }
+                        )
+                        IconButton(onClick = { showDeleteMessageDialog.value = true }) {
+                            Icon(Icons.Default.Delete, contentDescription = null)
+                        }
+                    }
                 }
-                items(messages) { message(it.message) }
+                items(allMessages.sortedByDescending { it.dateCreated }) { message(it) }
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-private fun message(text: String) {
-    Text(text = text)
+fun alertDialog(messages: List<Message>, onDismiss: () -> Unit) {
+    AlertDialog(onDismissRequest = { },
+        title = { Text("Hello title") },
+        confirmButton = { },
+        dismissButton = {
+            Button(onClick = { }) {
+                Text("Schließen")
+            }
+        },
+        text = {
+            LazyColumn(modifier = Modifier.height(500.dp)) {
+                items(messages) {
+                    Row {
+                        Text(text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(it.dateCreated).toString() + ": ")
+                        Text(text = it.message.slice(0..5))
+                        IconButton(onClick = { deleteMessage(it.id) }) {
+                            Icon(Icons.Default.Delete, contentDescription = null)
+                        }
+                    }
+                }
+            }
+        })
+
+}
+
+@Composable
+private fun message(message: Message) {
+    Row {
+        Text(text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(message.dateCreated).toString() + ": ")
+        Text(text = message.message + " " + message.id)
+    }
 }
 
 @Composable
