@@ -88,22 +88,22 @@ fun StartPage(students: List<Student>, messages: List<Message>, changeScreen: (i
                     Row {
                         val period = Period.between(it.birthday, LocalDate.now()).days
                         Text(
-                            text = it.prename + ": ",
+                            text = "${it.surname}, ${it.prename}: ",
                             //style = TextStyle(color = Color(0xffff8f06), fontSize = 30.sp),
                             fontWeight = FontWeight.Normal,
                         )
                         @Suppress("KotlinConstantConditions")
                         Text(
-                            text = if (period < 0) {
+                            text = if (period == 1) {
                                 "gestern"
-                            } else if (period < -1) {
-                                "vor ${period * (-1)} Tagen"
-                            } else if (period > 0) {
+                            } else if (period <= 2) {
+                                "vor ${period} Tagen"
+                            } else if (period == -1) {
                                 "morgen"
-                            } else if (period > 1) {
-                                "vor ${period * (-1)} Tagen"
+                            } else if (period >= -2) {
+                                "in ${period * (-1)} Tagen"
                             } else {
-                                "heute"
+                                "heute \uD83E\uDD73"
                             },
                             //style = TextStyle(color = Color(0xffff8f06), fontSize = 30.sp),
                             fontWeight = FontWeight.Bold,
