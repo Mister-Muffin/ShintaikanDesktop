@@ -3,7 +3,7 @@
 ## TODO:
 
 - [ ] Startseite
-    - [ ] Geburtstage
+    - [x] Geburtstage
     - [x] Kurznachichten
 - [ ] Menüleiste
 - [ ] Teilnehmereingabe
