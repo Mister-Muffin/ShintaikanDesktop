@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
+import dialogs.datenHolenWindow
+import dialogs.passwordDialog
 import models.Message
 import models.Student
 import models.addMessage
@@ -31,7 +33,12 @@ import java.time.Period
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun startPage(students: List<Student>, messages: List<Message>, changeScreen: (id: Int) -> Unit) {
+fun startPage(
+    students: List<Student>,
+    messages: List<Message>,
+    shiftPressed: Boolean,
+    changeScreen: (id: Int) -> Unit
+) {
 
     val allStudents = remember { mutableStateListOf<Student>() }
     remember {
@@ -46,6 +53,9 @@ fun startPage(students: List<Student>, messages: List<Message>, changeScreen: (i
         }
     }
     val showDeleteMessageDialog = remember { mutableStateOf(false) }
+    val showPasswordDialog = remember { mutableStateOf(false) }
+    val showDatenHolenDialog = remember { mutableStateOf(false) }
+
 
     val birthdays = remember { loadBirthdays(students) }
 
@@ -55,6 +65,16 @@ fun startPage(students: List<Student>, messages: List<Message>, changeScreen: (i
         if (showDeleteMessageDialog.value) deleteDialog(
             messages = allMessages,
             onDismiss = { showDeleteMessageDialog.value = false })
+
+        if (showPasswordDialog.value) {
+            passwordDialog(
+                result = {
+                    showPasswordDialog.value = false
+                    showDatenHolenDialog.value = it
+                })
+        }
+        if (showDatenHolenDialog.value) datenHolenWindow { showDatenHolenDialog.value = false }
+
         Text(
             "Willkommen!",
             style = TextStyle(color = Color(0xffff8f06), fontSize = 30.sp),
@@ -65,7 +85,7 @@ fun startPage(students: List<Student>, messages: List<Message>, changeScreen: (i
             modifier = Modifier.padding(vertical = 16.dp)
         )
         Box {
-            buttonRow(changeScreen)
+            buttonRow(shiftPressed, changeScreen, datenHolen = { showPasswordDialog.value = true })
         }
         Row(
             verticalAlignment = Alignment.Top,
@@ -192,13 +212,14 @@ private fun headerText(text: String) {
 }
 
 @Composable
-private fun buttonRow(changeScreen: (id: Int) -> Unit) {
+private fun buttonRow(shiftPressed: Boolean, changeScreen: (id: Int) -> Unit, datenHolen: () -> Unit) {
+
     @Composable
     fun rowButton(text: String, onClick: () -> Unit, enabled: Boolean) {
         Button(
             enabled = enabled,
             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
-            //modifier = Modifier.width(150.dp).height(40.dp),
+            modifier = Modifier.width(250.dp),
             onClick = onClick
         ) {
             Text(text)
@@ -206,9 +227,13 @@ private fun buttonRow(changeScreen: (id: Int) -> Unit) {
     }
 
     Row {
-        rowButton(text = "Teilnehmer eintragen", enabled = true, onClick = { changeScreen(1) })
+        rowButton(
+            text = if (!shiftPressed) "Teilnehmer eintragen" else "Daten holen",
+            enabled = true,
+            onClick = { if (!shiftPressed) changeScreen(1) else datenHolen() })
     }
 }
+
 
 private fun loadBirthdays(students: List<Student>): MutableList<Student> {
     val birthdays = mutableListOf<Student>()

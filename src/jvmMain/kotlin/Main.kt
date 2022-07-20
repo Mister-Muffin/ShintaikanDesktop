@@ -8,6 +8,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -47,18 +48,23 @@ fun main() {
             loadImageBitmap(file.inputStream())
         }
 
+        var shiftPressed by remember { mutableStateOf(false) }
 
         Window(
             onCloseRequest = ::exitApplication,
             title = "Teilnahme",
             icon = BitmapPainter(image = imageBitmap),
             state = rememberWindowState(width = 1152.dp, height = 864.dp),
+            onKeyEvent = {
+                shiftPressed = it.isShiftPressed
+                shiftPressed
+            }
         ) {
             var screenID by remember { mutableStateOf(0) }
             MaterialTheme {
                 when (screenID) {
                     0 -> {
-                        startPage(students, messages) { screenID = it }
+                        startPage(students, messages, shiftPressed) { screenID = it }
                     }
                     1 -> {
                         TrainerSelector(trainers) { screenID = it }
