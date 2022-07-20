@@ -52,7 +52,7 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
         for (student in newStudents) {
             teilnahmeString = teilnahmeString + student.id + ","
         }
-        changeScreen(2)
+        changeScreen(3)
         insertTeilnahme(teilnahmeString)
     }
 
