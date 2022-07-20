@@ -56,7 +56,7 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
 
     Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
         Row {
-            LazyColumn(state = leftLazyState, modifier = Modifier.fillMaxHeight()) {
+            LazyColumn(state = leftLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
                 items((if (checked.isNotEmpty()) searchStudents.filter { s -> // filter checkboxes ->
                     findMatch(s.level, checked)
                 } // <- filter checkboxes
@@ -164,12 +164,8 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
 
         }
 
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.width(250.dp)
-        ) {
-            LazyColumn {
+        Row {
+            LazyColumn(state = rightLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
                 items(newStudents) { student ->
                     Box(
                         modifier = Modifier
@@ -213,6 +209,12 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                     Divider(modifier = Modifier.width(250.dp))
                 }
             }
+            VerticalScrollbar(
+                modifier = Modifier.fillMaxHeight(),
+                adapter = rememberScrollbarAdapter(
+                    scrollState = rightLazyState
+                )
+            )
         }
     }
 }
