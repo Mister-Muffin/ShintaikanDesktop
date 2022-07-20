@@ -64,7 +64,7 @@ fun startPage(students: List<Student>, messages: List<Message>, changeScreen: (i
         Divider(
             modifier = Modifier.padding(vertical = 16.dp)
         )
-        Box() {
+        Box {
             buttonRow(changeScreen)
         }
         Row(
@@ -90,7 +90,7 @@ fun startPage(students: List<Student>, messages: List<Message>, changeScreen: (i
                             text = if (period == 1) {
                                 "gestern"
                             } else if (period <= 2) {
-                                "vor ${period} Tagen"
+                                "vor $period Tagen"
                             } else if (period == -1) {
                                 "morgen"
                             } else if (period >= -2) {
@@ -149,7 +149,6 @@ fun startPage(students: List<Student>, messages: List<Message>, changeScreen: (i
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun deleteDialog(messages: MutableList<Message>, onDismiss: () -> Unit) {
     Dialog(
