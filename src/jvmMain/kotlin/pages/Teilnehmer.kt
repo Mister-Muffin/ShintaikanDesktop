@@ -23,6 +23,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import models.Student
+import models.insertTeilnahme
 import java.util.*
 
 @Composable
@@ -48,6 +49,7 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
 
     fun submit() {
         changeScreen(2)
+        insertTeilnahme("test")
     }
 
     val leftLazyState = rememberLazyListState()
