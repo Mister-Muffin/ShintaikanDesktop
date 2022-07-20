@@ -56,7 +56,6 @@ fun main() {
         ) {
             var screenID by remember { mutableStateOf(0) }
             MaterialTheme {
-                val loopId = 0
                 when (screenID) {
                     0 -> {
                         StartPage(students, messages) { screenID = it }
