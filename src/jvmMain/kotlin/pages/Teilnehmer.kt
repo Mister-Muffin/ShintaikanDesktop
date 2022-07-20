@@ -48,8 +48,12 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
     }
 
     fun submit() {
+        var teilnahmeString = ""
+        for (student in newStudents) {
+            teilnahmeString = teilnahmeString + student.id + ","
+        }
         changeScreen(2)
-        insertTeilnahme("test")
+        insertTeilnahme(teilnahmeString)
     }
 
     val leftLazyState = rememberLazyListState()

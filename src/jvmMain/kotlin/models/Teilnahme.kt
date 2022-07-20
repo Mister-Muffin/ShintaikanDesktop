@@ -55,7 +55,9 @@ fun insertTeilnahme(ids: String) {
         val updatedRow = transaction {
             TeilnahmeTable.update(where = { TeilnahmeTable.date eq LocalDate.now() }) {
                 with(SqlExpressionBuilder) {
-                    it[TeilnahmeTable.userId] = "${today[0].userId}, ${ids}"
+                    it[TeilnahmeTable.userId] =
+                        "${today[0].userId.trim { it <= ',' }}, ${ids.trim { it <= ',' }}".trim { it <= ',' }
+                            .filter { !it.isWhitespace() }
                 }
             }
         }
