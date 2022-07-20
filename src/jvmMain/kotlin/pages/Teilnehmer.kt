@@ -1,9 +1,12 @@
 package pages
 
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
@@ -47,14 +50,13 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
         changeScreen(2)
     }
 
+    val leftLazyState = rememberLazyListState()
+    val rightLazyState = rememberLazyListState()
+
 
     Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.width(250.dp)
-        ) {
-            LazyColumn {
+        Row {
+            LazyColumn(state = leftLazyState, modifier = Modifier.fillMaxHeight()) {
                 items((if (checked.isNotEmpty()) searchStudents.filter { s -> // filter checkboxes ->
                     findMatch(s.level, checked)
                 } // <- filter checkboxes
@@ -107,7 +109,14 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                     Divider(modifier = Modifier.width(250.dp))
                 }
             }
+            VerticalScrollbar(
+                modifier = Modifier.fillMaxHeight(),
+                adapter = rememberScrollbarAdapter(
+                    scrollState = leftLazyState
+                )
+            )
         }
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly,
@@ -120,7 +129,7 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                 })
             }
             LazyColumn { // filter
-                val farben = arrayOf("Weiss", "Gelb", "Rot", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
+                val farben = arrayOf("Weiss", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
                 items(farben) { c ->
 
                     fun handleChecked() {
@@ -259,7 +268,7 @@ private fun boxColor(student: Student): Array<Color> {
 enum class DEGREECOLORS(val color: Color) {
     WHITE(Color.White),
     YELLOW(Color(0xffffff35)),
-    RED(Color(0xffffff00)),
+    RED(Color(0xffff0004)),
     ORANGE(Color(0xffffaa00)),
     GREEN(Color(0xff00aa00)),
     BLUE(Color(0xff0055ff)),
