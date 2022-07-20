@@ -73,7 +73,7 @@ fun TrainerSelector(trainers: List<Trainer>, changeScreen: (id: Int) -> Unit) {
             enabled = selectedTrainer != null,
             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
             modifier = Modifier.width(350.dp).height(60.dp),
-            onClick = { changeScreen(1) }
+            onClick = { changeScreen(2) }
         ) {
             Text("Weiter")
         }
