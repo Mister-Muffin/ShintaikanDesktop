@@ -1,10 +1,12 @@
 # ShintaikanDesktop
 
-## TODO:
+### TODO:
 
 - [ ] Startseite
     - [x] Geburtstage
     - [x] Kurznachichten
+    - [ ] Shutdown button?
 - [ ] Menüleiste
-- [ ] Teilnehmereingabe
-    - Prüfung oder Training?
+- [x] Teilnehmereingabe
+    - [ ] Prüfung oder Training?
+- [ ] Daten holen
