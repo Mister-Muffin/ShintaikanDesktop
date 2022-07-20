@@ -44,23 +44,18 @@ fun insertTeilnahme(ids: String) {
         }
     }
     if (today.size == 0) {
-        val newRow = transaction {
+        transaction {
             TeilnahmeTable.insert {
-                it[TeilnahmeTable.userId] = ids
-                it[TeilnahmeTable.date] = LocalDate.now()
+                it[userId] = ids
+                it[date] = LocalDate.now()
             }
         }
-        newRow
     } else {
-        val updatedRow = transaction {
+        transaction {
             TeilnahmeTable.update(where = { TeilnahmeTable.date eq LocalDate.now() }) {
-                with(SqlExpressionBuilder) {
-                    it[TeilnahmeTable.userId] =
-                        "${today[0].userId.trim { it <= ',' }}, ${ids.trim { it <= ',' }}".trim { it <= ',' }
-                            .filter { !it.isWhitespace() }
-                }
+                it[userId] = "${today[0].userId.trim { it <= ',' }}, ${ids.trim { it <= ',' }}".trim { it <= ',' }
+                    .filter { !it.isWhitespace() }
             }
         }
-        updatedRow
     }
 }
