@@ -88,6 +88,7 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                                 newStudents.add(student)
                                 allStudents.remove(student)
                                 searchStudents.remove(student)
+                                searchQuery.value = ""
                             },
                         contentAlignment = Alignment.CenterStart,
                     ) {
