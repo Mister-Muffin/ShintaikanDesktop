@@ -17,7 +17,7 @@ import models.loadMessages
 import models.loadStudents
 import models.loadTrainers
 import org.jetbrains.exposed.sql.Database
-import pages.StartPage
+import pages.startPage
 import pages.successPage
 import pages.teilnehmerSelector
 import java.io.File
@@ -58,7 +58,7 @@ fun main() {
             MaterialTheme {
                 when (screenID) {
                     0 -> {
-                        StartPage(students, messages) { screenID = it }
+                        startPage(students, messages) { screenID = it }
                     }
                     1 -> {
                         TrainerSelector(trainers) { screenID = it }

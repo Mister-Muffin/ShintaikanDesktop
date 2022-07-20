@@ -31,7 +31,7 @@ import java.time.Period
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun StartPage(students: List<Student>, messages: List<Message>, changeScreen: (id: Int) -> Unit) {
+fun startPage(students: List<Student>, messages: List<Message>, changeScreen: (id: Int) -> Unit) {
 
     val allStudents = remember { mutableStateListOf<Student>() }
     remember {
@@ -55,11 +55,6 @@ fun StartPage(students: List<Student>, messages: List<Message>, changeScreen: (i
         if (showDeleteMessageDialog.value) deleteDialog(
             messages = allMessages,
             onDismiss = { showDeleteMessageDialog.value = false })
-        /*if (showDeleteMessageDialog.value) {
-            Window(onCloseRequest = { showDeleteMessageDialog.value = false }) {
-                Text("Hello, World!")
-            }
-        }*/
         Text(
             "Willkommen!",
             style = TextStyle(color = Color(0xffff8f06), fontSize = 30.sp),
@@ -73,7 +68,6 @@ fun StartPage(students: List<Student>, messages: List<Message>, changeScreen: (i
             buttonRow(changeScreen)
         }
         Row(
-            //horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.Top,
             modifier = Modifier.fillMaxSize().padding(top = 24.dp)
         ) {
@@ -89,7 +83,6 @@ fun StartPage(students: List<Student>, messages: List<Message>, changeScreen: (i
                         val period = Period.between(it.birthday, LocalDate.now()).days
                         Text(
                             text = "${it.surname}, ${it.prename}: ",
-                            //style = TextStyle(color = Color(0xffff8f06), fontSize = 30.sp),
                             fontWeight = FontWeight.Normal,
                         )
                         @Suppress("KotlinConstantConditions")
@@ -105,7 +98,6 @@ fun StartPage(students: List<Student>, messages: List<Message>, changeScreen: (i
                             } else {
                                 "heute \uD83E\uDD73"
                             },
-                            //style = TextStyle(color = Color(0xffff8f06), fontSize = 30.sp),
                             fontWeight = FontWeight.Bold,
                         )
                     }
