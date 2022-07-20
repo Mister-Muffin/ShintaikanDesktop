@@ -18,6 +18,7 @@ import models.loadStudents
 import models.loadTrainers
 import org.jetbrains.exposed.sql.Database
 import pages.StartPage
+import pages.successPage
 import pages.teilnehmerSelector
 import java.io.File
 
@@ -65,6 +66,9 @@ fun main() {
                     }
                     2 -> {
                         teilnehmerSelector(students) { screenID = it }
+                    }
+                    3 -> {
+                        successPage { screenID = it }
                     }
                     else -> Text("Missing page", modifier = Modifier.clickable { screenID = 0 })
                 }
