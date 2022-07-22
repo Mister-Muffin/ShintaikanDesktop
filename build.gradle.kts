@@ -17,23 +17,22 @@ repositories {
 
 kotlin {
     jvm {
-        compilations.all {
+/*        compilations.all {
             kotlinOptions.jvmTarget = "17"
-        }
+        }*/
         withJava()
     }
     sourceSets {
-        val jvmMain by getting {
+        named("jvmMain") {
             dependencies {
                 implementation(compose.desktop.currentOs)
-                implementation("org.slf4j:slf4j-simple:1.7.36")
-                implementation("org.jetbrains.exposed:exposed-core:0.38.1")
-                implementation("org.jetbrains.exposed:exposed-jdbc:0.38.1")
-                implementation("org.jetbrains.exposed:exposed-java-time:0.38.1")
-                implementation("org.postgresql:postgresql:42.2.2")
+                implementation("org.slf4j:slf4j-nop:1.7.36")
+                implementation("org.jetbrains.exposed:exposed-core:0.38.2")
+                implementation("org.jetbrains.exposed:exposed-jdbc:0.38.2")
+                implementation("org.jetbrains.exposed:exposed-java-time:0.38.2")
+                implementation("org.postgresql:postgresql:42.3.3")
             }
         }
-        val jvmTest by getting
     }
 }
 
@@ -44,6 +43,8 @@ compose.desktop {
             targetFormats(TargetFormat.Deb, TargetFormat.AppImage, TargetFormat.Rpm)
             packageName = "shintaikandesktop"
             packageVersion = "1.0.0"
+            modules("java.sql")
+            modules("java.lang.management")
         }
     }
 }
