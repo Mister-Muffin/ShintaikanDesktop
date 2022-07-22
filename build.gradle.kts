@@ -15,6 +15,12 @@ repositories {
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
+plugins.withId("org.jetbrains.kotlin.multiplatform") {
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+    }
+}
+
 kotlin {
     jvm {
 /*        compilations.all {
@@ -32,6 +38,7 @@ kotlin {
                 implementation("org.jetbrains.exposed:exposed-java-time:0.38.2")
                 implementation("org.postgresql:postgresql:42.3.3")
             }
+
         }
     }
 }
@@ -43,8 +50,9 @@ compose.desktop {
             targetFormats(TargetFormat.Deb, TargetFormat.AppImage, TargetFormat.Rpm)
             packageName = "shintaikandesktop"
             packageVersion = "1.0.0"
-            modules("java.sql")
-            modules("java.lang.management")
+            includeAllModules = true
         }
+
     }
 }
+
