@@ -24,7 +24,7 @@ import androidx.compose.ui.window.rememberDialogState
 public fun passwordDialog(result: (pwCorrect: Boolean) -> Unit) {
     val passwordFieldVal = remember { mutableStateOf("") }
     Dialog(
-        state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 750.dp, height = 600.dp),
+        state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 700.dp),
         title = "Passworteingabe",
         onCloseRequest = { result(false) }
     ) {
