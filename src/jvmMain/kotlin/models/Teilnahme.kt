@@ -9,12 +9,14 @@ import java.time.LocalDate
 object TeilnahmeTable : Table("teilnahme") {
     val id = integer("id").autoIncrement()
     val userId = text("user_ids")
+    val userIdExam = text("user_ids_exam")
     val date = date("date")
 }
 
 data class Teilnahme(
     val id: Int,
     val userId: String,
+    val userIdExam: String,
     val date: LocalDate
 )
 
@@ -25,6 +27,7 @@ fun loadTeilnahme(): List<Teilnahme> {
             Teilnahme(
                 id = it[TeilnahmeTable.id],
                 userId = it[TeilnahmeTable.userId],
+                userIdExam = it[TeilnahmeTable.userIdExam],
                 date = it[TeilnahmeTable.date]
             )
         }
@@ -33,12 +36,13 @@ fun loadTeilnahme(): List<Teilnahme> {
     //print(ehre)
 }
 
-fun insertTeilnahme(ids: String) {
+fun insertTeilnahme(ids: String, isExam: Boolean) {
     val today = transaction {
         TeilnahmeTable.select(where = TeilnahmeTable.date eq LocalDate.now()).map {
             Teilnahme(
                 id = it[TeilnahmeTable.id],
                 userId = it[TeilnahmeTable.userId],
+                userIdExam = it[TeilnahmeTable.userIdExam],
                 date = it[TeilnahmeTable.date]
             )
         }
@@ -46,15 +50,23 @@ fun insertTeilnahme(ids: String) {
     if (today.size == 0) {
         transaction {
             TeilnahmeTable.insert {
-                it[userId] = ids
+                if (isExam) it[userIdExam] = ids else it[userId] = ids
                 it[date] = LocalDate.now()
             }
         }
     } else {
         transaction {
-            TeilnahmeTable.update(where = { TeilnahmeTable.date eq LocalDate.now() }) {
-                it[userId] = "${today[0].userId.trim { it <= ',' }}, ${ids.trim { it <= ',' }}".trim { it <= ',' }
-                    .filter { !it.isWhitespace() }
+            if (isExam) {
+                TeilnahmeTable.update(where = { TeilnahmeTable.date eq LocalDate.now() }) {
+                    it[userIdExam] =
+                        "${today[0].userIdExam.trim { it <= ',' }}, ${ids.trim { it <= ',' }}".trim { it <= ',' }
+                            .filter { !it.isWhitespace() }
+                }
+            } else {
+                TeilnahmeTable.update(where = { TeilnahmeTable.date eq LocalDate.now() }) {
+                    it[userId] = "${today[0].userId.trim { it <= ',' }}, ${ids.trim { it <= ',' }}".trim { it <= ',' }
+                        .filter { !it.isWhitespace() }
+                }
             }
         }
     }

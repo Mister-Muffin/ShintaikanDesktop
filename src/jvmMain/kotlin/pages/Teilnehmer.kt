@@ -30,6 +30,7 @@ import java.util.*
 fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit) {
 
     val searchQuery = remember { mutableStateOf("") }
+    val handleAsExam = remember { mutableStateOf(false) }
 
     val newStudents = remember { mutableStateListOf<Student>() }
     val allStudents = remember { mutableStateListOf<Student>() }
@@ -47,13 +48,13 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
         return strings.any { a -> s.contains(a.lowercase(Locale.getDefault())) }
     }
 
-    fun submit() {
+    fun submit(isExam: Boolean) {
         var teilnahmeString = ""
         for (student in newStudents) {
             teilnahmeString = teilnahmeString + student.id + ","
         }
         changeScreen(3)
-        insertTeilnahme(teilnahmeString)
+        insertTeilnahme(teilnahmeString, isExam)
     }
 
     val leftLazyState = rememberLazyListState()
@@ -157,16 +158,29 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                     }
                 }
             }
+            Column {
+                Box(
+                    modifier = Modifier.fillMaxWidth().padding(4.dp)
+                        .clickable { handleAsExam.value = !handleAsExam.value }) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(
+                            checked = handleAsExam.value,
+                            colors = CheckboxDefaults.colors(checkedColor = Color.Gray),
+                            onCheckedChange = { handleAsExam.value = it })
+                        Text(text = "Ausgewählte als Prüfung eintragen")
+                    }
+                }
 
-            Button( // eingabe bestätigen
-                enabled = newStudents.isNotEmpty(),
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
-                modifier = Modifier.fillMaxWidth().height(60.dp),
-                onClick = { submit() }) {
-                Text(
-                    textAlign = TextAlign.Center,
-                    text = if (newStudents.isEmpty()) "Teilnehmen aus der ersten Spalte auswählen" else "Eingabe bestätigen!"
-                )
+                Button( // eingabe bestätigen
+                    enabled = newStudents.isNotEmpty(),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
+                    modifier = Modifier.fillMaxWidth().height(60.dp),
+                    onClick = { submit(handleAsExam.value) }) {
+                    Text(
+                        textAlign = TextAlign.Center,
+                        text = if (newStudents.isEmpty()) "Teilnehmen aus der ersten Spalte auswählen" else "Eingabe bestätigen!"
+                    )
+                }
             }
 
         }
