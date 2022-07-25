@@ -21,8 +21,8 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
 
 @Composable
-public fun passwordDialog(result: (pwCorrect: Boolean) -> Unit) {
-    val passwordFieldVal = remember { mutableStateOf("") }
+fun passwordDialog(result: (pwCorrect: Boolean) -> Unit) {
+    val passwordFieldVal = remember { mutableStateOf("test") } //TODO: Remove this for production
     Dialog(
         state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 700.dp),
         title = "Passworteingabe",
