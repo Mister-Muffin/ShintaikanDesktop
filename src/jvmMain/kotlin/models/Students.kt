@@ -6,7 +6,7 @@ import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDate
 
-object StudentTable : Table("teilnahme") {
+object StudentTable : Table("main") {
     val id = integer("id")
     val surname = text("surname")
     val prename = text("prename")

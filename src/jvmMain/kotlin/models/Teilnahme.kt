@@ -6,7 +6,7 @@ import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDate
 
-object TeilnahmeTable : Table("test") {
+object TeilnahmeTable : Table("teilnahme") {
     val id = integer("id").autoIncrement()
     val userId = text("user_ids")
     val date = date("date")
