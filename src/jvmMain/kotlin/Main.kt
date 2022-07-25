@@ -5,12 +5,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
@@ -22,6 +26,7 @@ import pages.startPage
 import pages.successPage
 import pages.teilnehmerSelector
 
+@OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     application {
 
@@ -57,6 +62,28 @@ fun main() {
             }
         ) {
             var screenID by remember { mutableStateOf(0) }
+
+            MenuBar {
+                Menu("Datei", mnemonic = 'F') {
+                    Item(
+                        "Startseite",
+                        onClick = { screenID = 0 },
+                        shortcut = KeyShortcut(Key.Escape),
+                        enabled = screenID != 0
+                    )
+                    Item("Beenden", onClick = { exitApplication() }, mnemonic = 'E')
+                }
+                Menu("Administration", mnemonic = 'A', enabled = screenID == 0) {
+                    Item("Daten holen", onClick = { })
+                }
+                Menu("Kurznachichten", mnemonic = 'K') {
+                    Item("Kurznachicht schreiben", onClick = { }, mnemonic = 'S')
+                    Item("Kurznachicht löschen", onClick = { }, mnemonic = 'L')
+                }
+                Menu("Prüfungen", mnemonic = 'P') {
+                    Item("Letzte Prüfungen abfragen", onClick = { }, mnemonic = 'K')
+                }
+            }
             MaterialTheme {
                 when (screenID) {
                     0 -> {
