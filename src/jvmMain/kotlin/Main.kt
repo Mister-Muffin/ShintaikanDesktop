@@ -18,6 +18,7 @@ import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import dialogs.examsDialog
 import models.loadMessages
 import models.loadStudents
 import models.loadTrainers
@@ -50,6 +51,7 @@ fun main() {
         val imageBitmap = remember { useResource("pelli2.jpg") { loadImageBitmap(it) } }
 
         var shiftPressed by remember { mutableStateOf(false) }
+        var showExamsDialog by remember { mutableStateOf(false) }
 
         Window(
             onCloseRequest = ::exitApplication,
@@ -81,9 +83,20 @@ fun main() {
                     Item("Kurznachicht löschen", onClick = { }, mnemonic = 'L')
                 }
                 Menu("Prüfungen", mnemonic = 'P') {
-                    Item("Letzte Prüfungen abfragen", onClick = { }, mnemonic = 'K')
+                    Item(
+                        "Letzte Prüfungen abfragen",
+                        onClick = { showExamsDialog = true },
+                        mnemonic = 'K'
+                    )
                 }
             }
+
+            if (showExamsDialog) {
+                examsDialog(onDismiss = {
+                    showExamsDialog = false
+                })
+            }
+
             MaterialTheme {
                 when (screenID) {
                     0 -> {
