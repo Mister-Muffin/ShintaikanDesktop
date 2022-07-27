@@ -33,12 +33,11 @@ fun main() {
 
         val ip: String = System.getenv("S_DSK_IP") ?: "172.17.0.1"
         val port: String = System.getenv("S_DSK_PORT") ?: "5434"
-        val table: String = System.getenv("S_DSK_TABLE") ?: "test"
         val user: String = System.getenv("S_DSK_USER") ?: "postgres"
         val password: String = System.getenv("S_DSK_PASSWORD") ?: "mysecretpassword"
 
         Database.connect(
-            "jdbc:postgresql://${ip}:${port}/${table}",
+            "jdbc:postgresql://${ip}:${port}/",
             driver = "org.postgresql.Driver",
             user = user,
             password = password
