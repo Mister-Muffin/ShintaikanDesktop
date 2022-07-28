@@ -91,7 +91,7 @@ fun main() {
             }
 
             if (showExamsDialog) {
-                examsDialog(onDismiss = {
+                examsDialog(students, onDismiss = {
                     showExamsDialog = false
                 })
             }

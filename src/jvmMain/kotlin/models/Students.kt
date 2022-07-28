@@ -15,6 +15,7 @@ object StudentTable : Table("main") {
     val sum_years = text("sum_years")
     val total = integer("total")
     val birthday = date("birthday")
+    val date_last_exam = date("date_last_exam")
 }
 
 data class Student(
@@ -23,10 +24,10 @@ data class Student(
     val prename: String,
     val group: String,
     val level: String,
-    //val sessions: LocalTime,
     val sum_years: String,
     val total: Int,
-    val birthday: LocalDate?
+    val birthday: LocalDate?,
+    val date_last_exam: LocalDate?
 )
 
 fun loadStudents(): List<Student> {
@@ -41,6 +42,7 @@ fun loadStudents(): List<Student> {
                 sum_years = it[StudentTable.sum_years],
                 total = it[StudentTable.total],
                 birthday = it[StudentTable.birthday],
+                date_last_exam = it[StudentTable.date_last_exam]
             )
         }
     }
