@@ -17,43 +17,46 @@ import pages.titleText
 @Composable
 fun trainerSelector(trainers: List<Trainer>, changeScreen: (id: Int) -> Unit) {
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly,
-
-        modifier = Modifier.fillMaxSize(),
-    ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
         titleText("Wer bist du?")
-        var selectedTrainer: Trainer? by remember { mutableStateOf(null) }
-        var selectedCotrainer: Trainer? by remember { mutableStateOf(null) }
+        Divider(modifier = Modifier.padding(vertical = 16.dp))
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceEvenly,
 
-        LazyVerticalGrid(
-            cells = GridCells.Fixed(4)
+            modifier = Modifier.fillMaxSize(),
         ) {
-            items(trainers.filter { !it.onlyCotrainer }) { trainer ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable {
-                        selectedTrainer = trainer; if (selectedCotrainer == trainer) selectedCotrainer = null
-                    }.padding(24.dp)
-                ) {
-                    RadioButton(
-                        selectedTrainer == trainer,
-                        onClick = null,
-                        colors = RadioButtonDefaults.colors(selectedColor = Color.Gray),
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Text(trainer.name)
+            var selectedTrainer: Trainer? by remember { mutableStateOf(null) }
+            var selectedCotrainer: Trainer? by remember { mutableStateOf(null) }
+
+            LazyVerticalGrid(
+                cells = GridCells.Fixed(4)
+            ) {
+                items(trainers.filter { !it.onlyCotrainer }) { trainer ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable {
+                            selectedTrainer = trainer; if (selectedCotrainer == trainer) selectedCotrainer = null
+                        }.padding(24.dp)
+                    ) {
+                        RadioButton(
+                            selectedTrainer == trainer,
+                            onClick = null,
+                            colors = RadioButtonDefaults.colors(selectedColor = Color.Gray),
+                            modifier = Modifier.size(32.dp)
+                        )
+                        Text(trainer.name)
+                    }
                 }
             }
-        }
-        Button(
-            enabled = selectedTrainer != null,
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
-            modifier = Modifier.width(350.dp).height(60.dp),
-            onClick = { changeScreen(2) }
-        ) {
-            Text("Weiter")
+            Button(
+                enabled = selectedTrainer != null,
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
+                modifier = Modifier.width(350.dp).height(60.dp),
+                onClick = { changeScreen(2) }
+            ) {
+                Text("Weiter")
+            }
         }
     }
 }

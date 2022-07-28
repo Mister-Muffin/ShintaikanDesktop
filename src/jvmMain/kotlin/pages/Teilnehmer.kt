@@ -60,182 +60,185 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
     val leftLazyState = rememberLazyListState()
     val rightLazyState = rememberLazyListState()
 
-
-    Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
-        Row {
-            LazyColumn(state = leftLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
-                items((if (checked.isNotEmpty()) searchStudents.filter { s -> // filter checkboxes ->
-                    findMatch(s.level, checked)
-                } // <- filter checkboxes
-                else searchStudents).filter { // filter again for search ->
-                    arrayListOf(
-                        it.prename.lowercase(Locale.getDefault()),
-                        it.surname.lowercase(Locale.getDefault())
-                    ).joinToString(" ") // "prename surname"
-                        .contains(searchQuery.value) // <- filter again for search
-                }.sortedByDescending { it.id }.sortedByDescending { it.level })
-                { /* linke spalte */ student ->
-                    Box(
-                        modifier = Modifier
-                            .width(250.dp)
-                            .height(25.dp)
-                            .drawWithCache {
-                                val gradient = Brush.horizontalGradient(
-                                    colors = listOf(
-                                        boxColor(student)[0],
-                                        boxColor(student)[1]
-                                    ),
-                                    startX = size.width / 2 - 1,
-                                    endX = size.width / 2 + 1,
-                                )
-                                onDrawBehind {
-                                    drawRect(gradient)
-                                }
-                            }.clickable {
-                                newStudents.add(student)
-                                allStudents.remove(student)
-                                searchStudents.remove(student)
-                                searchQuery.value = ""
-                            },
-                        contentAlignment = Alignment.CenterStart,
-                    ) {
-                        Text(
-                            fontSize = 12.sp,
-                            fontFamily = FontFamily.SansSerif,
-                            fontWeight = FontWeight.W500,
-                            color = if (
-                                student.level.contains("5. Kyu blau") ||
-                                student.level.contains("4. Kyu violett") ||
-                                student.level.contains(". Kyu braun") ||
-                                student.level.contains(". Dan schwarz")
-                            ) Color.White
-                            else Color.Black,
-                            modifier = Modifier.padding(start = 8.dp),
-                            text = "${student.prename} ${student.surname}"
-                        )
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
+        titleText("Teilnehmer aus der linken Spalte auswählen")
+        Divider(modifier = Modifier.padding(vertical = 16.dp))
+        Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
+            Row {
+                LazyColumn(state = leftLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
+                    items((if (checked.isNotEmpty()) searchStudents.filter { s -> // filter checkboxes ->
+                        findMatch(s.level, checked)
+                    } // <- filter checkboxes
+                    else searchStudents).filter { // filter again for search ->
+                        arrayListOf(
+                            it.prename.lowercase(Locale.getDefault()),
+                            it.surname.lowercase(Locale.getDefault())
+                        ).joinToString(" ") // "prename surname"
+                            .contains(searchQuery.value) // <- filter again for search
+                    }.sortedByDescending { it.id }.sortedByDescending { it.level })
+                    { /* linke spalte */ student ->
+                        Box(
+                            modifier = Modifier
+                                .width(250.dp)
+                                .height(25.dp)
+                                .drawWithCache {
+                                    val gradient = Brush.horizontalGradient(
+                                        colors = listOf(
+                                            boxColor(student)[0],
+                                            boxColor(student)[1]
+                                        ),
+                                        startX = size.width / 2 - 1,
+                                        endX = size.width / 2 + 1,
+                                    )
+                                    onDrawBehind {
+                                        drawRect(gradient)
+                                    }
+                                }.clickable {
+                                    newStudents.add(student)
+                                    allStudents.remove(student)
+                                    searchStudents.remove(student)
+                                    searchQuery.value = ""
+                                },
+                            contentAlignment = Alignment.CenterStart,
+                        ) {
+                            Text(
+                                fontSize = 12.sp,
+                                fontFamily = FontFamily.SansSerif,
+                                fontWeight = FontWeight.W500,
+                                color = if (
+                                    student.level.contains("5. Kyu blau") ||
+                                    student.level.contains("4. Kyu violett") ||
+                                    student.level.contains(". Kyu braun") ||
+                                    student.level.contains(". Dan schwarz")
+                                ) Color.White
+                                else Color.Black,
+                                modifier = Modifier.padding(start = 8.dp),
+                                text = "${student.prename} ${student.surname}"
+                            )
+                        }
+                        Divider(modifier = Modifier.width(250.dp))
                     }
-                    Divider(modifier = Modifier.width(250.dp))
                 }
-            }
-            VerticalScrollbar(
-                modifier = Modifier.fillMaxHeight(),
-                adapter = rememberScrollbarAdapter(
-                    scrollState = leftLazyState
+                VerticalScrollbar(
+                    modifier = Modifier.fillMaxHeight(),
+                    adapter = rememberScrollbarAdapter(
+                        scrollState = leftLazyState
+                    )
                 )
-            )
-        }
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.width(250.dp).fillMaxHeight()
-        ) {
-            Column { // search column
-                Text("Suchen:")
-                TextField(searchQuery.value, onValueChange = { newVal ->
-                    searchQuery.value = newVal.lowercase(Locale.getDefault())
-                })
             }
-            LazyColumn { // filter
-                val farben = arrayOf("Weiss", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
-                items(farben) { c ->
 
-                    fun handleChecked() {
-                        //if (farbe.value == c) farbe.value = "" else farbe.value = c
-                        if (checked.contains(c)) checked.remove(c) else checked.add(c)
-                    }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceEvenly,
+                modifier = Modifier.width(250.dp).fillMaxHeight()
+            ) {
+                Column { // search column
+                    Text("Suchen:")
+                    TextField(searchQuery.value, onValueChange = { newVal ->
+                        searchQuery.value = newVal.lowercase(Locale.getDefault())
+                    })
+                }
+                LazyColumn { // filter
+                    val farben = arrayOf("Weiss", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
+                    items(farben) { c ->
 
-                    Box(
-                        modifier = Modifier.width(200.dp)
-                            .clickable { handleChecked() }) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(
-                                checked = checked.contains(c),
-                                colors = CheckboxDefaults.colors(checkedColor = Color.Gray),
-                                onCheckedChange = { handleChecked() })
-                            Text(text = c)
+                        fun handleChecked() {
+                            //if (farbe.value == c) farbe.value = "" else farbe.value = c
+                            if (checked.contains(c)) checked.remove(c) else checked.add(c)
+                        }
+
+                        Box(
+                            modifier = Modifier.width(200.dp)
+                                .clickable { handleChecked() }) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Checkbox(
+                                    checked = checked.contains(c),
+                                    colors = CheckboxDefaults.colors(checkedColor = Color.Gray),
+                                    onCheckedChange = { handleChecked() })
+                                Text(text = c)
+                            }
                         }
                     }
                 }
-            }
-            Column {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(4.dp)
-                        .clickable { handleAsExam.value = !handleAsExam.value }) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Checkbox(
-                            checked = handleAsExam.value,
-                            colors = CheckboxDefaults.colors(checkedColor = Color.Gray),
-                            onCheckedChange = { handleAsExam.value = it })
-                        Text(text = "Ausgewählte als Prüfung eintragen")
-                    }
-                }
-
-                Button( // eingabe bestätigen
-                    enabled = newStudents.isNotEmpty(),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
-                    modifier = Modifier.fillMaxWidth().height(60.dp),
-                    onClick = { submit(handleAsExam.value) }) {
-                    Text(
-                        textAlign = TextAlign.Center,
-                        text = if (newStudents.isEmpty()) "Teilnehmen aus der ersten Spalte auswählen" else "Eingabe bestätigen!"
-                    )
-                }
-            }
-
-        }
-
-        Row {
-            LazyColumn(state = rightLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
-                items(newStudents) { student ->
+                Column {
                     Box(
-                        modifier = Modifier
-                            .width(250.dp)
-                            .height(25.dp)
-                            .drawWithCache {
-                                val gradient = Brush.horizontalGradient(
-                                    colors = listOf(
-                                        boxColor(student)[0],
-                                        boxColor(student)[1]
-                                    ),
-                                    startX = size.width / 2 - 1,
-                                    endX = size.width / 2 + 1,
-                                )
-                                onDrawBehind {
-                                    drawRect(gradient)
-                                }
-                            }
-                            .clickable {
-                                allStudents.add(student)
-                                searchStudents.add(student)
-                                newStudents.remove(student)
-                            },
-                        contentAlignment = Alignment.CenterStart,
-                    ) {
+                        modifier = Modifier.fillMaxWidth().padding(4.dp)
+                            .clickable { handleAsExam.value = !handleAsExam.value }) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Checkbox(
+                                checked = handleAsExam.value,
+                                colors = CheckboxDefaults.colors(checkedColor = Color.Gray),
+                                onCheckedChange = { handleAsExam.value = it })
+                            Text(text = "Ausgewählte als Prüfung eintragen")
+                        }
+                    }
+
+                    Button( // eingabe bestätigen
+                        enabled = newStudents.isNotEmpty(),
+                        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
+                        modifier = Modifier.fillMaxWidth().height(60.dp),
+                        onClick = { submit(handleAsExam.value) }) {
                         Text(
-                            fontSize = 12.sp,
-                            fontFamily = FontFamily.SansSerif,
-                            fontWeight = FontWeight.W500,
-                            color = if (
-                                student.level.contains("5. Kyu blau") ||
-                                student.level.contains("4. Kyu violett") ||
-                                student.level.contains(". Kyu braun") ||
-                                student.level.contains(". Dan schwarz")
-                            ) Color.White
-                            else Color.Black,
-                            modifier = Modifier.padding(start = 8.dp),
-                            text = "${student.prename} ${student.surname}"
+                            textAlign = TextAlign.Center,
+                            text = if (newStudents.isEmpty()) "Teilnehmen aus der ersten Spalte auswählen" else "Eingabe bestätigen!"
                         )
                     }
-                    Divider(modifier = Modifier.width(250.dp))
                 }
+
             }
-            VerticalScrollbar(
-                modifier = Modifier.fillMaxHeight(),
-                adapter = rememberScrollbarAdapter(
-                    scrollState = rightLazyState
+
+            Row {
+                LazyColumn(state = rightLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
+                    items(newStudents) { student ->
+                        Box(
+                            modifier = Modifier
+                                .width(250.dp)
+                                .height(25.dp)
+                                .drawWithCache {
+                                    val gradient = Brush.horizontalGradient(
+                                        colors = listOf(
+                                            boxColor(student)[0],
+                                            boxColor(student)[1]
+                                        ),
+                                        startX = size.width / 2 - 1,
+                                        endX = size.width / 2 + 1,
+                                    )
+                                    onDrawBehind {
+                                        drawRect(gradient)
+                                    }
+                                }
+                                .clickable {
+                                    allStudents.add(student)
+                                    searchStudents.add(student)
+                                    newStudents.remove(student)
+                                },
+                            contentAlignment = Alignment.CenterStart,
+                        ) {
+                            Text(
+                                fontSize = 12.sp,
+                                fontFamily = FontFamily.SansSerif,
+                                fontWeight = FontWeight.W500,
+                                color = if (
+                                    student.level.contains("5. Kyu blau") ||
+                                    student.level.contains("4. Kyu violett") ||
+                                    student.level.contains(". Kyu braun") ||
+                                    student.level.contains(". Dan schwarz")
+                                ) Color.White
+                                else Color.Black,
+                                modifier = Modifier.padding(start = 8.dp),
+                                text = "${student.prename} ${student.surname}"
+                            )
+                        }
+                        Divider(modifier = Modifier.width(250.dp))
+                    }
+                }
+                VerticalScrollbar(
+                    modifier = Modifier.fillMaxHeight(),
+                    adapter = rememberScrollbarAdapter(
+                        scrollState = rightLazyState
+                    )
                 )
-            )
+            }
         }
     }
 }
