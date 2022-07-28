@@ -102,7 +102,7 @@ fun main() {
                         startPage(students, messages, shiftPressed) { screenID = it }
                     }
                     1 -> {
-                        TrainerSelector(trainers) { screenID = it }
+                        trainerSelector(trainers) { screenID = it }
                     }
                     2 -> {
                         teilnehmerSelector(students) { screenID = it }

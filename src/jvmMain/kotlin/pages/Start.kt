@@ -75,12 +75,7 @@ fun startPage(
         }
         if (showDatenHolenDialog.value) datenHolenWindow { showDatenHolenDialog.value = false }
 
-        Text(
-            "Willkommen!",
-            style = TextStyle(color = Color(0xffff8f06), fontSize = 30.sp),
-            fontWeight = FontWeight.Light,
-            fontFamily = FontFamily.Monospace,
-        )
+        titleText("Willkommen")
         Divider(
             modifier = Modifier.padding(vertical = 16.dp)
         )
@@ -167,6 +162,16 @@ fun startPage(
             }
         }
     }
+}
+
+@Composable
+fun titleText(text: String) {
+    Text(
+        text,
+        style = TextStyle(color = Color(0xffff8f06), fontSize = 30.sp),
+        fontWeight = FontWeight.Light,
+        fontFamily = FontFamily.Monospace,
+    )
 }
 
 @Composable

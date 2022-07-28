@@ -11,10 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import models.Trainer
+import pages.titleText
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TrainerSelector(trainers: List<Trainer>, changeScreen: (id: Int) -> Unit) {
+fun trainerSelector(trainers: List<Trainer>, changeScreen: (id: Int) -> Unit) {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -22,7 +23,7 @@ fun TrainerSelector(trainers: List<Trainer>, changeScreen: (id: Int) -> Unit) {
 
         modifier = Modifier.fillMaxSize(),
     ) {
-        Text("Wer bist du?")
+        titleText("Wer bist du?")
         var selectedTrainer: Trainer? by remember { mutableStateOf(null) }
         var selectedCotrainer: Trainer? by remember { mutableStateOf(null) }
 
@@ -43,29 +44,6 @@ fun TrainerSelector(trainers: List<Trainer>, changeScreen: (id: Int) -> Unit) {
                         modifier = Modifier.size(32.dp)
                     )
                     Text(trainer.name)
-                }
-            }
-        }
-        Text("Cotrainer")
-        var cotrainerExpanded by remember { mutableStateOf(false) }
-        Row {
-            Text(
-                text = selectedCotrainer?.name ?: "Keiner",
-                modifier = Modifier.clickable { cotrainerExpanded = !cotrainerExpanded })
-            DropdownMenu(
-                expanded = cotrainerExpanded,
-                onDismissRequest = { cotrainerExpanded = false }
-            ) {
-                DropdownMenuItem(onClick = {
-                    selectedCotrainer = null; cotrainerExpanded = false
-                }) { Text("Keiner") }
-                Divider()
-                for (cotrainer in trainers.filter { it != selectedTrainer }) {
-                    DropdownMenuItem(onClick = { selectedCotrainer = cotrainer; cotrainerExpanded = false }) {
-                        Text(
-                            cotrainer.name
-                        )
-                    }
                 }
             }
         }
