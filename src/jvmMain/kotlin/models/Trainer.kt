@@ -23,6 +23,4 @@ fun loadTrainers(): List<Trainer> {
             )
         }
     }
-
-    //print(ehre)
 }

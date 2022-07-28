@@ -32,8 +32,6 @@ fun loadMessages(): List<Message> {
             )
         }
     }
-
-    //print(ehre)
 }
 
 fun addMessage(message: Message): Int {

@@ -33,8 +33,6 @@ fun loadTeilnahme(): List<Teilnahme> {
             )
         }
     }
-
-    //print(ehre)
 }
 
 fun loadExams(): List<Teilnahme> {
@@ -49,8 +47,6 @@ fun loadExams(): List<Teilnahme> {
             )
         }
     }
-
-    //print(ehre)
 }
 
 fun insertTeilnahme(ids: String, isExam: Boolean) {
