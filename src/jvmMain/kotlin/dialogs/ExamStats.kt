@@ -117,7 +117,7 @@ private fun studentStats(student: Student) { //datum letzte prüfung | wie lange
                 if (period.months == 0) "" else if (period.months == 1) period.months.toString() + " Monat" else period.months.toString() + " Monaten"
             val days =
                 if (period.days == 0) "" else if (period.days == 1) period.days.toString() + " Tag" else period.days.toString() + " Tagen"
-            Text("Letzte Prüfung vor: ${if (years.isNotEmpty()) "$years, " else ""}${if (months.isNotEmpty()) months else ""} ${if (days.isNotEmpty()) "und $days" else ""}")
+            Text("Letzte Prüfung vor: ${if (years.isNotEmpty()) "$years, " else ""}${if (months.isNotEmpty()) months else ""}${if (days.isNotEmpty() && months.isNotEmpty()) "und" else ""}${if (days.isNotEmpty()) days else ""}")
             Text(
                 "Einheiten seit der letzten Prüfung: " + countId(
                     student.id.toString(),
