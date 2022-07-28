@@ -46,7 +46,7 @@ fun examsDialog(students: List<Student>, onDismiss: () -> Unit) {
 
     Dialog(
         state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 750.dp, height = 600.dp),
-        title = "AAAAAAAAAAAAAAAAAAAAAAA",
+        title = "Letzte Prüfungen abfragen",
         onCloseRequest = onDismiss
     ) {
         Column(
