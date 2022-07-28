@@ -32,7 +32,7 @@ fun trainerSelector(trainers: List<Trainer>, changeScreen: (id: Int) -> Unit) {
             LazyVerticalGrid(
                 cells = GridCells.Fixed(4)
             ) {
-                items(trainers.filter { !it.onlyCotrainer }) { trainer ->
+                items(trainers) { trainer ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.clickable {
@@ -45,7 +45,7 @@ fun trainerSelector(trainers: List<Trainer>, changeScreen: (id: Int) -> Unit) {
                             colors = RadioButtonDefaults.colors(selectedColor = Color.Gray),
                             modifier = Modifier.size(32.dp)
                         )
-                        Text(trainer.name)
+                        Text(trainer.prename)
                     }
                 }
             }
