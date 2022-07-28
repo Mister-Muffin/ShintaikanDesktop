@@ -109,13 +109,13 @@ private fun studentStats(student: Student) { //datum letzte prüfung | wie lange
                 DateTimeFormatter.ofPattern("dd.MM.yyyy").format(student.date_last_exam)
             }"
         ) else Text("Noch keine Prüfung")
-        if (student.date_last_exam !== null) {
+        if (student.date_last_exam !== null) { //Sollte die Person bereits eine Prüfung gemacht haben, bau den string für die Differenz zu diesem Datum zusammen
             val period = Period.between(student.date_last_exam, LocalDate.now())
-            val years =
+            val years = //Zeigt die Jahre, falls diese nicht 0 sind
                 if (period.years == 0) "" else if (period.years == 1) period.years.toString() + " Jahr" else period.years.toString() + " Jahren"
-            val months =
+            val months = //Same here für die Monate
                 if (period.months == 0) "" else if (period.months == 1) period.months.toString() + " Monat" else period.months.toString() + " Monaten"
-            val days =
+            val days = //Same here für die Tage
                 if (period.days == 0) "" else if (period.days == 1) period.days.toString() + " Tag" else period.days.toString() + " Tagen"
             Text("Letzte Prüfung vor: ${if (years.isNotEmpty()) "$years, " else ""}${if (months.isNotEmpty()) months else ""}${if (days.isNotEmpty() && months.isNotEmpty()) "und" else ""}${if (days.isNotEmpty()) days else ""}")
             Text(
@@ -130,6 +130,7 @@ private fun studentStats(student: Student) { //datum letzte prüfung | wie lange
     }
 }
 
+//Zählt die Trainingseinheiten, standardmäßig alle, durch since nur Einheiten ab dem gegebenen Datum
 private fun countId(id: String, teilnahme: List<Teilnahme>, since: LocalDate = LocalDate.EPOCH): Int {
     var counter = 0
     for (a in teilnahme) {
