@@ -18,6 +18,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
 import models.Student
+import models.Teilnahme
+import models.loadTeilnahme
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
@@ -96,6 +98,7 @@ private fun studentList(id: Int, students: List<Student>, onClick: (nameString: 
 
 @Composable
 private fun studentStats(student: Student) { //datum letzte prüfung | wie lange her y m d | einheiten seit l prüf | einheiten gesamt
+    val teilnahme = loadTeilnahme()
     return Column(horizontalAlignment = Alignment.CenterHorizontally) {
         val nameString: String = student.prename + " " + student.surname
 
@@ -115,6 +118,24 @@ private fun studentStats(student: Student) { //datum letzte prüfung | wie lange
             val days =
                 if (period.days == 0) "" else if (period.days == 1) period.days.toString() + " Tag" else period.days.toString() + " Tagen"
             Text("Letzte Prüfung vor: ${if (years.isNotEmpty()) "$years, " else ""}${if (months.isNotEmpty()) months else ""} ${if (days.isNotEmpty()) "und $days" else ""}")
+            Text(
+                "Einheiten seit der letzten Prüfung: " + countId(
+                    student.id.toString(),
+                    teilnahme,
+                    student.date_last_exam
+                ).toString()
+            )
+        }
+        Text("Einheiten gesamt: " + countId(student.id.toString(), teilnahme).toString())
+    }
+}
+
+private fun countId(id: String, teilnahme: List<Teilnahme>, since: LocalDate = LocalDate.EPOCH): Int {
+    var counter = 0
+    for (a in teilnahme) {
+        if (a.userId !== null && a.date > since) {
+            counter += a.userId.split(",").filter { id == it }.size
         }
     }
+    return counter
 }
