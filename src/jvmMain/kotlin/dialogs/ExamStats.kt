@@ -56,6 +56,7 @@ fun examsDialog(students: List<Student>, onDismiss: () -> Unit) {
             OutlinedTextField(
                 value = searchFieldVal.value,
                 onValueChange = { searchFieldVal.value = it },
+                placeholder = { Text("Suchen... (mind. 3 Zeichen)") },
                 modifier = Modifier.padding(bottom = 10.dp).width(300.dp)
             )
             LazyColumn {
