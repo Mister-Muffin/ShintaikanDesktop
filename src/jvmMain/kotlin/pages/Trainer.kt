@@ -11,14 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import models.Trainer
-import pages.titleText
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun trainerSelector(trainers: List<Trainer>, changeScreen: (id: Int) -> Unit) {
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
-        titleText("Wer bist du?")
+        Text("Wer bist du?", style = MaterialTheme.typography.h1)
         Divider(modifier = Modifier.padding(vertical = 16.dp))
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

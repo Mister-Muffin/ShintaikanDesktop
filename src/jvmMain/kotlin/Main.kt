@@ -1,18 +1,24 @@
 import androidx.compose.foundation.clickable
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.Typography
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -90,14 +96,27 @@ fun main() {
             }
 
             if (showManageTrainerDialog) {
-                manageTrainerDialog { showManageTrainerDialog = false }
+                manageTrainerDialog(students) { showManageTrainerDialog = false }
             }
             if (showExamsDialog) {
                 examsDialog(students, onDismiss = { showExamsDialog = false })
             }
             if (showDatenHolenDialog) datenHolenWindow { showDatenHolenDialog = false }
 
-            MaterialTheme {
+            MaterialTheme(
+                typography = Typography(
+                    h1 = TextStyle(
+                        color = Color(0xffff8f06), fontSize = 40.sp,
+                        fontWeight = FontWeight.Light,
+                        fontFamily = FontFamily.Monospace
+                    ),
+                    subtitle1 = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    body1 = TextStyle(fontSize = 20.sp) // All 'Text' use this as default as it seems
+                )
+            ) {
                 when (screenID) {
                     0 -> {
                         startPage(students, messages) { screenID = it }

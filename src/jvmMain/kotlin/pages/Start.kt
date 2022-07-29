@@ -14,11 +14,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
@@ -61,7 +58,7 @@ fun startPage(
             onDismiss = { showDeleteMessageDialog.value = false })
 
 
-        titleText("Willkommen")
+        Text("Willkommen", style = MaterialTheme.typography.h1)
         Divider(
             modifier = Modifier.padding(vertical = 16.dp)
         )
@@ -77,7 +74,7 @@ fun startPage(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 item {
-                    headerText("Es haben/hatten Geburtstag:")
+                    Text("Es haben/hatten Geburtstag:", style = MaterialTheme.typography.subtitle1)
                 }
                 items(birthdays) {
                     Row {
@@ -109,7 +106,7 @@ fun startPage(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                headerText(text = "Kurznachrichten")
+                Text(text = "Kurznachrichten", style = MaterialTheme.typography.subtitle1)
 
                 Row {
                     OutlinedTextField(
@@ -150,15 +147,6 @@ fun startPage(
     }
 }
 
-@Composable
-fun titleText(text: String) {
-    Text(
-        text,
-        style = TextStyle(color = Color(0xffff8f06), fontSize = 30.sp),
-        fontWeight = FontWeight.Light,
-        fontFamily = FontFamily.Monospace,
-    )
-}
 
 @Composable
 private fun deleteDialog(messages: MutableList<Message>, onDismiss: () -> Unit) {
@@ -168,7 +156,7 @@ private fun deleteDialog(messages: MutableList<Message>, onDismiss: () -> Unit) 
         onCloseRequest = onDismiss
     ) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            headerText("Nachichten löschen")
+            Text("Nachichten löschen", style = MaterialTheme.typography.subtitle1)
             LazyColumn(horizontalAlignment = Alignment.Start) {
                 items(messages) {
                     Row {
@@ -197,10 +185,6 @@ private fun message(message: Message) {
     }
 }
 
-@Composable
-private fun headerText(text: String) {
-    Text(text = text, fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 16.dp))
-}
 
 @Composable
 private fun buttonRow(changeScreen: (id: Int) -> Unit) {

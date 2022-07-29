@@ -61,7 +61,7 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
     val rightLazyState = rememberLazyListState()
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
-        titleText("Teilnehmer aus der linken Spalte auswählen")
+        Text("Teilnehmer aus der linken Spalte auswählen", style = MaterialTheme.typography.h1)
         Divider(modifier = Modifier.padding(vertical = 16.dp))
         Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
             Row {
