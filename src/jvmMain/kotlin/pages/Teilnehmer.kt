@@ -77,44 +77,11 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                             .contains(searchQuery.value) // <- filter again for search
                     }.sortedByDescending { it.id }.sortedByDescending { it.level })
                     { /* linke spalte */ student ->
-                        Box(
-                            modifier = Modifier
-                                .width(250.dp)
-                                .height(25.dp)
-                                .drawWithCache {
-                                    val gradient = Brush.horizontalGradient(
-                                        colors = listOf(
-                                            boxColor(student)[0],
-                                            boxColor(student)[1]
-                                        ),
-                                        startX = size.width / 2 - 1,
-                                        endX = size.width / 2 + 1,
-                                    )
-                                    onDrawBehind {
-                                        drawRect(gradient)
-                                    }
-                                }.clickable {
-                                    newStudents.add(student)
-                                    allStudents.remove(student)
-                                    searchStudents.remove(student)
-                                    searchQuery.value = ""
-                                },
-                            contentAlignment = Alignment.CenterStart,
-                        ) {
-                            Text(
-                                fontSize = 12.sp,
-                                fontFamily = FontFamily.SansSerif,
-                                fontWeight = FontWeight.W500,
-                                color = if (
-                                    student.level.contains("5. Kyu blau") ||
-                                    student.level.contains("4. Kyu violett") ||
-                                    student.level.contains(". Kyu braun") ||
-                                    student.level.contains(". Dan schwarz")
-                                ) Color.White
-                                else Color.Black,
-                                modifier = Modifier.padding(start = 8.dp),
-                                text = "${student.prename} ${student.surname}"
-                            )
+                        listBox(student) {
+                            newStudents.add(student)
+                            allStudents.remove(student)
+                            searchStudents.remove(student)
+                            searchQuery.value = ""
                         }
                         Divider(modifier = Modifier.width(250.dp))
                     }
@@ -138,28 +105,7 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                         searchQuery.value = newVal.lowercase(Locale.getDefault())
                     })
                 }
-                LazyColumn { // filter
-                    val farben = arrayOf("Weiss", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
-                    items(farben) { c ->
-
-                        fun handleChecked() {
-                            //if (farbe.value == c) farbe.value = "" else farbe.value = c
-                            if (checked.contains(c)) checked.remove(c) else checked.add(c)
-                        }
-
-                        Box(
-                            modifier = Modifier.width(200.dp)
-                                .clickable { handleChecked() }) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Checkbox(
-                                    checked = checked.contains(c),
-                                    colors = CheckboxDefaults.colors(checkedColor = Color.Gray),
-                                    onCheckedChange = { handleChecked() })
-                                Text(text = c)
-                            }
-                        }
-                    }
-                }
+                customFilter(checked)
                 Column {
                     Box(
                         modifier = Modifier.fillMaxWidth().padding(4.dp)
@@ -190,44 +136,10 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
             Row {
                 LazyColumn(state = rightLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
                     items(newStudents) { student ->
-                        Box(
-                            modifier = Modifier
-                                .width(250.dp)
-                                .height(25.dp)
-                                .drawWithCache {
-                                    val gradient = Brush.horizontalGradient(
-                                        colors = listOf(
-                                            boxColor(student)[0],
-                                            boxColor(student)[1]
-                                        ),
-                                        startX = size.width / 2 - 1,
-                                        endX = size.width / 2 + 1,
-                                    )
-                                    onDrawBehind {
-                                        drawRect(gradient)
-                                    }
-                                }
-                                .clickable {
-                                    allStudents.add(student)
-                                    searchStudents.add(student)
-                                    newStudents.remove(student)
-                                },
-                            contentAlignment = Alignment.CenterStart,
-                        ) {
-                            Text(
-                                fontSize = 12.sp,
-                                fontFamily = FontFamily.SansSerif,
-                                fontWeight = FontWeight.W500,
-                                color = if (
-                                    student.level.contains("5. Kyu blau") ||
-                                    student.level.contains("4. Kyu violett") ||
-                                    student.level.contains(". Kyu braun") ||
-                                    student.level.contains(". Dan schwarz")
-                                ) Color.White
-                                else Color.Black,
-                                modifier = Modifier.padding(start = 8.dp),
-                                text = "${student.prename} ${student.surname}"
-                            )
+                        listBox(student) {
+                            allStudents.add(student)
+                            searchStudents.add(student)
+                            newStudents.remove(student)
                         }
                         Divider(modifier = Modifier.width(250.dp))
                     }
@@ -240,6 +152,74 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun customFilter(checked: MutableList<String>) {
+    LazyColumn { // filter
+        val farben = arrayOf("Weiss", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
+        items(farben) { c ->
+
+            fun handleChecked() {
+                //if (farbe.value == c) farbe.value = "" else farbe.value = c
+                if (checked.contains(c)) checked.remove(c) else checked.add(c)
+            }
+
+            Box(
+                modifier = Modifier.width(200.dp)
+                    .clickable { handleChecked() }) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Checkbox(
+                        checked = checked.contains(c),
+                        colors = CheckboxDefaults.colors(checkedColor = Color.Gray),
+                        onCheckedChange = { handleChecked() })
+                    Text(text = c)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun listBox(
+    student: Student,
+    onBoxClicked: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .width(250.dp)
+            .height(25.dp)
+            .drawWithCache {
+                val gradient = Brush.horizontalGradient(
+                    colors = listOf(
+                        boxColor(student)[0],
+                        boxColor(student)[1]
+                    ),
+                    startX = size.width / 2 - 1,
+                    endX = size.width / 2 + 1,
+                )
+                onDrawBehind {
+                    drawRect(gradient)
+                }
+            }
+            .clickable { onBoxClicked() },
+        contentAlignment = Alignment.CenterStart,
+    ) {
+        Text(
+            fontSize = 12.sp,
+            fontFamily = FontFamily.SansSerif,
+            fontWeight = FontWeight.W500,
+            color = if (
+                student.level.contains("5. Kyu blau") ||
+                student.level.contains("4. Kyu violett") ||
+                student.level.contains(". Kyu braun") ||
+                student.level.contains(". Dan schwarz")
+            ) Color.White
+            else Color.Black,
+            modifier = Modifier.padding(start = 8.dp),
+            text = "${student.prename} ${student.surname}"
+        )
     }
 }
 
