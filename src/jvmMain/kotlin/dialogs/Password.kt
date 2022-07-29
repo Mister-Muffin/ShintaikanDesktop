@@ -6,9 +6,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
@@ -21,25 +19,34 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
 
 @Composable
-fun passwordDialog(result: (pwCorrect: Boolean) -> Unit) {
-    val passwordFieldVal = remember { mutableStateOf("test") } //TODO: Remove this for production
+fun passwordDialog(result: (pwCorrect: Boolean) -> Unit, onDissmiss: () -> Unit) {
+
+    var passwordFieldVal by remember { mutableStateOf("test") } //TODO: Set empty string for production
+    var errorTextField by remember { mutableStateOf(false) }
+
     Dialog(
         state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 700.dp),
         title = "Passworteingabe",
-        onCloseRequest = { result(false) }
+        onCloseRequest = onDissmiss
     ) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Text("Bitte gib das Passwort ein")
             OutlinedTextField(
-                value = passwordFieldVal.value,
+                value = passwordFieldVal,
                 visualTransformation = VisualTransformation {
                     TransformedText(
-                        AnnotatedString("*".repeat(passwordFieldVal.value.length)), OffsetMapping.Identity
+                        AnnotatedString("*".repeat(passwordFieldVal.length)), OffsetMapping.Identity
                     )
                 },
                 singleLine = true,
-                onValueChange = { passwordFieldVal.value = it })
-            Button(onClick = { result(passwordFieldVal.value == "test") }) { Text("OK") }
+                isError = errorTextField,
+                onValueChange = { passwordFieldVal = it })
+            Button(onClick = {
+                val passwordCorrect = passwordFieldVal == "test" // <- Password
+                errorTextField = !passwordCorrect
+
+                result(passwordCorrect)
+            }) { Text("OK") }
         }
     }
 

@@ -1,3 +1,4 @@
+
 import androidx.compose.foundation.clickable
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -10,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyShortcut
-import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.dp
@@ -18,6 +18,7 @@ import androidx.compose.ui.window.MenuBar
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import dialogs.datenHolenWindow
 import dialogs.examsDialog
 import dialogs.manageTrainerDialog
 import models.loadMessages
@@ -50,7 +51,7 @@ fun main() {
 
         val imageBitmap = remember { useResource("pelli2.jpg") { loadImageBitmap(it) } }
 
-        var shiftPressed by remember { mutableStateOf(false) }
+        var showDatenHolenDialog by remember { mutableStateOf(false) }
         var showExamsDialog by remember { mutableStateOf(false) }
         var showManageTrainerDialog by remember { mutableStateOf(false) }
 
@@ -59,10 +60,6 @@ fun main() {
             title = "Teilnahme",
             icon = BitmapPainter(image = imageBitmap),
             state = rememberWindowState(width = 1152.dp, height = 864.dp),
-            onKeyEvent = {
-                shiftPressed = it.isShiftPressed
-                shiftPressed
-            }
         ) {
             var screenID by remember { mutableStateOf(0) }
 
@@ -96,17 +93,15 @@ fun main() {
             if (showManageTrainerDialog) {
                 manageTrainerDialog { showManageTrainerDialog = false }
             }
-
             if (showExamsDialog) {
-                examsDialog(students, onDismiss = {
-                    showExamsDialog = false
-                })
+                examsDialog(students, onDismiss = { showExamsDialog = false })
             }
+            if (showDatenHolenDialog) datenHolenWindow { showDatenHolenDialog = false }
 
             MaterialTheme {
                 when (screenID) {
                     0 -> {
-                        startPage(students, messages, shiftPressed) { screenID = it }
+                        startPage(students, messages) { screenID = it }
                     }
                     1 -> {
                         trainerSelector(trainers) { screenID = it }

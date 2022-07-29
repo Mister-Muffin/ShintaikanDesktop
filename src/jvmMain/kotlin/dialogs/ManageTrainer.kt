@@ -17,7 +17,10 @@ fun manageTrainerDialog(onDismiss: () -> Unit) {
     var requirePassword by remember { mutableStateOf(true) }
 
     if (requirePassword) {
-        passwordDialog { pwCorrect -> requirePassword = !pwCorrect } // if password correct, set requirePasswort to false
+        passwordDialog(
+            result = { pwCorrect -> requirePassword = !pwCorrect }, // if password correct, set requirePasswort to false
+            onDissmiss = onDismiss
+        )
     } else {
         Dialog(
             state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 750.dp, height = 600.dp),

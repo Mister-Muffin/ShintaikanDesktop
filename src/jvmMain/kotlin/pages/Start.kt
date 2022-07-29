@@ -22,8 +22,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
-import dialogs.datenHolenWindow
-import dialogs.passwordDialog
 import models.Message
 import models.Student
 import models.addMessage
@@ -36,7 +34,6 @@ import java.time.format.DateTimeFormatter
 fun startPage(
     students: List<Student>,
     messages: List<Message>,
-    shiftPressed: Boolean,
     changeScreen: (id: Int) -> Unit
 ) {
 
@@ -53,9 +50,6 @@ fun startPage(
         }
     }
     val showDeleteMessageDialog = remember { mutableStateOf(false) }
-    val showPasswordDialog = remember { mutableStateOf(false) }
-    val showDatenHolenDialog = remember { mutableStateOf(false) }
-
 
     val birthdays = remember { loadBirthdays(students) }
 
@@ -66,21 +60,13 @@ fun startPage(
             messages = allMessages,
             onDismiss = { showDeleteMessageDialog.value = false })
 
-        if (showPasswordDialog.value) {
-            passwordDialog(
-                result = {
-                    showPasswordDialog.value = false
-                    showDatenHolenDialog.value = it
-                })
-        }
-        if (showDatenHolenDialog.value) datenHolenWindow { showDatenHolenDialog.value = false }
 
         titleText("Willkommen")
         Divider(
             modifier = Modifier.padding(vertical = 16.dp)
         )
         Box {
-            buttonRow(shiftPressed, changeScreen, datenHolen = { showPasswordDialog.value = true })
+            buttonRow(changeScreen)
         }
         Row(
             verticalAlignment = Alignment.Top,
@@ -217,12 +203,11 @@ private fun headerText(text: String) {
 }
 
 @Composable
-private fun buttonRow(shiftPressed: Boolean, changeScreen: (id: Int) -> Unit, datenHolen: () -> Unit) {
+private fun buttonRow(changeScreen: (id: Int) -> Unit) {
 
     @Composable
-    fun rowButton(text: String, onClick: () -> Unit, enabled: Boolean) {
+    fun rowButton(text: String, onClick: () -> Unit) {
         Button(
-            enabled = enabled,
             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
             modifier = Modifier.width(250.dp),
             onClick = onClick
@@ -233,9 +218,8 @@ private fun buttonRow(shiftPressed: Boolean, changeScreen: (id: Int) -> Unit, da
 
     Row {
         rowButton(
-            text = if (!shiftPressed) "Teilnehmer eintragen" else "Daten holen",
-            enabled = true,
-            onClick = { if (!shiftPressed) changeScreen(1) else datenHolen() })
+            text = "Teilnehmer eintragen",
+            onClick = { changeScreen(1) })
     }
 }
 
