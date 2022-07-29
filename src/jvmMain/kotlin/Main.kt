@@ -19,6 +19,7 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import dialogs.examsDialog
+import dialogs.manageTrainerDialog
 import models.loadMessages
 import models.loadStudents
 import models.loadTrainers
@@ -51,6 +52,7 @@ fun main() {
 
         var shiftPressed by remember { mutableStateOf(false) }
         var showExamsDialog by remember { mutableStateOf(false) }
+        var showManageTrainerDialog by remember { mutableStateOf(false) }
 
         Window(
             onCloseRequest = ::exitApplication,
@@ -75,6 +77,7 @@ fun main() {
                     Item("Beenden", onClick = { exitApplication() }, mnemonic = 'E')
                 }
                 Menu("Administration", mnemonic = 'A', enabled = screenID == 0) {
+                    Item("Trainer verwalten", onClick = { showManageTrainerDialog = true })
                     Item("Daten holen", onClick = { })
                 }
                 Menu("Kurznachichten", mnemonic = 'K') {
@@ -88,6 +91,10 @@ fun main() {
                         mnemonic = 'K'
                     )
                 }
+            }
+
+            if (showManageTrainerDialog) {
+                manageTrainerDialog { showManageTrainerDialog = false }
             }
 
             if (showExamsDialog) {
