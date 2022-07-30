@@ -28,12 +28,12 @@ fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
     }
 
     var requirePassword by remember { mutableStateOf(true) }
-    val searchFieldVal = remember { mutableStateOf("") }
+    var searchFieldVal by remember { mutableStateOf("") }
 
     val studentFilter = students.filter {
         (it.prename + it.surname)
             .lowercase()
-            .contains(searchFieldVal.value.lowercase().replace(" ", ""))
+            .contains(searchFieldVal.lowercase().replace(" ", ""))
     }
 
     if (requirePassword) {
@@ -61,28 +61,31 @@ fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
                 }
                 // Search field to select person as trainer
                 OutlinedTextField(
-                    value = searchFieldVal.value,
-                    onValueChange = { searchFieldVal.value = it },
+                    value = searchFieldVal,
+                    onValueChange = { searchFieldVal = it },
                     placeholder = { Text("Suchen... (mind. 3 Zeichen)") },
                     modifier = Modifier.padding(bottom = 10.dp).width(300.dp)
                 )
                 LazyColumn {
-                    if (searchFieldVal.value.length > 2) {
+                    if (searchFieldVal.length > 2) {
                         if (studentFilter.size >= 2) {
                             items(students.filter {
                                 (it.prename + it.surname)
                                     .lowercase()
-                                    .contains(searchFieldVal.value.lowercase().replace(" ", ""))
+                                    .contains(searchFieldVal.lowercase().replace(" ", ""))
                             }) {
                                 studentList(
                                     it.id,
                                     students,
-                                    onClick = { nameString -> searchFieldVal.value = nameString })
+                                    onClick = { nameString -> searchFieldVal = nameString })
                             }
                         } else if (studentFilter.size == 1) {
                             item {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(studentFilter[0].prename, style = MaterialTheme.typography.body1)
+                                    Text(
+                                        "${studentFilter[0].prename} ${studentFilter[0].surname}",
+                                        style = MaterialTheme.typography.body1
+                                    )
                                     Checkbox(
                                         checked = studentFilter[0].is_trainer,
                                         onCheckedChange = {
@@ -91,6 +94,7 @@ fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
                                             for (s in loadStudents()) {
                                                 students.add(s)
                                             }
+                                            searchFieldVal = ""
                                         })
                                 }
                             }
@@ -126,7 +130,7 @@ private fun currentTrainerList(
 fun shouldRestartDialog(onDismiss: () -> Unit) {
     Dialog(
         state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 550.dp, height = 300.dp),
-        title = "Shintaikan Desktop",
+        title = "Teilnahme",
         onCloseRequest = onDismiss
     ) {
         Column(
