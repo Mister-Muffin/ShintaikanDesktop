@@ -13,10 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import models.Trainer
+import models.loadTrainers
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun trainerSelector(trainers: List<Trainer>, changeScreen: (id: Int) -> Unit) {
+fun trainerSelector(changeScreen: (id: Int) -> Unit) {
+    val trainers = loadTrainers()
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
         Text("Wer bist du?", style = MaterialTheme.typography.h1)

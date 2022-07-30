@@ -1,3 +1,4 @@
+
 import androidx.compose.foundation.clickable
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -27,7 +28,6 @@ import dialogs.manageTrainerDialog
 import dialogs.shouldRestartDialog
 import models.loadMessages
 import models.loadStudents
-import models.loadTrainers
 import org.jetbrains.exposed.sql.Database
 import pages.startPage
 import pages.successPage
@@ -50,7 +50,6 @@ fun main() {
             password = password
         )
 
-        val trainers = loadTrainers()
         val students = loadStudents()
         val messages = loadMessages()
 
@@ -126,7 +125,7 @@ fun main() {
                         startPage(students, messages) { screenID = it }
                     }
                     1 -> {
-                        trainerSelector(trainers) { screenID = it }
+                        trainerSelector { screenID = it }
                     }
                     2 -> {
                         teilnehmerSelector(students) { screenID = it }
