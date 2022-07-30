@@ -52,68 +52,73 @@ fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
             onCloseRequest = onDismiss
         ) {
             Column(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
+                modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Aktuelle Trainer:", style = MaterialTheme.typography.h6)
-                currentTrainerList(students) { newVal, student ->
-                    editIsTrainer(student.id, newVal)
-                    students.clear()
-                    for (s in loadStudents()) {
-                        students.add(s)
-                    }
-                }
-                // Search field to select person as trainer
-                OutlinedTextField(
-                    value = searchFieldVal,
-                    onValueChange = { searchFieldVal = it },
-                    placeholder = { Text("Suchen... (mind. 3 Zeichen)") },
-                    modifier = Modifier.padding(bottom = 10.dp).width(300.dp)
-                )
-                Row(modifier = Modifier.fillMaxHeight(.8f)) {
-                    LazyColumn(state = lazyState) {
-                        if (searchFieldVal.length > 2) {
-                            if (studentFilter.size >= 2) {
-                                items(students.filter {
-                                    (it.prename + it.surname)
-                                        .lowercase()
-                                        .contains(searchFieldVal.lowercase().replace(" ", ""))
-                                }) {
-                                    StudentList().studentList(
-                                        it.id,
-                                        students,
-                                        onClick = { nameString -> searchFieldVal = nameString })
-                                }
-                            } else if (studentFilter.size == 1) {
-                                item {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(
-                                            "${studentFilter[0].prename} ${studentFilter[0].surname}",
-                                            style = MaterialTheme.typography.body1
-                                        )
-                                        Checkbox(
-                                            checked = studentFilter[0].is_trainer,
-                                            onCheckedChange = {
-                                                editIsTrainer(studentFilter[0].id, it)
-                                                students.clear()
-                                                for (s in loadStudents()) {
-                                                    students.add(s)
-                                                }
-                                                searchFieldVal = ""
-                                            })
-                                    }
-                                }
-                            } else {
-                                item { Text("Keine Personen gefunden") }
-                            }
+                Column(
+                    modifier = Modifier.fillMaxWidth().fillMaxHeight(.8f).padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("Aktuelle Trainer:", style = MaterialTheme.typography.h6)
+                    currentTrainerList(students) { newVal, student ->
+                        editIsTrainer(student.id, newVal)
+                        students.clear()
+                        for (s in loadStudents()) {
+                            students.add(s)
                         }
                     }
-                    VerticalScrollbar(
-                        modifier = Modifier.fillMaxHeight(),
-                        adapter = rememberScrollbarAdapter(
-                            scrollState = lazyState
-                        )
+                    // Search field to select person as trainer
+                    OutlinedTextField(
+                        value = searchFieldVal,
+                        onValueChange = { searchFieldVal = it },
+                        placeholder = { Text("Suchen... (mind. 3 Zeichen)") },
+                        modifier = Modifier.padding(bottom = 10.dp).width(300.dp)
                     )
+                    Row {
+                        LazyColumn(state = lazyState) {
+                            if (searchFieldVal.length > 2) {
+                                if (studentFilter.size >= 2) {
+                                    items(students.filter {
+                                        (it.prename + it.surname)
+                                            .lowercase()
+                                            .contains(searchFieldVal.lowercase().replace(" ", ""))
+                                    }) {
+                                        StudentList().studentList(
+                                            it.id,
+                                            students,
+                                            onClick = { nameString -> searchFieldVal = nameString })
+                                    }
+                                } else if (studentFilter.size == 1) {
+                                    item {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                "${studentFilter[0].prename} ${studentFilter[0].surname}",
+                                                style = MaterialTheme.typography.body1
+                                            )
+                                            Checkbox(
+                                                checked = studentFilter[0].is_trainer,
+                                                onCheckedChange = {
+                                                    editIsTrainer(studentFilter[0].id, it)
+                                                    students.clear()
+                                                    for (s in loadStudents()) {
+                                                        students.add(s)
+                                                    }
+                                                    searchFieldVal = ""
+                                                })
+                                        }
+                                    }
+                                } else {
+                                    item { Text("Keine Personen gefunden") }
+                                }
+                            }
+                        }
+                        VerticalScrollbar(
+                            modifier = Modifier.fillMaxHeight(),
+                            adapter = rememberScrollbarAdapter(
+                                scrollState = lazyState
+                            )
+                        )
+                    }
                 }
                 Button(onClick = onDismiss, modifier = Modifier.padding(8.dp).width(StudentList.textWidth)) {
                     Text("OK")
