@@ -24,6 +24,7 @@ import androidx.compose.ui.window.*
 import dialogs.datenHolenWindow
 import dialogs.examsDialog
 import dialogs.manageTrainerDialog
+import dialogs.shouldRestartDialog
 import models.loadMessages
 import models.loadStudents
 import models.loadTrainers
@@ -57,6 +58,7 @@ fun main() {
         var showDatenHolenDialog by remember { mutableStateOf(false) }
         var showExamsDialog by remember { mutableStateOf(false) }
         var showManageTrainerDialog by remember { mutableStateOf(false) }
+        var showShouldRestartDialog by remember { mutableStateOf(false) }
 
         Window(
             onCloseRequest = ::exitApplication,
@@ -94,7 +96,10 @@ fun main() {
             }
 
             if (showManageTrainerDialog) {
-                manageTrainerDialog(students) { showManageTrainerDialog = false }
+                manageTrainerDialog(students) { showShouldRestartDialog = true; showManageTrainerDialog = false }
+            }
+            if (showShouldRestartDialog) {
+                shouldRestartDialog { showShouldRestartDialog = false }
             }
             if (showExamsDialog) {
                 examsDialog(students, onDismiss = { showExamsDialog = false })
