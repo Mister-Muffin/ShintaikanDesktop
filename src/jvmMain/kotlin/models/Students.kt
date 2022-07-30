@@ -6,6 +6,7 @@ import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
 import java.time.LocalDate
 
 object StudentTable : Table("main") {
@@ -70,6 +71,14 @@ fun loadTrainers(): List<Trainer> {
                 prename = it[StudentTable.prename],
                 is_trainer = it[StudentTable.is_trainer]
             )
+        }
+    }
+}
+
+fun editIsTrainer(id: Int, is_trainer: Boolean) {
+    return transaction {
+        StudentTable.update(where = { StudentTable.id eq id }) {
+            it[StudentTable.is_trainer] = is_trainer
         }
     }
 }
