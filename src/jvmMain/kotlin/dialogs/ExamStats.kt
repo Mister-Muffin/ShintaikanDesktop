@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
-import composables.studentList
+import composables.StudentList
 import models.Student
 import models.Teilnahme
 import models.loadTeilnahme
@@ -69,7 +69,10 @@ fun examsDialog(students: List<Student>, onDismiss: () -> Unit) {
                                 .lowercase()
                                 .contains(searchFieldVal.value.lowercase().replace(" ", ""))
                         }) {
-                            studentList(it.id, students, onClick = { nameString -> searchFieldVal.value = nameString })
+                            StudentList().studentList(
+                                it.id,
+                                students,
+                                onClick = { nameString -> searchFieldVal.value = nameString })
                         }
                     } else if (studentFilter.size == 1) {
                         item { studentStats(studentFilter[0]) }

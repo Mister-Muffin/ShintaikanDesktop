@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
-import composables.studentList
+import composables.StudentList
 import models.Student
 import models.editIsTrainer
 import models.loadStudents
@@ -79,7 +79,7 @@ fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
                                         .lowercase()
                                         .contains(searchFieldVal.lowercase().replace(" ", ""))
                                 }) {
-                                    studentList(
+                                    StudentList().studentList(
                                         it.id,
                                         students,
                                         onClick = { nameString -> searchFieldVal = nameString })
@@ -115,7 +115,7 @@ fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
                         )
                     )
                 }
-                Button(onClick = onDismiss, modifier = Modifier.padding(8.dp)) {
+                Button(onClick = onDismiss, modifier = Modifier.padding(8.dp).width(StudentList.textWidth)) {
                     Text("OK")
                 }
             }
