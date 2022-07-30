@@ -32,6 +32,7 @@ import org.jetbrains.exposed.sql.Database
 import pages.startPage
 import pages.successPage
 import pages.teilnehmerSelector
+import pages.trainerSelector
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
