@@ -47,7 +47,7 @@ fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
         )
     } else {
         Dialog(
-            state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 750.dp, height = 600.dp),
+            state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 800.dp, height = 600.dp),
             title = "Trainer verwalten",
             onCloseRequest = onDismiss
         ) {
@@ -60,10 +60,12 @@ fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     Column(
-                        modifier = Modifier.padding(8.dp),
+                        modifier = Modifier.padding(8.dp)
+                            .width(StudentList.textWidth + 30.dp), // use textWidth here to make them both the same width
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text("Aktuelle Trainer:", style = MaterialTheme.typography.h6)
+                        Divider(modifier = Modifier.padding(4.dp))
                         currentTrainerList(students) { newVal, student ->
                             editIsTrainer(student.id, newVal)
                             students.clear()
@@ -73,9 +75,11 @@ fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
                         }
                     }
                     Column(
-                        modifier = Modifier.padding(16.dp).width(StudentList.textWidth),
+                        modifier = Modifier.padding(8.dp).width(StudentList.textWidth + 30.dp), // +30 for scrollbar
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
+                        Text("Trainer hinzufügen:", style = MaterialTheme.typography.h6)
+                        Spacer(modifier = Modifier.padding(4.dp))
                         // Search field to select person as trainer
                         OutlinedTextField(
                             value = searchFieldVal,
@@ -122,7 +126,7 @@ fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
                                 }
                             }
                             VerticalScrollbar(
-                                modifier = Modifier.fillMaxHeight(),
+                                modifier = Modifier.fillMaxHeight().width(8.dp).padding(start = 2.dp),
                                 adapter = rememberScrollbarAdapter(
                                     scrollState = lazyState
                                 )
