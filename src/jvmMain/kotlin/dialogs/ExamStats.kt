@@ -1,7 +1,9 @@
 package dialogs
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.OutlinedTextField
@@ -12,11 +14,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
+import composables.studentList
 import models.Student
 import models.Teilnahme
 import models.loadTeilnahme
@@ -77,23 +79,6 @@ fun examsDialog(students: List<Student>, onDismiss: () -> Unit) {
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun studentList(id: Int, students: List<Student>, onClick: (nameString: String) -> Unit) {
-    val student = students.find { it.id == id }
-    return if (student != null) {
-        Row(horizontalArrangement = Arrangement.Center) {
-            val nameString: String = student.prename + " " + student.surname
-            Text(
-                text = nameString,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.clickable { onClick(nameString) }.padding(10.dp).width(300.dp)
-            )
-        }
-    } else {
-        Row { }
     }
 }
 

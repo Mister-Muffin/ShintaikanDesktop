@@ -1,13 +1,11 @@
 package dialogs
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Checkbox
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -16,6 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
+import composables.studentList
 import models.Student
 import models.editIsTrainer
 import models.loadStudents
@@ -31,6 +30,13 @@ fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
     }
 
     var requirePassword by remember { mutableStateOf(true) }
+    val searchFieldVal = remember { mutableStateOf("") }
+
+    val studentFilter = students.filter {
+        (it.prename + it.surname)
+            .lowercase()
+            .contains(searchFieldVal.value.lowercase().replace(" ", ""))
+    }
 
     if (requirePassword) {
         passwordDialog(
@@ -48,23 +54,71 @@ fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text("Aktuelle Trainer:", style = MaterialTheme.typography.h6)
+                currentTrainerList(students) { newVal, student ->
+                    editIsTrainer(student.id, newVal)
+                    students.clear()
+                    for (s in loadStudents()) {
+                        students.add(s)
+                    }
+                }
+                // Search field to select person as trainer
+                OutlinedTextField(
+                    value = searchFieldVal.value,
+                    onValueChange = { searchFieldVal.value = it },
+                    placeholder = { Text("Suchen... (mind. 3 Zeichen)") },
+                    modifier = Modifier.padding(bottom = 10.dp).width(300.dp)
+                )
                 LazyColumn {
-                    items(students.filter { it.is_trainer }) { student ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(student.prename, style = MaterialTheme.typography.body1)
-                            Checkbox(
-                                checked = student.is_trainer,
-                                onCheckedChange = {
-                                    editIsTrainer(student.id, it)
-                                    students.clear()
-                                    for (s in loadStudents()) {
-                                        students.add(s)
-                                    }
-                                })
+                    if (searchFieldVal.value.length > 2) {
+                        if (studentFilter.size >= 2) {
+                            items(students.filter {
+                                (it.prename + it.surname)
+                                    .lowercase()
+                                    .contains(searchFieldVal.value.lowercase().replace(" ", ""))
+                            }) {
+                                studentList(
+                                    it.id,
+                                    students,
+                                    onClick = { nameString -> searchFieldVal.value = nameString })
+                            }
+                        } else if (studentFilter.size == 1) {
+                            item {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Text(studentFilter[0].prename, style = MaterialTheme.typography.body1)
+                                    Checkbox(
+                                        checked = studentFilter[0].is_trainer,
+                                        onCheckedChange = {
+                                            editIsTrainer(studentFilter[0].id, it)
+                                            students.clear()
+                                            for (s in loadStudents()) {
+                                                students.add(s)
+                                            }
+                                        })
+                                }
+                            }
+                        } else {
+                            item { Text("Keine Personen gefunden") }
                         }
                     }
                 }
+            }
+        }
+    }
+}
 
+@Composable
+private fun currentTrainerList(
+    students: MutableList<Student>,
+    onCheckedChange: (newVal: Boolean, student: Student) -> Unit
+) {
+    LazyColumn {
+        items(students.filter { it.is_trainer }) { student ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(student.prename, style = MaterialTheme.typography.body1)
+                Checkbox(
+                    checked = student.is_trainer,
+                    onCheckedChange = { onCheckedChange(it, student) }
+                )
             }
         }
     }
