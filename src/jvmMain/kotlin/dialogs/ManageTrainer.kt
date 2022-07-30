@@ -3,7 +3,10 @@ package dialogs
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.*
+import androidx.compose.material.Checkbox
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,7 +18,6 @@ import composables.studentList
 import models.Student
 import models.editIsTrainer
 import models.loadStudents
-import kotlin.system.exitProcess
 
 @Composable
 fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
@@ -124,32 +126,4 @@ private fun currentTrainerList(
             }
         }
     }
-}
-
-@Composable
-fun shouldRestartDialog(onDismiss: () -> Unit) {
-    Dialog(
-        state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 550.dp, height = 300.dp),
-        title = "Teilnahme",
-        onCloseRequest = onDismiss
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                "Wenn du gerade Änderungen an dem Trainerstatus vorgenommen hast, solltest du das Programm neu starten",
-                style = MaterialTheme.typography.subtitle2, modifier = Modifier.padding(16.dp)
-            )
-            Row {
-                Button(onClick = onDismiss, modifier = Modifier.padding(horizontal = 8.dp)) {
-                    Text("Dialog schließen")
-                }
-                Button(onClick = { exitProcess(0) }, modifier = Modifier.padding(horizontal = 8.dp)) {
-                    Text("Programm beenden")
-                }
-            }
-        }
-    }
-
 }
