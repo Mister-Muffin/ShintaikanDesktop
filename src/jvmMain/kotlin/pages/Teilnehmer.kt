@@ -21,12 +21,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import countId
 import dialogs.stickerDialog
+import gretting
 import models.Student
+import models.Trainer
 import models.loadTeilnahme
 import java.util.*
 
 @Composable
-fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit) {
+fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeScreen: (id: Int) -> Unit) {
 
     val searchQuery = remember { mutableStateOf("") }
     val handleAsExam = remember { mutableStateOf(false) }
@@ -83,6 +85,8 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
     val leftLazyState = rememberLazyListState()
     val rightLazyState = rememberLazyListState()
 
+    val greeting = remember { gretting() }
+
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
 
         if (showStickerDialog) {
@@ -91,7 +95,7 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
             }
         }
 
-        Text("Teilnehmer aus der linken Spalte auswählen", style = MaterialTheme.typography.h1)
+        Text("$greeting ${activeTrainer.prename}, Teilnehmer auswählen", style = MaterialTheme.typography.h1)
         Divider(modifier = Modifier.padding(vertical = 16.dp))
         Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
             Row {

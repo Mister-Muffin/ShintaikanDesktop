@@ -17,7 +17,7 @@ import models.loadTrainers
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun trainerSelector(changeScreen: (id: Int) -> Unit) {
+fun trainerSelector(changeScreen: (id: Int, activeTrainer: Trainer) -> Unit) {
     val trainers = loadTrainers()
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
@@ -56,7 +56,7 @@ fun trainerSelector(changeScreen: (id: Int) -> Unit) {
                 enabled = selectedTrainer != null,
                 colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
                 modifier = Modifier.width(350.dp).height(60.dp),
-                onClick = { changeScreen(2) }
+                onClick = { changeScreen(2, selectedTrainer!!) }
             ) {
                 Text("Weiter")
             }

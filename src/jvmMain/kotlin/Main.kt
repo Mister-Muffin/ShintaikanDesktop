@@ -24,6 +24,7 @@ import androidx.compose.ui.window.*
 import dialogs.datenHolenWindow
 import dialogs.examsDialog
 import dialogs.manageTrainerDialog
+import models.Trainer
 import models.loadMessages
 import models.loadStudents
 import org.jetbrains.exposed.sql.Database
@@ -64,6 +65,7 @@ fun main() {
             state = rememberWindowState(position = WindowPosition(Alignment.Center), width = 1152.dp, height = 864.dp),
         ) {
             var screenID by remember { mutableStateOf(0) }
+            var activeTrainer: Trainer? by remember { mutableStateOf(null) }
 
             MenuBar {
                 Menu("Datei", mnemonic = 'F') {
@@ -119,10 +121,10 @@ fun main() {
                         startPage(students, messages) { screenID = it }
                     }
                     1 -> {
-                        trainerSelector { screenID = it }
+                        trainerSelector { id, selectedTrainer -> screenID = id; activeTrainer = selectedTrainer }
                     }
                     2 -> {
-                        teilnehmerSelector(students) { screenID = it }
+                        teilnehmerSelector(students, activeTrainer!!) { screenID = it }
                     }
                     3 -> {
                         successPage { screenID = it }
