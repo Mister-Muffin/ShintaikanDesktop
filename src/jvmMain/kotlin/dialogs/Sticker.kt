@@ -66,8 +66,8 @@ fun stickerDialog(stickerStudentsList: List<Student>, onDismiss: () -> Unit) {
                     ) {
                         item {
                             Text(
-                                "${student.prename} ${student.surname}, ${student.sticker_animal}(${student.sticker_units})",
-                                modifier = Modifier.padding(8.dp)
+                                "${student.prename} ${student.surname}, hat mehr als ${student.sticker_units} Trainingseinheiten und bekommt ein ${student.sticker_animal} Aufkleber",
+                                modifier = Modifier.padding(8.dp).width(300.dp)
                             )
                         }
                         item {
