@@ -13,9 +13,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
 import models.Student
+import models.Trainer
+import models.editStudentSticker
+import stickerUnitNames
+import stickerUnits
 
 @Composable
-fun stickerDialog(stickerStudentsList: List<Student>, onDismiss: () -> Unit) {
+fun stickerDialog(stickerStudentsList: List<Student>, activeTrainer: Trainer, onDismiss: () -> Unit) {
 
     val mutableStudents = remember { mutableStateListOf<Student>() }
     remember {
@@ -88,7 +92,21 @@ fun stickerDialog(stickerStudentsList: List<Student>, onDismiss: () -> Unit) {
                     }
                 }
             }
-            Button(enabled = buttonEnabled(), modifier = Modifier.fillMaxWidth(.5f), onClick = onDismiss) {
+            Button(enabled = buttonEnabled(), modifier = Modifier.fillMaxWidth(.5f), onClick = {
+                mutableStudents.forEach { s ->
+                    if (s.sticker_recieved) {
+                        editStudentSticker(
+                            s.copy(
+                                sticker_units = stickerUnits[stickerUnits.indexOf(s.sticker_units) + 1],
+                                sticker_recieved_by = activeTrainer.id,
+                                sticker_animal = stickerUnitNames[stickerUnits.indexOf(s.sticker_units) + 1]
+                            )
+                        )
+                    }
+                    
+                    onDismiss()
+                }
+            }) {
                 Text("OK")
             }
         }

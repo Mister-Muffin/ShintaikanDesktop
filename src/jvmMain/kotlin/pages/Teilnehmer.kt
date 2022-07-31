@@ -24,6 +24,7 @@ import dialogs.stickerDialog
 import gretting
 import models.Student
 import models.Trainer
+import models.insertTeilnahme
 import models.loadTeilnahme
 import stickerUnits
 import java.util.*
@@ -76,7 +77,7 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
             }
 
         }
-        //insertTeilnahme(teilnahmeString, isExam)
+        insertTeilnahme(teilnahmeString, isExam)
 
         if (studentsStickers.isEmpty()) changeScreen(3)
         else showStickerDialog = true
@@ -90,7 +91,7 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
 
         if (showStickerDialog) {
-            stickerDialog(studentsStickers) {
+            stickerDialog(studentsStickers, activeTrainer) {
                 changeScreen(3)
             }
         }

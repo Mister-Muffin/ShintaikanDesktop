@@ -98,3 +98,15 @@ fun editIsTrainer(id: Int, is_trainer: Boolean) {
         }
     }
 }
+
+fun editStudentSticker(student: Student) {
+    return transaction {
+        StudentTable.update(where = { StudentTable.id eq student.id }) {
+            it[StudentTable.sticker_recieved] = student.sticker_recieved
+            it[StudentTable.sticker_recieved_by] = student.sticker_recieved_by!!
+            it[StudentTable.sticker_units] = student.sticker_units
+            it[StudentTable.sticker_animal] = student.sticker_animal!!
+            it[StudentTable.sticker_date_recieved] = LocalDate.now()
+        }
+    }
+}
