@@ -25,6 +25,7 @@ import gretting
 import models.Student
 import models.Trainer
 import models.loadTeilnahme
+import stickerUnits
 import java.util.*
 
 @Composable
@@ -60,26 +61,25 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
         for (student in newStudents) {
             teilnahmeString = teilnahmeString + student.id + ","
             // Check for sticker:
-            // [recieved_stickers]=einheiten 0=/ | 1=25(Schlange) 50(Tiger) 75(Rabe) 100(Drache) 150(Adler)
-            // 200(Fuchs) 300(Phoenix) 500(Gottesanbeterin) 800(Reier)
-            when {
-                student.total + countId(student.id.toString(), teilnahme) in 99..199 -> {
-                    if (student.sticker_units < 100 && !student.sticker_recieved) {
-                        studentsStickers.add(student)
+            // [recieved_stickers]=einheiten 0=/ | 1=25(Schlange) 50(Tiger) ...
+            stickerUnits.forEachIndexed { index, i ->
+                if (index == 0) return@forEachIndexed
+                if (index != stickerUnits.size - 1) {
+                    when (student.total + countId(student.id.toString(), teilnahme) /*ALLE Trainingseinheiten*/) {
+                        in stickerUnits[index]..stickerUnits[index + 1] -> {
+                            if (student.sticker_units < stickerUnits[index] && !student.sticker_recieved) {
+                                studentsStickers.add(student)
+                            }
+                        }
                     }
-                }
-                student.total + countId(student.id.toString(), teilnahme) in 200..300 -> {
-
                 }
             }
 
         }
         //insertTeilnahme(teilnahmeString, isExam)
 
-        showStickerDialog = true
-
-
-        //changeScreen(3)
+        if (studentsStickers.isEmpty()) changeScreen(3)
+        else showStickerDialog = true
     }
 
     val leftLazyState = rememberLazyListState()

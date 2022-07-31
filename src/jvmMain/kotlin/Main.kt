@@ -33,6 +33,11 @@ import pages.successPage
 import pages.teilnehmerSelector
 import pages.trainerSelector
 
+//Global consts
+val stickerUnits = arrayOf(0, 25, 50, 75, 100, 150, 200, 300, 500, 800)
+val stickerUnitNames =
+    arrayOf("", "Schlange", "Tiger", "Rabe", "Drache", "Adler", "Fuchs", "Phoenix", "Gottesanbeterin", "Reier")
+
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     application {
