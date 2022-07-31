@@ -68,7 +68,7 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
                 if (index != stickerUnits.size - 1) {
                     when (student.total + countId(student.id.toString(), teilnahme) /*ALLE Trainingseinheiten*/) {
                         in stickerUnits[index]..stickerUnits[index + 1] -> {
-                            if (student.sticker_units < stickerUnits[index] && !student.sticker_recieved) {
+                            if (student.sticker_recieved < stickerUnits[index] && student.sticker_recieved != stickerUnits[index]) {
                                 studentsStickers.add(student)
                             }
                         }

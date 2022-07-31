@@ -22,7 +22,7 @@ object StudentTable : Table("main") {
     val is_trainer = bool("is_trainer")
     val sticker_units = integer("sticker_units")
     val sticker_animal = text("sticker_animal")
-    val sticker_recieved = bool("sticker_recieved")
+    val sticker_recieved = integer("sticker_recieved")
     val sticker_date_recieved = date("sticker_date_recieved")
     val sticker_recieved_by = integer("sticker_recieved_by")
 }
@@ -40,10 +40,11 @@ data class Student(
     val is_trainer: Boolean,
     val sticker_units: Int,
     val sticker_animal: String?,
-    val sticker_recieved: Boolean,
+    val sticker_recieved: Int,
     val sticker_date_recieved: LocalDate?,
     val sticker_recieved_by: Int?,
-    val radioClicked: Boolean = false // for sticker dialog (all radio buttons must be clicked before button activated)
+    val radioClicked: Boolean = false, // for sticker dialog (all radio buttons must be clicked before button activated)
+    val sticker_old_unit: Int
 )
 
 data class Trainer(
@@ -71,7 +72,8 @@ fun loadStudents(): List<Student> {
                 sticker_animal = it[StudentTable.sticker_animal],
                 sticker_recieved = it[StudentTable.sticker_recieved],
                 sticker_date_recieved = it[StudentTable.sticker_date_recieved],
-                sticker_recieved_by = it[StudentTable.sticker_recieved_by]
+                sticker_recieved_by = it[StudentTable.sticker_recieved_by],
+                sticker_old_unit = it[StudentTable.sticker_units]
             )
         }
     }

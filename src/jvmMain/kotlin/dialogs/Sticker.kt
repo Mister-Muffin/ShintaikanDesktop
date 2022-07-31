@@ -5,7 +5,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -27,8 +29,6 @@ fun stickerDialog(stickerStudentsList: List<Student>, activeTrainer: Trainer, on
             mutableStudents.add(student)
         }
     }
-
-    val recievedChecked by remember { mutableStateOf(false) }
 
 
     /**
@@ -69,24 +69,43 @@ fun stickerDialog(stickerStudentsList: List<Student>, activeTrainer: Trainer, on
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         item {
-                            Text(
-                                "${student.prename} ${student.surname}, hat mehr als ${student.sticker_units} Trainingseinheiten und bekommt ein ${student.sticker_animal} Aufkleber",
-                                modifier = Modifier.padding(8.dp).width(300.dp)
-                            )
+                            if (stickerUnits[stickerUnits.indexOf(student.sticker_units) - 1] == student.sticker_recieved) {
+                                Text(
+                                    "${student.prename} ${student.surname}, hat mehr als ${student.sticker_units} Trainingseinheiten und bekommt einen ${student.sticker_animal} Aufkleber",
+                                    modifier = Modifier.padding(8.dp).width(300.dp)
+                                )
+                            } else {
+                                Text(
+                                    "${student.prename} ${student.surname}, hat mehr als ${student.sticker_units} Trainingseinheiten und bekommt aber immer noch einen ${
+                                        stickerUnitNames[stickerUnits.indexOf(
+                                            student.sticker_recieved
+                                        ) + 1]
+                                    } Aufkleber",
+                                    modifier = Modifier.padding(8.dp).width(300.dp)
+                                )
+                            }
                         }
                         item {
                             Text("Erhalten")
-                            RadioButton(student.sticker_recieved && student.radioClicked, onClick = {
-                                mutableStudents[mutableStudents.indexOf(student)] =
-                                    student.copy(sticker_recieved = true, radioClicked = true)
-                            })
+                            RadioButton(
+                                student.sticker_recieved == stickerUnits[stickerUnits.indexOf(student.sticker_old_unit) + 1] && student.radioClicked,
+                                onClick = {
+                                    mutableStudents[mutableStudents.indexOf(student)] =
+                                        student.copy(
+                                            sticker_recieved = stickerUnits[stickerUnits.indexOf(student.sticker_old_unit) + 1],
+                                            radioClicked = true
+                                        )
+                                })
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Nicht erhalten", style = MaterialTheme.typography.body1)
                             RadioButton(
-                                !student.sticker_recieved && student.radioClicked,
+                                student.sticker_recieved == stickerUnits[stickerUnits.indexOf(student.sticker_old_unit)] && student.radioClicked,
                                 onClick = {
                                     mutableStudents[mutableStudents.indexOf(student)] =
-                                        student.copy(sticker_recieved = false, radioClicked = true)
+                                        student.copy(
+                                            sticker_recieved = stickerUnits[stickerUnits.indexOf(student.sticker_old_unit)],
+                                            radioClicked = true
+                                        )
                                 })
                         }
                     }
@@ -94,16 +113,17 @@ fun stickerDialog(stickerStudentsList: List<Student>, activeTrainer: Trainer, on
             }
             Button(enabled = buttonEnabled(), modifier = Modifier.fillMaxWidth(.5f), onClick = {
                 mutableStudents.forEach { s ->
-                    if (s.sticker_recieved) {
+                    if (s.sticker_recieved == stickerUnits[stickerUnits.indexOf(s.sticker_old_unit) + 1]) {
                         editStudentSticker(
                             s.copy(
                                 sticker_units = stickerUnits[stickerUnits.indexOf(s.sticker_units) + 1],
                                 sticker_recieved_by = activeTrainer.id,
-                                sticker_animal = stickerUnitNames[stickerUnits.indexOf(s.sticker_units) + 1]
+                                sticker_animal = stickerUnitNames[stickerUnits.indexOf(s.sticker_units) + 1],
+                                sticker_recieved = stickerUnits[stickerUnits.indexOf(s.sticker_old_unit)]
                             )
                         )
                     }
-                    
+
                     onDismiss()
                 }
             }) {
