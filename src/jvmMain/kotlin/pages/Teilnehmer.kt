@@ -61,20 +61,10 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
         var teilnahmeString = ""
         for (student in newStudents) {
             teilnahmeString = teilnahmeString + student.id + ","
-            // Check for sticker:
-            // [recieved_stickers]=einheiten 0=/ | 1=25(Schlange) 50(Tiger) ...
-            stickerUnits.forEachIndexed { index, _ ->
-                if (index == 0) return@forEachIndexed
-                if (index != stickerUnits.size - 1) {
-                    when (student.total + countId(student.id.toString(), teilnahme) /*ALLE Trainingseinheiten*/) {
-                        in stickerUnits[index]..stickerUnits[index + 1] -> {
-                            if (student.sticker_recieved < stickerUnits[index] && student.sticker_recieved != stickerUnits[index]) {
-                                studentsStickers.add(student)
-                            }
-                        }
-                    }
-                }
-            }
+
+            if (student.total + countId(student.id.toString(), teilnahme) // ALLE Trainingseinheiten
+                >= stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 1]
+            ) studentsStickers.add(student)
 
         }
         insertTeilnahme(teilnahmeString, isExam)
