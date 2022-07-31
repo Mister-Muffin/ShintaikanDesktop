@@ -49,7 +49,7 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
     val checked = remember { mutableStateListOf<String>() }
 
     fun findMatch(s: String, strings: List<String>): Boolean {
-        return strings.any { a -> s.contains(a.lowercase(Locale.getDefault())) }
+        return strings.any { a -> s.contains(a.lowercase()) }
     }
 
     var showStickerDialog by remember { mutableStateOf(false) }
