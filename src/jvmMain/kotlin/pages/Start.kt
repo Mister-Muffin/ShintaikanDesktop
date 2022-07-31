@@ -19,21 +19,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
-import models.Message
-import models.Student
-import models.addMessage
-import models.deleteMessage
+import models.*
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun startPage(
-    students: List<Student>,
-    messages: List<Message>,
     changeScreen: (id: Int) -> Unit
 ) {
-
+    val students = loadStudents()
+    val messages = loadMessages()
     val allStudents = remember { mutableStateListOf<Student>() }
     remember {
         for (student in students) {

@@ -123,7 +123,7 @@ fun main() {
             ) {
                 when (screenID) {
                     0 -> {
-                        startPage(students, messages) { screenID = it }
+                        startPage() { screenID = it }
                     }
                     1 -> {
                         trainerSelector { id, selectedTrainer -> screenID = id; activeTrainer = selectedTrainer }
