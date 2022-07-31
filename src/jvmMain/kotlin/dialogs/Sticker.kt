@@ -4,10 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.RadioButton
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,6 +25,21 @@ fun stickerDialog(stickerStudentsList: List<Student>, onDismiss: () -> Unit) {
     }
 
     val recievedChecked by remember { mutableStateOf(false) }
+
+
+    /**
+     * This function returns true if all radio buttons have been clicked at lease once to ensure,
+     * that the user has made his desicion for each student
+     */
+    fun buttonEnabled(): Boolean {
+        mutableStudents.forEach { s ->
+            if (!s.radioClicked) {
+                return false
+            }
+        }
+        return true
+    }
+
     Dialog(
         state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 750.dp, height = 600.dp),
         title = "Aufkleber",
@@ -37,7 +49,11 @@ fun stickerDialog(stickerStudentsList: List<Student>, onDismiss: () -> Unit) {
             modifier = Modifier.fillMaxSize().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LazyColumn(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+            LazyColumn(
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxHeight(.8f).padding(bottom = 8.dp)
+            ) {
                 item {
                     Text("Folgende Teilnehmer bekommen Aufkleber:", style = MaterialTheme.typography.subtitle1)
                 }
@@ -71,6 +87,9 @@ fun stickerDialog(stickerStudentsList: List<Student>, onDismiss: () -> Unit) {
                         }
                     }
                 }
+            }
+            Button(enabled = buttonEnabled(), modifier = Modifier.fillMaxWidth(.5f), onClick = onDismiss) {
+                Text("OK")
             }
         }
     }
