@@ -23,7 +23,11 @@ import stickerUnitNames
 import stickerUnits
 
 @Composable
-fun stickerDialog(stickerStudentsList: List<Student>, activeTrainer: Trainer, onDismiss: () -> Unit) {
+fun stickerDialog(
+    stickerStudentsList: List<Student>,
+    activeTrainer: Trainer,
+    onDismiss: (students: List<Student>) -> Unit
+) {
 
     val mutableStudents = remember { mutableStateListOf<Student>() }
     remember {
@@ -97,18 +101,20 @@ fun stickerDialog(stickerStudentsList: List<Student>, activeTrainer: Trainer, on
                                     mutableStudents[mutableStudents.indexOf(student)] =
                                         student.copy(
                                             stickerRecieved = true,
-                                            radioClicked = true
+                                            radioClicked = true,
+                                            sticker_show_again = realTotal >= stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 2] // erster Teil vor dem && ist das gegenereignis von der if oben < / >=
                                         )
                                 })
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Nicht erhalten", style = MaterialTheme.typography.body1)
                             RadioButton(
-                                student.stickerRecieved && student.radioClicked,
+                                !student.stickerRecieved && student.radioClicked,
                                 onClick = {
                                     mutableStudents[mutableStudents.indexOf(student)] =
                                         student.copy(
                                             stickerRecieved = false,
-                                            radioClicked = true
+                                            radioClicked = true,
+                                            sticker_show_again = false
                                         )
                                 })
                         }
@@ -120,15 +126,22 @@ fun stickerDialog(stickerStudentsList: List<Student>, activeTrainer: Trainer, on
                     if (s.stickerRecieved) {
                         editStudentSticker(
                             s.copy(
-                                sticker_units = stickerUnits[stickerUnits.indexOf(s.sticker_units) + 1],
                                 sticker_recieved_by = activeTrainer.id,
-                                sticker_animal = stickerUnitNames[stickerUnits.indexOf(s.sticker_units) + 1],
-                                sticker_recieved = stickerUnits[stickerUnits.indexOf(s.sticker_old_unit)]
+                                //sticker_animal = stickerUnitNames[stickerUnits.indexOf(s.sticker_recieved) + 1],
+                                sticker_recieved = stickerUnits[stickerUnits.indexOf(s.sticker_recieved) + 1]
                             )
                         )
-                    }
 
-                    onDismiss()
+                    }
+                    mutableStudents[mutableStudents.indexOf(s)] =
+                        s.copy(
+                            sticker_recieved_by = activeTrainer.id,
+                            radioClicked = false,
+                            //sticker_animal = stickerUnitNames[stickerUnits.indexOf(s.sticker_recieved) + 1],
+                            sticker_recieved = stickerUnits[stickerUnits.indexOf(s.sticker_recieved) + 1]
+                        )
+
+                    onDismiss(mutableStudents)
                 }
             }) {
                 Text("OK")
