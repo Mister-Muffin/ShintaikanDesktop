@@ -19,8 +19,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
 import composables.StudentList
+import countId
 import models.Student
-import models.Teilnahme
 import models.loadTeilnahme
 import java.time.LocalDate
 import java.time.Period
@@ -117,15 +117,4 @@ private fun studentStats(student: Student) { //datum letzte prüfung | wie lange
         }
         Text("Einheiten gesamt: " + countId(student.id.toString(), teilnahme).toString())
     }
-}
-
-//Zählt die Trainingseinheiten, standardmäßig alle, durch since nur Einheiten ab dem gegebenen Datum
-private fun countId(id: String, teilnahme: List<Teilnahme>, since: LocalDate = LocalDate.EPOCH): Int {
-    var counter = 0
-    for (a in teilnahme) {
-        if (a.userId !== null && a.date > since) {
-            counter += a.userId.split(",").filter { id == it }.size
-        }
-    }
-    return counter
 }

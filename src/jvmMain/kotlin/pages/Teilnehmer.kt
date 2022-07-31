@@ -8,10 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
@@ -22,8 +19,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import countId
+import dialogs.stickerDialog
 import models.Student
-import models.insertTeilnahme
+import models.loadTeilnahme
 import java.util.*
 
 @Composable
@@ -42,25 +41,56 @@ fun teilnehmerSelector(students: List<Student>, changeScreen: (id: Int) -> Unit)
         }
     }
 
+    val teilnahme = loadTeilnahme()
+
     val checked = remember { mutableStateListOf<String>() }
 
     fun findMatch(s: String, strings: List<String>): Boolean {
         return strings.any { a -> s.contains(a.lowercase(Locale.getDefault())) }
     }
 
+    var showStickerDialog by remember { mutableStateOf(false) }
+
+    val studentsStickers = remember { mutableListOf<Student>() }
+
     fun submit(isExam: Boolean) {
         var teilnahmeString = ""
         for (student in newStudents) {
             teilnahmeString = teilnahmeString + student.id + ","
+            // Check for sticker:
+            // [recieved_stickers]=einheiten 0=/ | 1=25(Schlange) 50(Tiger) 75(Rabe) 100(Drache) 150(Adler)
+            // 200(Fuchs) 300(Phoenix) 500(Gottesanbeterin) 800(Reier)
+            when {
+                student.total + countId(student.id.toString(), teilnahme) in 99..199 -> {
+                    if (student.sticker_units < 100 && !student.sticker_recieved) {
+                        studentsStickers.add(student)
+                    }
+                }
+                student.total + countId(student.id.toString(), teilnahme) in 200..300 -> {
+
+                }
+            }
+
         }
-        changeScreen(3)
-        insertTeilnahme(teilnahmeString, isExam)
+        //insertTeilnahme(teilnahmeString, isExam)
+
+        showStickerDialog = true
+
+
+        //changeScreen(3)
     }
 
     val leftLazyState = rememberLazyListState()
     val rightLazyState = rememberLazyListState()
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
+
+        if (showStickerDialog) {
+            stickerDialog(studentsStickers) {
+                changeScreen(3)
+            }
+        }
+
         Text("Teilnehmer aus der linken Spalte auswählen", style = MaterialTheme.typography.h1)
         Divider(modifier = Modifier.padding(vertical = 16.dp))
         Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {

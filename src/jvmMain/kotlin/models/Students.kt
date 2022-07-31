@@ -20,6 +20,11 @@ object StudentTable : Table("main") {
     val birthday = date("birthday")
     val date_last_exam = date("date_last_exam")
     val is_trainer = bool("is_trainer")
+    val sticker_units = integer("sticker_units")
+    val sticker_animal = text("sticker_animal")
+    val sticker_recieved = bool("sticker_recieved")
+    val sticker_date_recieved = date("sticker_date_recieved")
+    val sticker_recieved_by = integer("sticker_recieved_by")
 }
 
 data class Student(
@@ -32,7 +37,13 @@ data class Student(
     val total: Int,
     val birthday: LocalDate?,
     val date_last_exam: LocalDate?,
-    val is_trainer: Boolean
+    val is_trainer: Boolean,
+    val sticker_units: Int,
+    val sticker_animal: String?,
+    val sticker_recieved: Boolean,
+    val sticker_date_recieved: LocalDate?,
+    val sticker_recieved_by: Int?,
+    val radioClicked: Boolean = false // for sticker dialog (all radio buttons must be clicked before button activated)
 )
 
 data class Trainer(
@@ -55,7 +66,12 @@ fun loadStudents(): List<Student> {
                 total = it[StudentTable.total],
                 birthday = it[StudentTable.birthday],
                 date_last_exam = it[StudentTable.date_last_exam],
-                is_trainer = it[StudentTable.is_trainer]
+                is_trainer = it[StudentTable.is_trainer],
+                sticker_units = it[StudentTable.sticker_units],
+                sticker_animal = it[StudentTable.sticker_animal],
+                sticker_recieved = it[StudentTable.sticker_recieved],
+                sticker_date_recieved = it[StudentTable.sticker_date_recieved],
+                sticker_recieved_by = it[StudentTable.sticker_recieved_by]
             )
         }
     }
