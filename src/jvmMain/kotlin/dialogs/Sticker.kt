@@ -14,9 +14,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
+import countId
 import models.Student
 import models.Trainer
 import models.editStudentSticker
+import models.loadTeilnahme
 import stickerUnitNames
 import stickerUnits
 
@@ -29,6 +31,8 @@ fun stickerDialog(stickerStudentsList: List<Student>, activeTrainer: Trainer, on
             mutableStudents.add(student)
         }
     }
+
+    val teilnahme = loadTeilnahme()
 
 
     /**
@@ -63,24 +67,24 @@ fun stickerDialog(stickerStudentsList: List<Student>, activeTrainer: Trainer, on
                 }
                 item { Divider(modifier = Modifier.padding(vertical = 10.dp)) }
                 items(mutableStudents) { student ->
+                    val realTotal = student.total + countId(student.id.toString(), teilnahme)
                     LazyRow(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         item {
-                            if (stickerUnits[stickerUnits.indexOf(student.sticker_units) - 1] == student.sticker_recieved) {
+                            if (realTotal < stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 2]) {
                                 Text(
-                                    "${student.prename} ${student.surname}, hat mehr als ${student.sticker_units} Trainingseinheiten und bekommt einen ${student.sticker_animal} Aufkleber",
+                                    "${student.prename} ${student.surname}, hat " +
+                                            "$realTotal Trainingseinheiten und bekommt einen " +
+                                            "${stickerUnitNames[stickerUnits.indexOf(student.sticker_recieved) + 1]} Aufkleber",
                                     modifier = Modifier.padding(8.dp).width(300.dp)
                                 )
                             } else {
                                 Text(
-                                    "${student.prename} ${student.surname}, hat mehr als ${student.sticker_units} Trainingseinheiten und bekommt aber immer noch einen ${
-                                        stickerUnitNames[stickerUnits.indexOf(
-                                            student.sticker_recieved
-                                        ) + 1]
-                                    } Aufkleber",
+                                    "${student.prename} ${student.surname}, hat $realTotal Trainingseinheiten und bekommt aber immer noch einen " +
+                                            "${stickerUnitNames[stickerUnits.indexOf(student.sticker_recieved) + 1]} Aufkleber",
                                     modifier = Modifier.padding(8.dp).width(300.dp)
                                 )
                             }
@@ -88,22 +92,22 @@ fun stickerDialog(stickerStudentsList: List<Student>, activeTrainer: Trainer, on
                         item {
                             Text("Erhalten")
                             RadioButton(
-                                student.sticker_recieved == stickerUnits[stickerUnits.indexOf(student.sticker_old_unit) + 1] && student.radioClicked,
+                                student.stickerRecieved && student.radioClicked,
                                 onClick = {
                                     mutableStudents[mutableStudents.indexOf(student)] =
                                         student.copy(
-                                            sticker_recieved = stickerUnits[stickerUnits.indexOf(student.sticker_old_unit) + 1],
+                                            stickerRecieved = true,
                                             radioClicked = true
                                         )
                                 })
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Nicht erhalten", style = MaterialTheme.typography.body1)
                             RadioButton(
-                                student.sticker_recieved == stickerUnits[stickerUnits.indexOf(student.sticker_old_unit)] && student.radioClicked,
+                                student.stickerRecieved && student.radioClicked,
                                 onClick = {
                                     mutableStudents[mutableStudents.indexOf(student)] =
                                         student.copy(
-                                            sticker_recieved = stickerUnits[stickerUnits.indexOf(student.sticker_old_unit)],
+                                            stickerRecieved = false,
                                             radioClicked = true
                                         )
                                 })
@@ -113,7 +117,7 @@ fun stickerDialog(stickerStudentsList: List<Student>, activeTrainer: Trainer, on
             }
             Button(enabled = buttonEnabled(), modifier = Modifier.fillMaxWidth(.5f), onClick = {
                 mutableStudents.forEach { s ->
-                    if (s.sticker_recieved == stickerUnits[stickerUnits.indexOf(s.sticker_old_unit) + 1]) {
+                    if (s.stickerRecieved) {
                         editStudentSticker(
                             s.copy(
                                 sticker_units = stickerUnits[stickerUnits.indexOf(s.sticker_units) + 1],

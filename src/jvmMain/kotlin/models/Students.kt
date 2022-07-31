@@ -44,6 +44,7 @@ data class Student(
     val sticker_date_recieved: LocalDate?,
     val sticker_recieved_by: Int?,
     val radioClicked: Boolean = false, // for sticker dialog (all radio buttons must be clicked before button activated)
+    val stickerRecieved: Boolean = false, // for sticker dialog, if radio button is checked or not
     val sticker_old_unit: Int
 )
 
