@@ -63,7 +63,7 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
             teilnahmeString = teilnahmeString + student.id + ","
             // Check for sticker:
             // [recieved_stickers]=einheiten 0=/ | 1=25(Schlange) 50(Tiger) ...
-            stickerUnits.forEachIndexed { index, i ->
+            stickerUnits.forEachIndexed { index, _ ->
                 if (index == 0) return@forEachIndexed
                 if (index != stickerUnits.size - 1) {
                     when (student.total + countId(student.id.toString(), teilnahme) /*ALLE Trainingseinheiten*/) {
