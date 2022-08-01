@@ -22,7 +22,9 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
 import composables.StudentList
 import countId
+import getTotalTrainingSessions
 import models.Student
+import models.Teilnahme
 import models.loadTeilnahme
 import java.time.LocalDate
 import java.time.Period
@@ -98,20 +100,42 @@ private fun studentStats(student: Student) { //datum letzte prüfung | wie lange
         Text(nameString)
         Divider(modifier = Modifier.padding(vertical = 16.dp))
 
-        if (student.date_last_exam !== null) Text(
-            "Letzte Prüfung am: ${
-                DateTimeFormatter.ofPattern("dd.MM.yyyy").format(student.date_last_exam)
-            }"
-        ) else Text("Noch keine Prüfung")
-        if (student.date_last_exam !== null) { //Sollte die Person bereits eine Prüfung gemacht haben, bau den string für die Differenz zu diesem Datum zusammen
-            val period = Period.between(student.date_last_exam, LocalDate.now())
-            val years = //Zeigt die Jahre, falls diese nicht 0 sind
-                if (period.years == 0) "" else if (period.years == 1) period.years.toString() + " Jahr" else period.years.toString() + " Jahren"
-            val months = //Same here für die Monate
-                if (period.months == 0) "" else if (period.months == 1) period.months.toString() + " Monat" else period.months.toString() + " Monaten"
-            val days = //Same here für die Tage
-                if (period.days == 0) "" else if (period.days == 1) period.days.toString() + " Tag" else period.days.toString() + " Tagen"
+        // Sollte die Person bereits eine Prüfung gemacht haben, zeige das Datum der letzten Prüfung und bau den string für die Differenz zu diesem Datum zusammen
+
+        if (student.date_last_exam != null) {
+            textLastExam(student)
+
+            val period = Period.between(
+                student.date_last_exam,
+                LocalDate.now()
+            ) // Zeitraum zwischen der letzten Prüfung und dem heutigen Datum
+
+            // Zeigt die Jahre, falls diese nicht 0 sind
+            val years =
+                when (period.years) {
+                    0 -> ""
+                    1 -> period.years.toString() + " Jahr"
+                    else -> period.years.toString() + " Jahren"
+                }
+
+            // Zeigt die Monate, falls diese nicht 0 sind
+            val months =
+                when (period.months) {
+                    0 -> ""
+                    1 -> period.months.toString() + " Monat"
+                    else -> period.months.toString() + " Monaten"
+                }
+
+            // Zeigt die Tage, falls diese nicht 0 sind
+            val days =
+                when (period.days) {
+                    0 -> ""
+                    1 -> period.days.toString() + " Tag"
+                    else -> period.days.toString() + " Tagen"
+                }
+
             Text("Letzte Prüfung vor: ${if (years.isNotEmpty()) "$years, " else ""}${if (months.isNotEmpty()) months else ""}${if (days.isNotEmpty() && months.isNotEmpty()) "und" else ""}${if (days.isNotEmpty()) days else ""}")
+
             Text(
                 "Einheiten seit der letzten Prüfung: " + countId(
                     student.id.toString(),
@@ -119,7 +143,27 @@ private fun studentStats(student: Student) { //datum letzte prüfung | wie lange
                     student.date_last_exam
                 ).toString()
             )
+        } else {
+            Text("Noch keine Prüfung")
         }
-        Text("Einheiten gesamt: " + countId(student.id.toString(), teilnahme).toString())
+
+        textTotalTrainingSessions(student, teilnahme)
     }
+}
+
+@Composable
+private fun textTotalTrainingSessions(student: Student, teilnahme: List<Teilnahme>) {
+    Text("Einheiten gesamt: " + getTotalTrainingSessions(student, teilnahme))
+}
+
+/**
+ * Text composable with the date of the student's last exam
+ */
+@Composable
+private fun textLastExam(student: Student) {
+    Text(
+        "Letzte Prüfung am: ${
+            DateTimeFormatter.ofPattern("dd.MM.yyyy").format(student.date_last_exam)
+        }"
+    )
 }

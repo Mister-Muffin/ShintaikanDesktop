@@ -19,8 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import countId
 import dialogs.stickerDialog
+import getTotalTrainingSessions
 import gretting
 import models.Student
 import models.Trainer
@@ -62,7 +62,7 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
             teilnahmeString = teilnahmeString + student.id + ","
 
             if (student.sticker_recieved != stickerUnits[stickerUnits.size - 1]) // Wer 800 aufkelber hat, bekommt keinen weiteren (catch indexOutOfBounds)
-                if (student.total + countId(student.id.toString(), teilnahme) // ALLE Trainingseinheiten
+                if (getTotalTrainingSessions(student, teilnahme) // ALLE Trainingseinheiten
                     >= stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 1]
                 ) studentsStickers.add(student)
         }

@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
-import countId
+import getTotalTrainingSessions
 import models.Student
 import models.Trainer
 import models.editStudentSticker
@@ -71,7 +71,7 @@ fun stickerDialog(
                 }
                 item { Divider(modifier = Modifier.padding(vertical = 10.dp)) }
                 items(mutableStudents) { student ->
-                    val realTotal = student.total + countId(student.id.toString(), teilnahme)
+                    val total = getTotalTrainingSessions(student, teilnahme)
                     LazyRow(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
@@ -80,17 +80,17 @@ fun stickerDialog(
                         item {
                             if (
                                 student.sticker_recieved == stickerUnits[stickerUnits.size - 2] ||
-                                realTotal < stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 2]
+                                total < stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 2]
                             ) {
                                 Text(
                                     "${student.prename} ${student.surname}, hat " +
-                                            "$realTotal Trainingseinheiten und bekommt einen " +
+                                            "$total Trainingseinheiten und bekommt einen " +
                                             "${stickerUnitNames[stickerUnits.indexOf(student.sticker_recieved) + 1]} Aufkleber",
                                     modifier = Modifier.padding(8.dp).width(300.dp)
                                 )
                             } else {
                                 Text(
-                                    "${student.prename} ${student.surname}, hat $realTotal Trainingseinheiten und bekommt aber immer noch einen " +
+                                    "${student.prename} ${student.surname}, hat $total Trainingseinheiten und bekommt aber immer noch einen " +
                                             "${stickerUnitNames[stickerUnits.indexOf(student.sticker_recieved) + 1]} Aufkleber",
                                     modifier = Modifier.padding(8.dp).width(300.dp)
                                 )
@@ -106,7 +106,7 @@ fun stickerDialog(
                                             stickerRecieved = true,
                                             radioClicked = true,
                                             sticker_show_again = if (student.sticker_recieved == stickerUnits[stickerUnits.size - 2]) false else
-                                                realTotal >= stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 2] // erster Teil vor dem && ist das gegenereignis von der if oben < / >=
+                                                total >= stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 2] // erster Teil vor dem && ist das gegenereignis von der if oben < / >=
                                         )
                                 })
                             Spacer(modifier = Modifier.width(8.dp))
