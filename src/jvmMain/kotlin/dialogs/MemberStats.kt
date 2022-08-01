@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -48,13 +50,15 @@ fun examsDialog(students: List<Student>, onDismiss: () -> Unit) {
 
     Dialog(
         state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 750.dp, height = 600.dp),
-        title = "Letzte Prüfungen abfragen",
+        title = "Daten abfragen",
         onCloseRequest = onDismiss
     ) {
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Text("Mitgliedsdaten abfragen", style = MaterialTheme.typography.h6)
+            Divider(modifier = Modifier.padding(vertical = 16.dp))
             OutlinedTextField(
                 value = searchFieldVal.value,
                 onValueChange = { searchFieldVal.value = it },
@@ -92,6 +96,7 @@ private fun studentStats(student: Student) { //datum letzte prüfung | wie lange
         val nameString: String = student.prename + " " + student.surname
 
         Text(nameString)
+        Divider(modifier = Modifier.padding(vertical = 16.dp))
 
         if (student.date_last_exam !== null) Text(
             "Letzte Prüfung am: ${

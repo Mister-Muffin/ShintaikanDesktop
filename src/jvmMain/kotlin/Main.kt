@@ -90,11 +90,10 @@ fun main() {
                     Item("Kurznachicht schreiben", onClick = { }, mnemonic = 'S')
                     Item("Kurznachicht löschen", onClick = { }, mnemonic = 'L')
                 }
-                Menu("Prüfungen", mnemonic = 'P') {
+                Menu("Mitglieder", mnemonic = 'P') {
                     Item(
-                        "Letzte Prüfungen abfragen",
-                        onClick = { showExamsDialog = true },
-                        mnemonic = 'K'
+                        "Daten abfragen",
+                        onClick = { showExamsDialog = true }
                     )
                 }
             }
