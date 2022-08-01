@@ -14,8 +14,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
@@ -107,30 +109,38 @@ fun startPage(
                 Row {
                     OutlinedTextField(
                         value = newMessage.value,
+                        placeholder = {
+                            Text(
+                                "Kurznachicht eingeben...",
+                                style = TextStyle.Default.copy(fontSize = 16.sp)
+                            )
+                        },
                         modifier = Modifier.fillMaxWidth(0.8F),
                         trailingIcon = {
-                            IconButton(onClick = {
-                                val newMessageObj = Message(-1, newMessage.value, "", LocalDate.now())
-                                val id = addMessage(newMessageObj)
-                                allMessages.add(
-                                    Message(
-                                        id = id,
-                                        message = newMessage.value,
-                                        short = "",
-                                        newMessageObj.dateCreated
+                            Row(modifier = Modifier.padding(end = 4.dp)) {
+                                IconButton(onClick = {
+                                    val newMessageObj = Message(-1, newMessage.value, "", LocalDate.now())
+                                    val id = addMessage(newMessageObj)
+                                    allMessages.add(
+                                        Message(
+                                            id = id,
+                                            message = newMessage.value,
+                                            short = "",
+                                            newMessageObj.dateCreated
+                                        )
                                     )
-                                )
-                                newMessage.value = ""
-                            }) {
-                                Icon(Icons.Default.Add, contentDescription = null)
+                                    newMessage.value = ""
+                                }) {
+                                    Icon(Icons.Default.Add, contentDescription = null)
+                                }
+                                IconButton(onClick = { showDeleteMessageDialog.value = true }) {
+                                    Icon(Icons.Default.Delete, contentDescription = null)
+                                }
                             }
                         },
                         singleLine = true,
                         onValueChange = { newMessage.value = it }
                     )
-                    IconButton(onClick = { showDeleteMessageDialog.value = true }) {
-                        Icon(Icons.Default.Delete, contentDescription = null)
-                    }
                 }
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth().padding(top = 24.dp, start = 24.dp),
