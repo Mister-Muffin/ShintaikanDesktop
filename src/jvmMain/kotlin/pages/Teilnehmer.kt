@@ -51,8 +51,9 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
     val groups = arrayOf("Benjamini", "Kinder Karate", "Jugend Karate", "Karate")
     val checkedGroups = remember { mutableStateListOf<String>() }
 
-    fun findMatch(s: String, strings: List<String>): Boolean {
-        return strings.any { a -> s.lowercase().contains(a.lowercase()) }
+    fun findMatch(s: String, strings: List<String>, exactMach: Boolean): Boolean {
+        return if (exactMach) strings.any { a -> s.lowercase() == a.lowercase() }
+        else strings.any { a -> s.lowercase().contains(a.lowercase()) }
     }
 
     var showStickerDialog by remember { mutableStateOf(false) }
@@ -105,11 +106,11 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
                         .filter { s ->
                             // filter color checkboxes
                             if (checkedColors.isEmpty()) true
-                            else findMatch(s.level, checkedColors)
+                            else findMatch(s.level, checkedColors, false)
                         }.filter { s ->
                             // filter group checkboxes on top
                             if (checkedGroups.isEmpty()) true
-                            else checkedGroups.any { a -> s.group.lowercase() == a.lowercase() }// TODO: funtion
+                            else findMatch(s.group, checkedGroups, true)
                         }.filter {
                             // filter again for search ->
                             arrayListOf(
@@ -140,7 +141,7 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceEvenly,
+                verticalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.width(500.dp).fillMaxHeight()
             ) {
                 Column { // search column
@@ -151,7 +152,7 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
                 }
                 Column {
                     customFilter(farben, checkedColors)
-                    Divider()
+                    Divider(modifier = Modifier.padding(vertical = 30.dp))
                     customFilter(groups, checkedGroups)
                 }
                 Column {
