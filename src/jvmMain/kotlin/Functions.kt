@@ -10,11 +10,11 @@ import kotlin.random.Random
  *
  * @param since nur Einheiten ab dem dann gegebenen Datum
  **/
-fun countId(id: String, teilnahme: List<Teilnahme>, since: LocalDate = LocalDate.EPOCH): Int {
+fun countId(id: Int, teilnahme: List<Teilnahme>, since: LocalDate = LocalDate.EPOCH): Int {
     var counter = 0
     for (a in teilnahme) {
         if (a.userId !== null && a.date > since) {
-            counter += a.userId.split(",").filter { id == it }.size
+            counter += a.userId.split(",").filter { id.toString() == it }.size
         }
     }
     return counter
@@ -27,7 +27,7 @@ fun countId(id: String, teilnahme: List<Teilnahme>, since: LocalDate = LocalDate
  * da diese Trainingseinheiten sonst nicht berücksichtigt werden würden
  */
 fun getTotalTrainingSessions(student: Student, teilnahme: List<Teilnahme>): Int {
-    return student.total + countId(student.id.toString(), teilnahme)
+    return student.total + countId(student.id, teilnahme)
 }
 
 /**
@@ -59,7 +59,6 @@ fun gretting(): String {
 
 /**
  * Returns the legth of an array which is equal to Array.size - 1
- * @sample
  */
 val <T> Array<T>.length: Int
     get() {
