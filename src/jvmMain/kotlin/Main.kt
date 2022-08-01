@@ -117,7 +117,7 @@ fun main() {
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                     ),
-                    body1 = TextStyle(fontSize = 20.sp) // All 'Text' use this as default as it seems
+                    body1 = TextStyle(fontSize = 24.sp) // All 'Text' use this as default as it seems
                 )
             ) {
                 when (screenID) {
