@@ -78,7 +78,10 @@ fun stickerDialog(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         item {
-                            if (realTotal < stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 2]) {
+                            if (
+                                student.sticker_recieved == stickerUnits[stickerUnits.size - 2] ||
+                                realTotal < stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 2]
+                            ) {
                                 Text(
                                     "${student.prename} ${student.surname}, hat " +
                                             "$realTotal Trainingseinheiten und bekommt einen " +
@@ -102,7 +105,8 @@ fun stickerDialog(
                                         student.copy(
                                             stickerRecieved = true,
                                             radioClicked = true,
-                                            sticker_show_again = realTotal >= stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 2] // erster Teil vor dem && ist das gegenereignis von der if oben < / >=
+                                            sticker_show_again = if (student.sticker_recieved == stickerUnits[stickerUnits.size - 2]) false else
+                                                realTotal >= stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 2] // erster Teil vor dem && ist das gegenereignis von der if oben < / >=
                                         )
                                 })
                             Spacer(modifier = Modifier.width(8.dp))
@@ -133,13 +137,15 @@ fun stickerDialog(
                         )
 
                     }
-                    mutableStudents[mutableStudents.indexOf(s)] =
-                        s.copy(
-                            sticker_recieved_by = activeTrainer.id,
-                            radioClicked = false,
-                            //sticker_animal = stickerUnitNames[stickerUnits.indexOf(s.sticker_recieved) + 1],
-                            sticker_recieved = stickerUnits[stickerUnits.indexOf(s.sticker_recieved) + 1]
-                        )
+                    if (s.sticker_recieved != stickerUnits[stickerUnits.size - 2]) {
+                        mutableStudents[mutableStudents.indexOf(s)] =
+                            s.copy(
+                                sticker_recieved_by = activeTrainer.id,
+                                radioClicked = false,
+                                //sticker_animal = stickerUnitNames[stickerUnits.indexOf(s.sticker_recieved) + 1],
+                                sticker_recieved = stickerUnits[stickerUnits.indexOf(s.sticker_recieved) + 1]
+                            )
+                    }
 
                     onDismiss(mutableStudents)
                 }

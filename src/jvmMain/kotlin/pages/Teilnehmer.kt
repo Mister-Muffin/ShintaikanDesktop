@@ -61,10 +61,10 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
         for (student in newStudents) {
             teilnahmeString = teilnahmeString + student.id + ","
 
-            if (student.total + countId(student.id.toString(), teilnahme) // ALLE Trainingseinheiten
-                >= stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 1]
-            ) studentsStickers.add(student)
-
+            if (student.sticker_recieved != stickerUnits[stickerUnits.size - 1]) // Wer 800 aufkelber hat, bekommt keinen weiteren (catch indexOutOfBounds)
+                if (student.total + countId(student.id.toString(), teilnahme) // ALLE Trainingseinheiten
+                    >= stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 1]
+                ) studentsStickers.add(student)
         }
         //insertTeilnahme(teilnahmeString, isExam)
 
