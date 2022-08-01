@@ -56,3 +56,12 @@ fun gretting(): String {
     )
     return array[Random.nextInt(0, array.size - 1)]
 }
+
+/**
+ * Returns the legth of an array which is equal to Array.size - 1
+ * @sample
+ */
+val <T> Array<T>.length: Int
+    get() {
+        return this.size - 1
+    }
