@@ -1,12 +1,9 @@
 package models
 
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.javatime.date
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.update
 import java.time.LocalDate
 
 object StudentTable : Table("main") {
@@ -24,6 +21,7 @@ object StudentTable : Table("main") {
     val sticker_recieved = integer("sticker_recieved")
     val sticker_date_recieved = date("sticker_date_recieved")
     val sticker_recieved_by = integer("sticker_recieved_by")
+    val is_active = bool("is_active")
 }
 
 data class Student(
@@ -41,6 +39,7 @@ data class Student(
     val sticker_recieved: Int,
     val sticker_date_recieved: LocalDate?,
     val sticker_recieved_by: Int?,
+    val is_active: Boolean,
     val radioClicked: Boolean = false, // for sticker dialog (all radio buttons must be clicked before button activated)
     val stickerRecieved: Boolean = false, // for sticker dialog, if radio button is checked or not
     val sticker_show_again: Boolean = false, // for sticker dialog, if student is still missing stickers and the dialog should open again with this student
@@ -70,7 +69,8 @@ fun loadStudents(): List<Student> {
                 sticker_animal = it[StudentTable.sticker_animal],
                 sticker_recieved = it[StudentTable.sticker_recieved],
                 sticker_date_recieved = it[StudentTable.sticker_date_recieved],
-                sticker_recieved_by = it[StudentTable.sticker_recieved_by]
+                sticker_recieved_by = it[StudentTable.sticker_recieved_by],
+                is_active = it[StudentTable.is_active]
             )
         }
     }
@@ -105,6 +105,15 @@ fun editStudentSticker(student: Student) {
             it[StudentTable.sticker_recieved_by] = student.sticker_recieved_by!!
             it[StudentTable.sticker_animal] = student.sticker_animal!!
             it[StudentTable.sticker_date_recieved] = LocalDate.now()
+        }
+    }
+}
+
+fun deactivateStudent(prename: String, surname: String) {
+    return transaction {
+        StudentTable.update(
+            where = { StudentTable.prename eq prename and (StudentTable.surname eq surname) }) {
+            it[is_active] = false
         }
     }
 }

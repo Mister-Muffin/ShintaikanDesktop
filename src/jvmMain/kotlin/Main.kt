@@ -84,7 +84,7 @@ fun main() {
                 }
                 Menu("Administration", mnemonic = 'A', enabled = screenID == 0) {
                     Item("Trainer verwalten", onClick = { showManageTrainerDialog = true })
-                    Item("Daten holen", onClick = { })
+                    Item("Daten holen", onClick = { showDatenHolenDialog = true })
                 }
                 Menu("Kurznachichten", mnemonic = 'K') {
                     Item("Kurznachicht schreiben", onClick = { }, mnemonic = 'S')

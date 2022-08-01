@@ -37,6 +37,7 @@ kotlin {
                 implementation("org.jetbrains.exposed:exposed-jdbc:0.38.2")
                 implementation("org.jetbrains.exposed:exposed-java-time:0.38.2")
                 implementation("org.postgresql:postgresql:42.3.3")
+                implementation("org.apache.commons:commons-csv:1.9.0")
             }
 
         }
