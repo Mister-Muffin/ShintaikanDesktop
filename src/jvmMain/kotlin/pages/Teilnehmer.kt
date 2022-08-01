@@ -1,11 +1,10 @@
 package pages
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -46,10 +45,14 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
 
     val teilnahme = loadTeilnahme()
 
-    val checked = remember { mutableStateListOf<String>() }
+    val farben = arrayOf("Weiss", "Gelb", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
+    val checkedColors = remember { mutableStateListOf<String>() }
+
+    val groups = arrayOf("Benjamini", "Kinder Karate", "Jugend Karate", "Karate")
+    val checkedGroups = remember { mutableStateListOf<String>() }
 
     fun findMatch(s: String, strings: List<String>): Boolean {
-        return strings.any { a -> s.contains(a.lowercase()) }
+        return strings.any { a -> s.lowercase().contains(a.lowercase()) }
     }
 
     var showStickerDialog by remember { mutableStateOf(false) }
@@ -98,16 +101,25 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
         Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
             Row {
                 LazyColumn(state = leftLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
-                    items((if (checked.isNotEmpty()) searchStudents.filter { s -> // filter checkboxes ->
-                        findMatch(s.level, checked)
-                    } // <- filter checkboxes
-                    else searchStudents).filter { // filter again for search ->
-                        arrayListOf(
-                            it.prename.lowercase(Locale.getDefault()),
-                            it.surname.lowercase(Locale.getDefault())
-                        ).joinToString(" ") // "prename surname"
-                            .contains(searchQuery.value) // <- filter again for search
-                    }.sortedByDescending { it.id }.sortedByDescending { it.level })
+                    items(searchStudents.asSequence()
+                        .filter { s ->
+                            // filter color checkboxes
+                            if (checkedColors.isEmpty()) true
+                            else findMatch(s.level, checkedColors)
+                        }.filter { s ->
+                            // filter group checkboxes on top
+                            if (checkedGroups.isEmpty()) true
+                            else checkedGroups.any { a -> s.group.lowercase() == a.lowercase() }// TODO: funtion
+                        }.filter {
+                            // filter again for search ->
+                            arrayListOf(
+                                it.prename.lowercase(Locale.getDefault()),
+                                it.surname.lowercase(Locale.getDefault())
+                            ).joinToString(" ") // "prename surname"
+                                .contains(searchQuery.value)
+                            // <- filter again for search
+                        }.sortedByDescending { it.id }.sortedByDescending { it.level }.toList()
+                    )
                     { /* linke spalte */ student ->
                         listBox(student) {
                             newStudents.add(student)
@@ -129,7 +141,7 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.width(250.dp).fillMaxHeight()
+                modifier = Modifier.width(500.dp).fillMaxHeight()
             ) {
                 Column { // search column
                     Text("Suchen:")
@@ -137,7 +149,11 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
                         searchQuery.value = newVal.lowercase(Locale.getDefault())
                     })
                 }
-                customFilter(checked)
+                Column {
+                    customFilter(farben, checkedColors)
+                    Divider()
+                    customFilter(groups, checkedGroups)
+                }
                 Column {
                     Box(
                         modifier = Modifier.fillMaxWidth().padding(4.dp)
@@ -187,11 +203,11 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun customFilter(checked: MutableList<String>) {
-    LazyColumn { // filter
-        val farben = arrayOf("Weiss", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
-        items(farben) { c ->
+private fun customFilter(filterOptions: Array<String>, checked: MutableList<String>) {
+    LazyVerticalGrid(cells = GridCells.Fixed(2)) { // filter
+        items(filterOptions) { c ->
 
             fun handleChecked() {
                 //if (farbe.value == c) farbe.value = "" else farbe.value = c
@@ -214,10 +230,7 @@ private fun customFilter(checked: MutableList<String>) {
 }
 
 @Composable
-private fun listBox(
-    student: Student,
-    onBoxClicked: () -> Unit
-) {
+private fun listBox(student: Student, onBoxClicked: () -> Unit) {
     Box(
         modifier = Modifier
             .width(250.dp)
