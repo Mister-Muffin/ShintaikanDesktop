@@ -13,6 +13,7 @@ repositories {
     google()
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+    maven("https://jitpack.io")
 }
 
 plugins.withId("org.jetbrains.kotlin.multiplatform") {
@@ -38,6 +39,7 @@ kotlin {
                 implementation("org.jetbrains.exposed:exposed-java-time:0.38.2")
                 implementation("org.postgresql:postgresql:42.3.3")
                 implementation("org.apache.commons:commons-csv:1.9.0")
+                implementation("cc.ekblad:4koma:1.1.0")
             }
 
         }

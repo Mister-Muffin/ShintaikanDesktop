@@ -21,6 +21,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.*
+import cc.ekblad.toml.decode
+import cc.ekblad.toml.tomlMapper
 import dialogs.datenHolenWindow
 import dialogs.examsDialog
 import dialogs.manageTrainerDialog
@@ -29,20 +31,46 @@ import models.loadMessages
 import models.loadStudents
 import org.jetbrains.exposed.sql.Database
 import pages.*
+import java.nio.file.Path
+import kotlin.io.path.copyTo
+import kotlin.io.path.createDirectories
+import kotlin.io.path.createDirectory
+import kotlin.io.path.notExists
 
 //Global consts
 val stickerUnits = arrayOf(0, 25, 50, 75, 100, 150, 200, 300, 500, 800)
 val stickerUnitNames =
     arrayOf("", "Schlange", "Tiger", "Rabe", "Drache", "Adler", "Fuchs", "Phoenix", "Gottesanbeterin", "Reier")
+const val configFileName = "config.toml"
+
+internal val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
     application {
+        // create file/directories in case the config file does not exist
+        if (Path.of(configFilePath + configFileName).notExists()) {
+            //Create root folder
+            Path.of(configFilePath).createDirectories()
+            //Create folder for upcomming database backups
+            Path.of(configFilePath + "backups/").createDirectory()
+            // copy sample config to config location
+            Path.of("src/jvmMain/resources/config.sample.toml")
+                .copyTo(Path.of(configFilePath + configFileName), false)
+        }
 
-        val ip: String = System.getenv("S_DSK_IP") ?: "172.17.0.1"
-        val port: String = System.getenv("S_DSK_PORT") ?: "5434"
-        val user: String = System.getenv("S_DSK_USER") ?: "postgres"
-        val password: String = System.getenv("S_DSK_PASSWORD") ?: "mysecretpassword"
+        // Create a TOML mapper without any custom configuration
+        val mapper = tomlMapper { }
+
+        // Read our config from file
+        val tomlFile = Path.of(configFilePath + configFileName)
+        val config = mapper.decode<Config>(tomlFile)
+        //println(config.settings)
+
+        val ip: String = config.settings.ip //System.getenv("S_DSK_IP") ?: "172.17.0.1"
+        val port: String = config.settings.port //System.getenv("S_DSK_PORT") ?: "5434"
+        val user: String = config.settings.user //System.getenv("S_DSK_USER") ?: "postgres"
+        val password: String = config.settings.password //System.getenv("S_DSK_PASSWORD") ?: "mysecretpassword"
 
         Database.connect(
             "jdbc:postgresql://${ip}:${port}/",

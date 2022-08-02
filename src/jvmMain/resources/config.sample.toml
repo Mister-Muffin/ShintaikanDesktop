@@ -1,0 +1,5 @@
+[settings]
+ip = "172.17.0.1"
+port = "5434"
+user = "postgres"
+password = "mysecretpassword"
