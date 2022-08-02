@@ -158,6 +158,7 @@ suspend fun updateStudent(name: Pair<String, String>, group: String, level: Stri
                 where = { StudentTable.prename eq name.first and (StudentTable.surname eq name.second) }) {
                 it[StudentTable.group] = group
                 it[StudentTable.level] = level.removeMultipleWhitespaces()
+                it[StudentTable.is_active] = true
                 if (birthday.split("/")[0].length == 1) {
                     if (birthday.split("/")[1].length == 1) {
                         it[StudentTable.birthday] = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("M/d/yyyy"))
