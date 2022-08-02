@@ -14,8 +14,6 @@ import androidx.compose.ui.window.rememberDialogState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import models.StudentTable.prename
-import models.StudentTable.surname
 import models.deactivateStudent
 import models.renameStudent
 import org.apache.commons.csv.CSVFormat
@@ -89,12 +87,10 @@ private suspend fun exMembers(csvParser: CSVParser, text: MutableState<String>) 
             println("---------------")
 
             if (!exMember.isNullOrEmpty()) {
-                val splitName = exMember.split(" ")
-                val prename = splitName.joinToString(" ", limit = splitName.size - 1, truncated = "").trim()
-                val surname = splitName[splitName.size - 1].trim()
-                deactivateStudent(prename, surname)
+                val exMemberName = splitName(exMember)
+                text.value = "${exMemberName.first}|${exMemberName.second}"
+                deactivateStudent(exMemberName)
             }
-            text.value = "$prename|$surname"
 
         } catch (_: ArrayIndexOutOfBoundsException) {
         }

@@ -109,10 +109,15 @@ fun editStudentSticker(student: Student) {
     }
 }
 
-fun deactivateStudent(prename: String, surname: String) {
+/**
+ * Deactivate a member by indentifing it with its name
+ *
+ * @param name is a Pair where 'first' is the prename and 'second' is the surname
+ */
+fun deactivateStudent(name: Pair<String, String>) {
     return transaction {
         StudentTable.update(
-            where = { StudentTable.prename eq prename and (StudentTable.surname eq surname) }) {
+            where = { StudentTable.prename eq name.first and (StudentTable.surname eq name.second) }) {
             it[is_active] = false
         }
     }
