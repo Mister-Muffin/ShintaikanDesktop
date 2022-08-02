@@ -117,3 +117,20 @@ fun deactivateStudent(prename: String, surname: String) {
         }
     }
 }
+
+/**
+ * Renames a member by indentifing it with the old name
+ * and renaming it with the new name
+ *
+ * @param oldName is a Pair where 'first' is the prename and 'second' is the surname
+ * @param newName is a Pair where 'first' is the prename and 'second' is the surname
+ */
+fun renameStudent(oldName: Pair<String, String>, newName: Pair<String, String>) {
+    return transaction {
+        StudentTable.update(
+            where = { StudentTable.prename eq oldName.first and (StudentTable.surname eq oldName.second) }) {
+            it[prename] = newName.first
+            it[surname] = newName.second
+        }
+    }
+}
