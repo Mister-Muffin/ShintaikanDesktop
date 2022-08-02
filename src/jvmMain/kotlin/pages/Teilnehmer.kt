@@ -208,11 +208,11 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
 @Composable
 private fun customFilter(filterOptions: Array<String>, checked: MutableList<String>) {
     LazyVerticalGrid(cells = GridCells.Fixed(2)) { // filter
-        items(filterOptions) { c ->
+        items(filterOptions) { option ->
 
             fun handleChecked() {
-                //if (farbe.value == c) farbe.value = "" else farbe.value = c
-                if (checked.contains(c)) checked.remove(c) else checked.add(c)
+                //if (farbe.value == option) farbe.value = "" else farbe.value = option
+                if (checked.contains(option)) checked.remove(option) else checked.add(option)
             }
 
             Box(
@@ -220,10 +220,10 @@ private fun customFilter(filterOptions: Array<String>, checked: MutableList<Stri
                     .clickable { handleChecked() }) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
-                        checked = checked.contains(c),
+                        checked = checked.contains(option),
                         colors = CheckboxDefaults.colors(checkedColor = Color.Gray),
                         onCheckedChange = { handleChecked() })
-                    Text(text = c)
+                    Text(text = if (option == "Benjamini") "Karamini" else option)
                 }
             }
         }
