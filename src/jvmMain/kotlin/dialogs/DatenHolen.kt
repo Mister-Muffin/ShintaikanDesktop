@@ -66,9 +66,11 @@ fun datenHolenWindow(onDismiss: () -> Unit) {
     }
 }
 
+private const val csvPath = "/home/julian/Entwicklung/transferHauseDojo.CSV"
+
 private suspend fun exMembers(text: MutableState<String>) {
     val reader = withContext(Dispatchers.IO) {
-        Files.newBufferedReader(Paths.get("src/jvmMain/resources/transferHauseDojo.CSV"))
+        Files.newBufferedReader(Paths.get(csvPath))
     }
     val csvParser = CSVParser(
         reader, CSVFormat.DEFAULT
@@ -108,7 +110,7 @@ private suspend fun exMembers(text: MutableState<String>) {
 
 private suspend fun renameMembers(text: MutableState<String>) {
     val reader = withContext(Dispatchers.IO) {
-        Files.newBufferedReader(Paths.get("src/jvmMain/resources/transferHauseDojo.CSV"))
+        Files.newBufferedReader(Paths.get(csvPath))
     }
     val csvParser = CSVParser(
         reader, CSVFormat.DEFAULT
@@ -152,7 +154,7 @@ private suspend fun renameMembers(text: MutableState<String>) {
 
 private suspend fun updateMembers(text: MutableState<String>) {
     val reader = withContext(Dispatchers.IO) {
-        Files.newBufferedReader(Paths.get("src/jvmMain/resources/transferHauseDojo.CSV"))
+        Files.newBufferedReader(Paths.get(csvPath))
     }
     val csvParser = CSVParser(
         reader, CSVFormat.DEFAULT
