@@ -1,6 +1,7 @@
 package dialogs
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,6 +20,8 @@ import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import java.nio.file.Files
 import java.nio.file.Paths
+
+private const val textWhenDone = "Complete!"
 
 @Composable
 fun datenHolenWindow(onDismiss: () -> Unit) {
@@ -40,13 +43,13 @@ fun datenHolenWindow(onDismiss: () -> Unit) {
             renameMembers(textFieldValue)
             updateMembers(textFieldValue)
         }.invokeOnCompletion {
-            textFieldValue.value = "Complete!"
+            textFieldValue.value = textWhenDone
         }
 
         Dialog(
             state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 600.dp, height = 250.dp),
             title = "Daten holen",
-            onCloseRequest = onDismiss
+            onCloseRequest = { if (textFieldValue.value == textWhenDone) onDismiss() }
         ) {
             Column(
                 modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -59,6 +62,10 @@ fun datenHolenWindow(onDismiss: () -> Unit) {
                 Text("Bitte warten...")
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(textFieldValue.value)
+                Spacer(modifier = Modifier.fillMaxHeight(.5f))
+                Button(enabled = textFieldValue.value == textWhenDone, onClick = onDismiss) {
+                    Text("Fenster schließen")
+                }
 
             }
         }
