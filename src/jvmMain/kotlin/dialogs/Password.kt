@@ -45,7 +45,7 @@ fun passwordDialog(result: (pwCorrect: Boolean) -> Unit, onDissmiss: () -> Unit)
             Button(onClick = {
                 val passwordCorrect = passwordFieldVal == "test" // <- Password
                 errorTextField = !passwordCorrect
-                textViewText = "Passwort falsch!"
+                textViewText = if (passwordCorrect) textViewText else "Passwort falsch!"
 
                 result(passwordCorrect)
             }) { Text("OK") }

@@ -1,18 +1,21 @@
 package models
 
+import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.javatime.date
+import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import org.jetbrains.exposed.sql.transactions.transaction
+import removeMultipleWhitespaces
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 object StudentTable : Table("main") {
-    val id = integer("id")
+    val id = integer("id").autoIncrement()
     val surname = text("surname")
     val prename = text("prename")
     val group = text("group")
     val level = text("level")
-    val sum_years = text("sum_years")
     val total = integer("total")
     val birthday = date("birthday")
     val date_last_exam = date("date_last_exam")
@@ -30,8 +33,7 @@ data class Student(
     val prename: String,
     val group: String,
     val level: String,
-    val sum_years: String,
-    val total: Int,
+    val total: Int?,
     val birthday: LocalDate?,
     val date_last_exam: LocalDate?,
     val is_trainer: Boolean,
@@ -61,8 +63,7 @@ fun loadStudents(): List<Student> {
                 prename = it[StudentTable.prename],
                 group = it[StudentTable.group],
                 level = it[StudentTable.level],
-                sum_years = it[StudentTable.sum_years],
-                total = it[StudentTable.total],
+                total = if (it[StudentTable.total] == null) 0 else it[StudentTable.total],
                 birthday = it[StudentTable.birthday],
                 date_last_exam = it[StudentTable.date_last_exam],
                 is_trainer = it[StudentTable.is_trainer],
@@ -114,13 +115,13 @@ fun editStudentSticker(student: Student) {
  *
  * @param name is a Pair where 'first' is the prename and 'second' is the surname
  */
-fun deactivateStudent(name: Pair<String, String>) {
-    return transaction {
+suspend fun deactivateStudent(name: Pair<String, String>): Int {
+    return suspendedTransactionAsync(Dispatchers.IO) {
         StudentTable.update(
             where = { StudentTable.prename eq name.first and (StudentTable.surname eq name.second) }) {
             it[is_active] = false
         }
-    }
+    }.await()
 }
 
 /**
@@ -130,12 +131,69 @@ fun deactivateStudent(name: Pair<String, String>) {
  * @param oldName is a Pair where 'first' is the prename and 'second' is the surname
  * @param newName is a Pair where 'first' is the prename and 'second' is the surname
  */
-fun renameStudent(oldName: Pair<String, String>, newName: Pair<String, String>) {
-    return transaction {
+suspend fun renameStudent(oldName: Pair<String, String>, newName: Pair<String, String>): Int {
+    return suspendedTransactionAsync(Dispatchers.IO) {
         StudentTable.update(
             where = { StudentTable.prename eq oldName.first and (StudentTable.surname eq oldName.second) }) {
             it[prename] = newName.first
             it[surname] = newName.second
         }
+    }.await()
+}
+
+/**
+ * Updates or creates a member by indentifing it with its name
+ *
+ * @param name is a Pair where 'first' is the prename and 'second' is the surname
+ * @param birthday is the Birthday to update as a string in format dd/MM/yyyy
+ */
+suspend fun updateStudent(name: Pair<String, String>, group: String, level: String, birthday: String): Any {
+    val studentExists = suspendedTransactionAsync(Dispatchers.IO) {
+        StudentTable.select(
+            where = { StudentTable.prename eq name.first and (StudentTable.surname eq name.second) }).toList()
+    }.await().isNotEmpty()
+    if (studentExists) {
+        return suspendedTransactionAsync(Dispatchers.IO) {
+            StudentTable.update(
+                where = { StudentTable.prename eq name.first and (StudentTable.surname eq name.second) }) {
+                it[StudentTable.group] = group
+                it[StudentTable.level] = level.removeMultipleWhitespaces()
+                if (birthday.split("/")[0].length == 1) {
+                    if (birthday.split("/")[1].length == 1) {
+                        it[StudentTable.birthday] = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("M/d/yyyy"))
+                    } else {
+                        it[StudentTable.birthday] = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("M/dd/yyyy"))
+                    }
+                } else {
+                    if (birthday.split("/")[1].length == 1) {
+                        it[StudentTable.birthday] = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("MM/d/yyyy"))
+                    } else {
+                        it[StudentTable.birthday] = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("MM/dd/yyyy"))
+                    }
+                }
+            }
+        }.await()
+    } else {
+        return suspendedTransactionAsync(Dispatchers.IO) {
+            StudentTable.insert {
+                it[StudentTable.prename] = name.first
+                it[StudentTable.surname] = name.second
+                it[StudentTable.group] = group
+                it[StudentTable.level] = level.removeMultipleWhitespaces()
+                if (birthday.split("/")[0].length == 1) {
+                    if (birthday.split("/")[1].length == 1) {
+                        it[StudentTable.birthday] = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("M/d/yyyy"))
+                    } else {
+                        it[StudentTable.birthday] = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("M/dd/yyyy"))
+                    }
+                } else {
+                    if (birthday.split("/")[1].length == 1) {
+                        it[StudentTable.birthday] = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("MM/d/yyyy"))
+                    } else {
+                        it[StudentTable.birthday] = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("MM/dd/yyyy"))
+                    }
+                }
+            }
+        }.await()
     }
 }

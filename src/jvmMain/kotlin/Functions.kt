@@ -27,7 +27,7 @@ fun countId(id: Int, teilnahme: List<Teilnahme>, since: LocalDate = LocalDate.EP
  * da diese Trainingseinheiten sonst nicht berücksichtigt werden würden
  */
 fun getTotalTrainingSessions(student: Student, teilnahme: List<Teilnahme>): Int {
-    return student.total + countId(student.id, teilnahme)
+    return student.total!! + countId(student.id, teilnahme)
 }
 
 /**
@@ -64,3 +64,12 @@ val <T> Array<T>.length: Int
     get() {
         return this.size - 1
     }
+
+/**
+ * Removes all 2 or more whitespaces
+ *
+ * Example: "This_is__a____test." -> "This_is_a_test." (underscore as demonstration for whitespaces)
+ */
+fun String.removeMultipleWhitespaces(): String {
+    return this.replace("\\s+".toRegex(), " ")
+}
