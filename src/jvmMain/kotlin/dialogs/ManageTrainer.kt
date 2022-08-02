@@ -147,15 +147,24 @@ private fun currentTrainerList(
     students: MutableList<Student>,
     onCheckedChange: (newVal: Boolean, student: Student) -> Unit
 ) {
-    LazyColumn {
-        items(students.filter { it.is_trainer }) { student ->
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(student.prename, style = MaterialTheme.typography.body1)
-                Checkbox(
-                    checked = student.is_trainer,
-                    onCheckedChange = { onCheckedChange(it, student) }
-                )
+    val lazyState = rememberLazyListState()
+    Row {
+        LazyColumn(state = lazyState) {
+            items(students.filter { it.is_trainer }) { student ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(student.prename + " " + student.surname, style = MaterialTheme.typography.body1)
+                    Checkbox(
+                        checked = student.is_trainer,
+                        onCheckedChange = { onCheckedChange(it, student) }
+                    )
+                }
             }
         }
+        VerticalScrollbar(
+            modifier = Modifier.fillMaxHeight(),
+            adapter = rememberScrollbarAdapter(
+                scrollState = lazyState
+            )
+        )
     }
 }
