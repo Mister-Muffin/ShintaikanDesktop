@@ -28,10 +28,7 @@ import models.Trainer
 import models.loadMessages
 import models.loadStudents
 import org.jetbrains.exposed.sql.Database
-import pages.startPage
-import pages.successPage
-import pages.teilnehmerSelector
-import pages.trainerSelector
+import pages.*
 
 //Global consts
 val stickerUnits = arrayOf(0, 25, 50, 75, 100, 150, 200, 300, 500, 800)
@@ -62,6 +59,7 @@ fun main() {
         var showDatenHolenDialog by remember { mutableStateOf(false) }
         var showExamsDialog by remember { mutableStateOf(false) }
         var showManageTrainerDialog by remember { mutableStateOf(false) }
+        var showDeleteMessageDialog by remember { mutableStateOf(false) }
 
         Window(
             onCloseRequest = ::exitApplication,
@@ -86,9 +84,9 @@ fun main() {
                     Item("Trainer verwalten", onClick = { showManageTrainerDialog = true })
                     Item("Daten holen", onClick = { showDatenHolenDialog = true })
                 }
-                Menu("Kurznachichten", mnemonic = 'K') {
+                Menu("Kurznachichten", enabled = false, mnemonic = 'K') {
                     Item("Kurznachicht schreiben", onClick = { }, mnemonic = 'S')
-                    Item("Kurznachicht löschen", onClick = { }, mnemonic = 'L')
+                    Item("Kurznachicht löschen", onClick = { showDeleteMessageDialog = true }, mnemonic = 'L')
                 }
                 Menu("Mitglieder", mnemonic = 'P') {
                     Item(
@@ -105,6 +103,7 @@ fun main() {
                 examsDialog(students, onDismiss = { showExamsDialog = false })
             }
             if (showDatenHolenDialog) datenHolenWindow { showDatenHolenDialog = false }
+            if (showDeleteMessageDialog) deleteDialog(messages) { showDeleteMessageDialog = false }
 
             MaterialTheme(
                 typography = Typography(

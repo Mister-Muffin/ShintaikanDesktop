@@ -7,10 +7,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,9 +24,7 @@ import java.time.Period
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun startPage(
-    changeScreen: (id: Int) -> Unit
-) {
+fun startPage(changeScreen: (id: Int) -> Unit) {
     val students = loadStudents()
     val messages = loadMessages()
     val allStudents = remember { mutableStateListOf<Student>() }
@@ -52,8 +47,14 @@ fun startPage(
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
         if (showDeleteMessageDialog.value) deleteDialog(
-            messages = allMessages,
-            onDismiss = { showDeleteMessageDialog.value = false })
+            m = allMessages,
+            onDismiss = {
+                showDeleteMessageDialog.value = false
+                allMessages.clear()
+                for (message in loadMessages()) {
+                    allMessages.add(message)
+                }
+            })
 
 
         Text("Willkommen", style = MaterialTheme.typography.h1)
@@ -81,7 +82,6 @@ fun startPage(
                             text = "${it.surname}, ${it.prename}: ",
                             fontWeight = FontWeight.Normal,
                         )
-                        @Suppress("KotlinConstantConditions")
                         Text(
                             text = if (period == 1) {
                                 "gestern"
@@ -155,32 +155,40 @@ fun startPage(
 
 
 @Composable
-private fun deleteDialog(messages: MutableList<Message>, onDismiss: () -> Unit) {
-    Dialog(
-        state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 750.dp, height = 600.dp),
-        title = "Nachrichten löschen",
-        onCloseRequest = onDismiss
-    ) {
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text("Nachichten löschen", style = MaterialTheme.typography.subtitle1)
-            LazyColumn(horizontalAlignment = Alignment.Start) {
-                items(messages) {
-                    Row {
-                        Text(text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(it.dateCreated).toString() + ": ")
-                        Text(text = it.message.slice(0 until it.message.length.coerceAtMost(30)) + "...")
-                        IconButton(modifier = Modifier.size(20.dp), onClick = {
-                            deleteMessage(it.id)
-                            messages.remove(it)
-                        }) {
-                            Icon(Icons.Default.Delete, contentDescription = null)
+internal fun deleteDialog(m: List<Message> = loadMessages(), onDismiss: () -> Unit) {
+    var messages by remember { mutableStateOf(m) }
+    MaterialTheme {
+        Dialog(
+            state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 750.dp, height = 600.dp),
+            title = "Nachrichten löschen",
+            onCloseRequest = onDismiss
+        ) {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("Nachichten löschen", style = MaterialTheme.typography.subtitle1)
+                LazyColumn(horizontalAlignment = Alignment.Start) {
+                    items(messages) {
+                        Row {
+                            Text(
+                                text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(it.dateCreated)
+                                    .toString() + ": "
+                            )
+                            Text(text = it.message.slice(0 until it.message.length.coerceAtMost(30)) + "...")
+                            IconButton(modifier = Modifier.size(20.dp), onClick = {
+                                deleteMessage(it.id)
+                                messages = loadMessages()
+                            }) {
+                                Icon(Icons.Default.Delete, contentDescription = null)
+                            }
                         }
+                        Divider()
                     }
-                    Divider()
                 }
             }
         }
     }
-
 }
 
 @Composable
