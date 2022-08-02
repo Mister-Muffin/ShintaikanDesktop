@@ -36,6 +36,20 @@ fun trainerSelector(changeScreen: (id: Int, activeTrainer: Trainer) -> Unit) {
                 cells = GridCells.Fixed(4)
             ) {
                 items(trainers) { trainer ->
+                    var trainerNameExtended = trainer.prename
+                    var trainerNameWasExtended = false
+                    trainers.forEach { t ->
+                        var i = 0
+                        if (trainer.prename == t.prename && trainer.surname != t.surname) {
+                            while ((t.prename + " " + t.surname).contains(trainerNameExtended)) {
+                                if (trainerNameExtended == trainer.prename) trainerNameExtended += " "
+                                trainerNameExtended += trainer.surname[i]
+                                i++
+                                trainerNameWasExtended = true
+                            }
+                        }
+                    }
+                    if (trainerNameWasExtended) trainerNameExtended += "."
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.clickable {
@@ -48,7 +62,7 @@ fun trainerSelector(changeScreen: (id: Int, activeTrainer: Trainer) -> Unit) {
                             colors = RadioButtonDefaults.colors(selectedColor = Color.Gray),
                             modifier = Modifier.size(32.dp)
                         )
-                        Text(trainer.prename)
+                        Text(trainerNameExtended)
                     }
                 }
             }
