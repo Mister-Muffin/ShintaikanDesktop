@@ -25,6 +25,7 @@ object StudentTable : Table("main") {
     val sticker_date_recieved = date("sticker_date_recieved")
     val sticker_recieved_by = integer("sticker_recieved_by")
     val is_active = bool("is_active")
+    val trainer_units = integer("trainer_units")
 }
 
 data class Student(
@@ -51,7 +52,8 @@ data class Trainer(
     val id: Int,
     val surname: String,
     val prename: String,
-    val is_trainer: Boolean
+    val is_trainer: Boolean,
+    val trainer_units: Int
 )
 
 fun loadStudents(): List<Student> {
@@ -85,7 +87,8 @@ fun loadTrainers(): List<Trainer> {
                 id = it[StudentTable.id],
                 surname = it[StudentTable.surname],
                 prename = it[StudentTable.prename],
-                is_trainer = it[StudentTable.is_trainer]
+                is_trainer = it[StudentTable.is_trainer],
+                trainer_units = it[StudentTable.trainer_units]
             )
         }
     }
@@ -95,6 +98,16 @@ fun editIsTrainer(id: Int, is_trainer: Boolean) {
     return transaction {
         StudentTable.update(where = { StudentTable.id eq id }) {
             it[StudentTable.is_trainer] = is_trainer
+        }
+    }
+}
+
+fun increaseTrainerUnitCount(trainer: Trainer) {
+    return transaction {
+        StudentTable.update(where = { StudentTable.id eq trainer.id }) {
+            with(SqlExpressionBuilder) {
+                it.update(trainer_units, trainer_units + 1)
+            }
         }
     }
 }

@@ -21,9 +21,7 @@ import androidx.compose.ui.unit.sp
 import dialogs.stickerDialog
 import getTotalTrainingSessions
 import gretting
-import models.Student
-import models.Trainer
-import models.loadTeilnahme
+import models.*
 import stickerUnits
 import java.util.*
 
@@ -68,7 +66,8 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
                     >= stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 1]
                 ) studentsStickers.add(student)
         }
-        //insertTeilnahme(teilnahmeString, isExam)
+        insertTeilnahme(teilnahmeString, isExam)
+        increaseTrainerUnitCount(activeTrainer)
 
         if (studentsStickers.isEmpty()) changeScreen(3)
         else showStickerDialog = true
