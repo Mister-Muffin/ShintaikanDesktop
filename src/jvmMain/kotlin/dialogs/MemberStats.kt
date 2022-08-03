@@ -163,6 +163,8 @@ private fun studentStats(student: Student) { //datum letzte prüfung | wie lange
 
         textTotalTrainingSessions(student, teilnahme)
 
+        if (student.trainer_units != 0) Text("Hat ${student.trainer_units} mal Training gegeben")
+
         val activeStickerCount = student.sticker_recieved
         if (student.sticker_recieved == 0) {
             Text("Hat noch keinen Sticker bekommen")

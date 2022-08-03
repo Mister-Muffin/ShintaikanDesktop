@@ -43,6 +43,7 @@ data class Student(
     val sticker_date_recieved: LocalDate?,
     val sticker_recieved_by: Int?,
     val is_active: Boolean,
+    val trainer_units: Int,
     val radioClicked: Boolean = false, // for sticker dialog (all radio buttons must be clicked before button activated)
     val stickerRecieved: Boolean = false, // for sticker dialog, if radio button is checked or not
     val sticker_show_again: Boolean = false, // for sticker dialog, if student is still missing stickers and the dialog should open again with this student
@@ -73,7 +74,8 @@ fun loadStudents(): List<Student> {
                 sticker_recieved = it[StudentTable.sticker_recieved],
                 sticker_date_recieved = it[StudentTable.sticker_date_recieved],
                 sticker_recieved_by = it[StudentTable.sticker_recieved_by],
-                is_active = it[StudentTable.is_active]
+                is_active = it[StudentTable.is_active],
+                trainer_units = it[StudentTable.trainer_units]
             )
         }
     }
