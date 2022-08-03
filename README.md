@@ -2,11 +2,4 @@
 
 ### TODO:
 
-- [ ] Startseite
-    - [x] Geburtstage
-    - [x] Kurznachichten
-    - [ ] Shutdown button?
-- [ ] Menüleiste
-- [x] Teilnehmereingabe
-    - [ ] Prüfung oder Training?
-- [ ] Daten holen
+https://github.com/users/Mister-Muffin/projects/1/views/1
