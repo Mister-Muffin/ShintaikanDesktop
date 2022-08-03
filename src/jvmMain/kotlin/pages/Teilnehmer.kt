@@ -16,8 +16,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dialogs.passwordDialog
 import dialogs.stickerDialog
 import getTotalTrainingSessions
 import gretting
@@ -29,7 +31,7 @@ import java.util.*
 fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeScreen: (id: Int) -> Unit) {
 
     val searchQuery = remember { mutableStateOf("") }
-    val handleAsExam = remember { mutableStateOf(false) }
+    var handleAsExam by remember { mutableStateOf(false) }
 
     val newStudents = remember { mutableStateListOf<Student>() }
     val allStudents = remember { mutableStateListOf<Student>() }
@@ -53,6 +55,7 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
     }
 
     var showStickerDialog by remember { mutableStateOf(false) }
+    var showCheckboxPasswordDialog by remember { mutableStateOf(false) }
 
     val studentsStickers = remember { mutableListOf<Student>() }
 
@@ -92,6 +95,16 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
                     }
                 }
             }
+        }
+
+        if (showCheckboxPasswordDialog) {
+            passwordDialog(
+                result = { pwCorrect ->
+                    handleAsExam = pwCorrect
+                    showCheckboxPasswordDialog = !pwCorrect
+                }, // if password correct, set requirePasswort to false
+                onDissmiss = { showCheckboxPasswordDialog = false }
+            )
         }
 
         Text("$greeting ${activeTrainer.prename}, Teilnehmer auswählen", style = MaterialTheme.typography.h1)
@@ -154,13 +167,36 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
                 Column {
                     Box(
                         modifier = Modifier.fillMaxWidth().padding(4.dp)
-                            .clickable { handleAsExam.value = !handleAsExam.value }) {
+                            .clickable {
+                                // just remove the tick if it was checked without password
+                                if (handleAsExam) handleAsExam = false
+                                else showCheckboxPasswordDialog = true
+                            }) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(
-                                checked = handleAsExam.value,
+                                checked = handleAsExam,
                                 colors = CheckboxDefaults.colors(checkedColor = Color.Gray),
-                                onCheckedChange = { handleAsExam.value = it })
-                            Text(text = "Ausgewählte als Prüfung eintragen")
+                                onCheckedChange = {
+                                    // just remove the tick if it was checked without password
+                                    if (handleAsExam) handleAsExam = false
+                                    else showCheckboxPasswordDialog = true
+
+                                })
+                            if (handleAsExam)
+                                Text(
+                                    text = "Prüfung!",
+                                    textDecoration = TextDecoration.Underline,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 35.sp,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth(.9f)
+                                )
+                            else
+                                Text(
+                                    "Auswahl als Prüfung eintragen",
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxWidth(.9f)
+                                )
                         }
                     }
 
@@ -168,7 +204,7 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
                         enabled = newStudents.isNotEmpty(),
                         colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
                         modifier = Modifier.fillMaxWidth().height(60.dp),
-                        onClick = { submit(handleAsExam.value) }) {
+                        onClick = { submit(handleAsExam) }) {
                         Text(
                             textAlign = TextAlign.Center,
                             text = if (newStudents.isEmpty()) "Teilnehmen aus der ersten Spalte auswählen" else "Eingabe bestätigen!"
