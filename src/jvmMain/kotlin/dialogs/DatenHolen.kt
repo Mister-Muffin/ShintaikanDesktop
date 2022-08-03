@@ -10,16 +10,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
+import configFilePath
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import models.deactivateStudent
-import models.renameStudent
-import models.updateStudent
+import models.*
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
+import org.apache.commons.csv.CSVPrinter
 import java.nio.file.Files
+import java.nio.file.Files.newBufferedWriter
 import java.nio.file.Paths
+import java.time.LocalTime
 
 private const val textWhenDone = "Complete!"
 
@@ -39,6 +41,7 @@ fun datenHolenWindow(onDismiss: () -> Unit) {
         )
     } else {
         coroutineScope.launch(Dispatchers.IO) {
+            dumpCurrentDatabase()
             exMembers(textFieldValue)
             renameMembers(textFieldValue)
             updateMembers(textFieldValue)
@@ -71,6 +74,63 @@ fun datenHolenWindow(onDismiss: () -> Unit) {
         }
 
     }
+}
+
+fun dumpCurrentDatabase() {
+    val writer = newBufferedWriter(Paths.get("${configFilePath}backups/backup-${LocalTime.now()}.csv"));
+
+    val csvPrinter = CSVPrinter(
+        writer, CSVFormat.DEFAULT
+        //.withHeader(StudentTable.columns)
+    );
+
+    val members = loadFullMemberTable()
+    val messages = loadMessages()
+    val teilnahme = loadTeilnahme()
+
+    members.forEach { member ->
+        csvPrinter.printRecord(
+            member.id,
+            member.prename,
+            member.surname,
+            member.group,
+            member.level,
+            member.total,
+            member.birthday,
+            member.is_trainer,
+            member.date_last_exam,
+            member.sticker_animal,
+            member.sticker_date_recieved,
+            member.sticker_recieved_by,
+            member.sticker_recieved,
+            member.is_active,
+            member.trainer_units
+        );
+
+    }
+    //csvPrinter.printRecords(members)
+    csvPrinter.println()
+    messages.forEach {
+        csvPrinter.printRecord(
+            it.id,
+            it.message,
+            it.short,
+            it.dateCreated
+        )
+    }
+    //csvPrinter.printRecords(messages)
+    csvPrinter.println()
+    teilnahme.forEach {
+        csvPrinter.printRecord(
+            it.id,
+            it.date,
+            it.userId,
+            it.userIdExam
+        )
+    }
+    //csvPrinter.printRecords(teilnahme)
+    csvPrinter.flush();
+    csvPrinter.close();
 }
 
 private const val csvPath = "/home/julian/Entwicklung/transferHauseDojo.CSV"

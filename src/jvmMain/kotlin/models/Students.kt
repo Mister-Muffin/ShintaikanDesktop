@@ -81,6 +81,30 @@ fun loadStudents(): List<Student> {
     }
 }
 
+fun loadFullMemberTable(): List<Student> {
+    return transaction {
+        StudentTable.selectAll().sortedByDescending { it[StudentTable.level] }.map {
+            Student(
+                id = it[StudentTable.id],
+                surname = it[StudentTable.surname],
+                prename = it[StudentTable.prename],
+                group = it[StudentTable.group],
+                level = it[StudentTable.level],
+                total = if (it[StudentTable.total] == null) 0 else it[StudentTable.total],
+                birthday = it[StudentTable.birthday],
+                date_last_exam = it[StudentTable.date_last_exam],
+                is_trainer = it[StudentTable.is_trainer],
+                sticker_animal = it[StudentTable.sticker_animal],
+                sticker_recieved = it[StudentTable.sticker_recieved],
+                sticker_date_recieved = it[StudentTable.sticker_date_recieved],
+                sticker_recieved_by = it[StudentTable.sticker_recieved_by],
+                is_active = it[StudentTable.is_active],
+                trainer_units = it[StudentTable.trainer_units]
+            )
+        }
+    }
+}
+
 fun loadTrainers(): List<Trainer> {
 
     return transaction {
