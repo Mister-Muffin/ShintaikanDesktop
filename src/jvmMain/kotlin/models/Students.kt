@@ -67,7 +67,7 @@ fun loadStudents(): List<Student> {
                     prename = it[StudentTable.prename],
                     group = it[StudentTable.group],
                     level = it[StudentTable.level],
-                    total = if (it[StudentTable.total] == null) 0 else it[StudentTable.total],
+                    total = it[StudentTable.total],
                     birthday = it[StudentTable.birthday],
                     date_last_exam = it[StudentTable.date_last_exam],
                     is_trainer = it[StudentTable.is_trainer],
