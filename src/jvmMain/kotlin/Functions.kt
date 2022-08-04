@@ -84,3 +84,21 @@ val <T> Array<T>.length: Int
 fun String.removeMultipleWhitespaces(): String {
     return this.replace("\\s+".toRegex(), " ")
 }
+
+/**
+ * Returns the next Key / Value Pair (equivalent to adding 1 to the index of a list)
+ *
+ * Access returned Key / Value with .first / .second
+ * @author Mr. Pine <50425705+Mr-Pine@users.noreply.github.com>
+ */
+fun <K, V> Map<K, V>.next(oldKey: K) =
+    this.keys.let { keys -> keys.elementAt(keys.indexOf(oldKey) + 1) }.let { newKey -> newKey to this[newKey] }
+
+/**
+ * Returns the previous Key / Value Pair (equivalent to subtracting 1 to the index of a list)
+ *
+ * Access returned Key / Value with .first / .second
+ * @author Mr. Pine <50425705+Mr-Pine@users.noreply.github.com>
+ */
+fun <K, V> Map<K, V>.previous(oldKey: K) =
+    this.keys.let { keys -> keys.elementAt(keys.indexOf(oldKey) - 1) }.let { newKey -> newKey to this[newKey] }

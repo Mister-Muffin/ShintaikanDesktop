@@ -24,6 +24,7 @@ import dialogs.stickerDialog
 import getTotalTrainingSessions
 import gretting
 import models.*
+import next
 import stickerUnits
 import java.util.*
 
@@ -64,9 +65,9 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
         for (student in newStudents) {
             teilnahmeString = teilnahmeString + student.id + ","
 
-            if (student.sticker_recieved != stickerUnits[stickerUnits.size - 1]) // Wer 800 aufkelber hat, bekommt keinen weiteren (catch indexOutOfBounds)
+            if (student.sticker_recieved != stickerUnits.keys.last()) // Wer 800 aufkelber hat, bekommt keinen weiteren (catch indexOutOfBounds)
                 if (getTotalTrainingSessions(student, teilnahme) // ALLE Trainingseinheiten
-                    >= stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 1]
+                    >= stickerUnits.next(student.sticker_recieved).first
                 ) studentsStickers.add(student)
         }
         insertTeilnahme(teilnahmeString, isExam)

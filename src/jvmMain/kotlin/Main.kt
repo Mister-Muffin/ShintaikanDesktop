@@ -39,37 +39,6 @@ import kotlin.io.path.createDirectories
 import kotlin.io.path.createDirectory
 import kotlin.io.path.notExists
 
-//Global consts
-val stickerUnits = arrayOf(0, 25, 50, 75, 100, 150, 200, 300, 500, 800)
-val stickerUnitNames =
-    arrayOf("", "Schlange", "Tiger", "Rabe", "Drache", "Adler", "Fuchs", "Phoenix", "Gottesanbeterin", "Reier")
-val levels = TreeMap(
-    mapOf(
-        "z Kyu weiss" to LevelRequirements(units = 0),
-        "9/10 Kyu weiss-rot" to LevelRequirements(months = 3, units = 10),
-        "9. Kyu weiss-gelb" to LevelRequirements(units = 10),
-        "8/9 Kyu gelb-rot" to LevelRequirements(units = 10),
-        "8. Kyu gelb" to LevelRequirements(months = 3, units = 10, age = 7),
-        "7/8 Kyu gelb-orange" to LevelRequirements(units = 15),
-        "7. Kyu orange" to LevelRequirements(months = 4, units = 20, age = 9),
-        "6/7 Kyu orange-grün" to LevelRequirements(units = 22),
-        "6. Kyu grün" to LevelRequirements(months = 5, units = 30, age = 11),
-        "5/6 Kyu grün-blau" to LevelRequirements(units = 22),
-        "5. Kyu blau" to LevelRequirements(months = 5, units = 30, age = 13),
-        "4. Kyu violett" to LevelRequirements(months = 8, units = 45, age = 14),
-        "3. Kyu braun" to LevelRequirements(months = 8, units = 45, age = 15),
-        "2. Kyu braun" to LevelRequirements(months = 8, units = 45, age = 16),
-        "1. Kyu braun" to LevelRequirements(months = 9, units = 60, age = 17),
-        "1. Dan schwarz" to LevelRequirements(months = 10, units = 60, age = 18)
-    )
-)
-
-data class LevelRequirements(
-    val months: Long = 0,
-    val units: Int,
-    val age: Int = 0
-)
-
 const val configFileName = "config.toml"
 
 internal val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"

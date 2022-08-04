@@ -23,6 +23,7 @@ import models.Student
 import models.Teilnahme
 import models.loadStudents
 import models.loadTeilnahme
+import next
 import java.time.LocalDate
 import java.time.Period
 
@@ -98,7 +99,7 @@ private fun oldLevel(member: Student) {
 
 @Composable
 private fun newLevel(member: Student) {
-    Text(levels.lowerKey(member.level) ?: member.level, modifier = Modifier.width(180.dp))
+    Text(levels.next(member.level).first, modifier = Modifier.width(180.dp))
 }
 
 @Composable

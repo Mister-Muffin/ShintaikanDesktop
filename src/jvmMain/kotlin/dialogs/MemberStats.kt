@@ -20,11 +20,10 @@ import androidx.compose.ui.window.rememberDialogState
 import composables.StudentList
 import countId
 import getTotalTrainingSessions
-import length
 import models.Student
 import models.Teilnahme
 import models.loadTeilnahme
-import stickerUnitNames
+import next
 import stickerUnits
 import java.time.LocalDate
 import java.time.Period
@@ -169,15 +168,15 @@ private fun studentStats(student: Student) { //datum letzte prüfung | wie lange
         if (student.sticker_recieved == 0) {
             Text("Hat noch keinen Sticker bekommen")
         } else {
-            val activeStickerName = stickerUnitNames[stickerUnits.indexOf(activeStickerCount)]
+            val activeStickerName = stickerUnits[activeStickerCount]
             Text("Aktueller Sticker: $activeStickerName($activeStickerCount)")
         }
 
-        if (student.sticker_recieved == stickerUnits[stickerUnits.length])
+        if (student.sticker_recieved == stickerUnits.keys.last())
             Text("Es gibt keinen weiteren Sticker")
         else {
-            val nextStickerCount = stickerUnits[stickerUnits.indexOf(activeStickerCount) + 1]
-            val nextStickerName = stickerUnitNames[stickerUnits.indexOf(nextStickerCount)]
+            val nextStickerCount = stickerUnits.next(activeStickerCount).first
+            val nextStickerName = stickerUnits[nextStickerCount]
             Text("Nächster Sticker: $nextStickerName($nextStickerCount)")
         }
     }

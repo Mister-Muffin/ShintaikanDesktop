@@ -19,7 +19,7 @@ import models.Student
 import models.Trainer
 import models.editStudentSticker
 import models.loadTeilnahme
-import stickerUnitNames
+import next
 import stickerUnits
 
 @Composable
@@ -78,20 +78,21 @@ fun stickerDialog(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         item {
+                            val nextStickerName = stickerUnits.next(student.sticker_recieved).second
                             if (
-                                student.sticker_recieved == stickerUnits[stickerUnits.size - 2] ||
-                                total < stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 2]
+                                student.sticker_recieved == stickerUnits.keys.toList()[stickerUnits.keys.size - 2] ||
+                                total < stickerUnits.next(stickerUnits.next(student.sticker_recieved).first).first
                             ) {
                                 Text(
                                     "${student.prename} ${student.surname}, hat " +
                                             "$total Trainingseinheiten und bekommt einen " +
-                                            "${stickerUnitNames[stickerUnits.indexOf(student.sticker_recieved) + 1]} Aufkleber",
+                                            "$nextStickerName Aufkleber",
                                     modifier = Modifier.padding(8.dp).width(300.dp)
                                 )
                             } else {
                                 Text(
                                     "${student.prename} ${student.surname}, hat $total Trainingseinheiten und bekommt aber immer noch einen " +
-                                            "${stickerUnitNames[stickerUnits.indexOf(student.sticker_recieved) + 1]} Aufkleber",
+                                            "$nextStickerName Aufkleber",
                                     modifier = Modifier.padding(8.dp).width(300.dp)
                                 )
                             }
@@ -105,8 +106,8 @@ fun stickerDialog(
                                         student.copy(
                                             stickerRecieved = true,
                                             radioClicked = true,
-                                            sticker_show_again = if (student.sticker_recieved == stickerUnits[stickerUnits.size - 2]) false else
-                                                total >= stickerUnits[stickerUnits.indexOf(student.sticker_recieved) + 2] // erster Teil vor dem && ist das gegenereignis von der if oben < / >=
+                                            sticker_show_again = if (student.sticker_recieved == stickerUnits.keys.toList()[stickerUnits.keys.size - 2]) false else
+                                                total >= stickerUnits.next(stickerUnits.next(student.sticker_recieved).first).first // erster Teil vor dem && ist das gegenereignis von der if oben < / >=
                                         )
                                 })
                             Spacer(modifier = Modifier.width(8.dp))
@@ -132,18 +133,18 @@ fun stickerDialog(
                             s.copy(
                                 sticker_recieved_by = activeTrainer.id,
                                 //sticker_animal = stickerUnitNames[stickerUnits.indexOf(s.sticker_recieved) + 1],
-                                sticker_recieved = stickerUnits[stickerUnits.indexOf(s.sticker_recieved) + 1]
+                                sticker_recieved = stickerUnits.next(s.sticker_recieved).first
                             )
                         )
 
                     }
-                    if (s.sticker_recieved != stickerUnits[stickerUnits.size - 2]) {
+                    if (s.sticker_recieved != stickerUnits.keys.toList()[stickerUnits.keys.size - 1]) {
                         mutableStudents[mutableStudents.indexOf(s)] =
                             s.copy(
                                 sticker_recieved_by = activeTrainer.id,
                                 radioClicked = false,
                                 //sticker_animal = stickerUnitNames[stickerUnits.indexOf(s.sticker_recieved) + 1],
-                                sticker_recieved = stickerUnits[stickerUnits.indexOf(s.sticker_recieved) + 1]
+                                sticker_recieved = stickerUnits.next(s.sticker_recieved).first
                             )
                     }
 
