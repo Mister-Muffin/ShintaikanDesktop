@@ -20,6 +20,17 @@ fun countId(id: Int, teilnahme: List<Teilnahme>, since: LocalDate = LocalDate.EP
     return counter
 }
 
+fun getFirstDate(id: Int, teilnahme: List<Teilnahme>): LocalDate? {
+    for (day in teilnahme) {
+        if (day.userIds != null) {
+            if (day.userIds.split(",").filter { id.toString() == it }.isNotEmpty()) {
+                return day.date
+            }
+        }
+    }
+    return null
+}
+
 /**
  * Gibt die gesamten Trainingseinheiten einer Person zurück
  *

@@ -26,6 +26,7 @@ import cc.ekblad.toml.tomlMapper
 import dialogs.datenHolenWindow
 import dialogs.examsDialog
 import dialogs.manageTrainerDialog
+import dialogs.memberExportDialog
 import models.Trainer
 import models.loadMessages
 import models.loadStudents
@@ -41,6 +42,24 @@ import kotlin.io.path.notExists
 val stickerUnits = arrayOf(0, 25, 50, 75, 100, 150, 200, 300, 500, 800)
 val stickerUnitNames =
     arrayOf("", "Schlange", "Tiger", "Rabe", "Drache", "Adler", "Fuchs", "Phoenix", "Gottesanbeterin", "Reier")
+val levels = arrayOf(
+    "z Kyu weiss",
+    "9/10 Kyu weiss-rot",
+    "9. Kyu weiss-gelb",
+    "8/9 Kyu gelb-rot",
+    "8. Kyu gelb",
+    "7/8 Kyu gelb-orange",
+    "7. Kyu orange",
+    "6/7 Kyu orange-grün",
+    "6. Kyu grün",
+    "5/6 Kyu grün-blau",
+    "5. Kyu blau",
+    "4. Kyu violett",
+    "3. Kyu braun",
+    "2. Kyu braun",
+    "1. Kyu braun",
+    "1. Dan schwarz"
+)
 const val configFileName = "config.toml"
 
 internal val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
@@ -88,6 +107,7 @@ fun main() {
         var showExamsDialog by remember { mutableStateOf(false) }
         var showManageTrainerDialog by remember { mutableStateOf(false) }
         var showDeleteMessageDialog by remember { mutableStateOf(false) }
+        var showMemberExportDialog by remember { mutableStateOf(true) }
 
         Window(
             onCloseRequest = ::exitApplication,
@@ -117,13 +137,12 @@ fun main() {
                     Item("Kurznachicht löschen", onClick = { showDeleteMessageDialog = true }, mnemonic = 'L')
                 }
                 Menu("Mitglieder", mnemonic = 'P') {
-                    Item(
-                        "Daten abfragen",
-                        onClick = { showExamsDialog = true }
-                    )
+                    Item("Daten abfragen", onClick = { showExamsDialog = true })
+                    Item("Daten exportieren", onClick = { showMemberExportDialog = true })
                 }
             }
 
+            //region Dialog
             if (showManageTrainerDialog) {
                 manageTrainerDialog(students) { showManageTrainerDialog = false }
             }
@@ -132,6 +151,8 @@ fun main() {
             }
             if (showDatenHolenDialog) datenHolenWindow { showDatenHolenDialog = false }
             if (showDeleteMessageDialog) deleteDialog(messages) { showDeleteMessageDialog = false }
+            if (showMemberExportDialog) memberExportDialog { showMemberExportDialog = false }
+            //endregion
 
             MaterialTheme(
                 typography = Typography(
