@@ -12,9 +12,9 @@ import kotlin.random.Random
  **/
 fun countId(id: Int, teilnahme: List<Teilnahme>, since: LocalDate = LocalDate.EPOCH): Int {
     var counter = 0
-    for (a in teilnahme) {
-        if (a.userId !== null && a.date > since) {
-            counter += a.userId.split(",").filter { id.toString() == it }.size
+    for (day in teilnahme) {
+        if (day.userIds != null && day.date > since) {
+            counter += day.userIds.split(",").filter { id.toString() == it }.size
         }
     }
     return counter

@@ -124,8 +124,8 @@ fun dumpCurrentDatabase() {
         csvPrinter.printRecord(
             it.id,
             it.date,
-            it.userId,
-            it.userIdExam
+            it.userIds,
+            it.userIdsExam
         )
     }
     //csvPrinter.printRecords(teilnahme)
