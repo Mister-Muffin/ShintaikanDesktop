@@ -6,7 +6,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material.TextField
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,6 +34,9 @@ fun memberExportDialog(
     val teilnahme = loadTeilnahme()
 //name | bish grad| next grad| training seit letzt brüf| dauer seit letzter prüf | warum kann keine prüfunge machen
     MaterialTheme {
+
+        var searchFieldValue by remember { mutableStateOf("") }
+
         Dialog(
             state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 900.dp, height = 600.dp),
             title = "Teilnahme",
@@ -42,12 +46,21 @@ fun memberExportDialog(
                 modifier = Modifier.fillMaxSize().padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+                TextField(
+                    searchFieldValue,
+                    onValueChange = { searchFieldValue = it },
+                    placeholder = { Text("Hier suchen...") },
+                    singleLine = true,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
                 LazyColumn(
                     verticalArrangement = Arrangement.Top,
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxHeight(.9f).fillMaxWidth().padding(bottom = 8.dp)
                 ) {
-                    items(members) { member ->
+                    items(members.filter {
+                        (it.prename + it.surname).lowercase().contains(searchFieldValue.lowercase().replace(" ", ""))
+                    }) { member ->
                         val isReadyString = isReadyForExam(member, teilnahme)
                         Row {
                             nameText(member, isReadyString)
