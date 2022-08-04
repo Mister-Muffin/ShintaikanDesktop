@@ -9,12 +9,14 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
 import countId
 import getFirstDate
+import getTotalTrainingSessions
 import levels
 import models.Student
 import models.Teilnahme
@@ -46,13 +48,14 @@ fun memberExportDialog(
                     modifier = Modifier.fillMaxHeight(.9f).fillMaxWidth().padding(bottom = 8.dp)
                 ) {
                     items(members) { member ->
+                        val isReadyString = isReadyForExam(member, teilnahme)
                         Row {
-                            nameText(member)
+                            nameText(member, isReadyString)
                             oldLevel(member)
                             newLevel(member)
                             unitsSinceLastExam(member, teilnahme)
                             periodLastExam(member)
-                            reasonText(member, teilnahme)
+                            reasonText(isReadyString)
                         }
                     }
                 }
@@ -67,8 +70,12 @@ fun memberExportDialog(
 
 //<editor-fold desc="'Table' fields (textComposables)">
 @Composable
-private fun nameText(member: Student) {
-    Text("${member.prename} ${member.surname}", modifier = Modifier.width(150.dp))
+private fun nameText(member: Student, isReadyString: String?) {
+    Text(
+        "${member.prename} ${member.surname}",
+        color = if (isReadyString == null) Color.Unspecified else Color.Red,
+        modifier = Modifier.width(150.dp)
+    )
 }
 
 @Composable
@@ -78,7 +85,7 @@ private fun oldLevel(member: Student) {
 
 @Composable
 private fun newLevel(member: Student) {
-    Text(levels[levels.indexOf(member.level) + 1], modifier = Modifier.width(180.dp))
+    Text(levels.lowerKey(member.level) ?: member.level, modifier = Modifier.width(180.dp))
 }
 
 @Composable
@@ -107,8 +114,8 @@ private fun periodLastExam(member: Student) {
 }
 
 @Composable
-private fun reasonText(member: Student, teilnahme: List<Teilnahme>) {
-    Text(isReadyForExam(member, teilnahme) ?: "", modifier = Modifier.width(300.dp))
+private fun reasonText(isReadyString: String?) {
+    Text(isReadyString ?: "", modifier = Modifier.width(300.dp))
 }
 //</editor-fold>
 
@@ -122,7 +129,8 @@ private fun reasonText(member: Student, teilnahme: List<Teilnahme>) {
 private fun isReadyForExam(member: Student, teilnahme: List<Teilnahme>): String? {
     var dateLastExam: LocalDate?
     if (member.date_last_exam == null) { // set date last exam to first traing unit
-        dateLastExam = getFirstDate(member.id, teilnahme)
+        val totalTrainingSessions = getTotalTrainingSessions(member, teilnahme)
+        dateLastExam = if (totalTrainingSessions == 0) null else getFirstDate(member.id, teilnahme)
         if (dateLastExam == null) {
             return "Der Schüler war noch nie im Training"
         } else {
@@ -136,115 +144,13 @@ private fun isReadyForExam(member: Student, teilnahme: List<Teilnahme>): String?
     val monthsSinceLastExam = Period.between(dateLastExam, LocalDate.now()).toTotalMonths()
     val memberAge = Period.between(member.birthday, LocalDate.now().plusMonths(2)).years
 
-    // ist das Mitglied in einem Zwischengrad?
-    if (member.level.contains("-")) {
-        when (member.level) {
-            levels[1] -> {
-                if (unitsSinceLastExam < 10)
-                    return "Zu wenig Trainingseinheiten ($unitsSinceLastExam)"
-                if (monthsSinceLastExam < 3)
-                    return "Zu wenig Zeit zur letzten Prüfung vergangen ($monthsSinceLastExam monate)"
-            }
-            levels[2] -> {
-                if (unitsSinceLastExam < 10)
-                    return "Zu wenig Trainingseinheiten ($unitsSinceLastExam)"
-            }
-            levels[3] -> {
-                if (unitsSinceLastExam < 10)
-                    return "Zu wenig Trainingseinheiten ($unitsSinceLastExam)"
-            }
-            levels[5] -> {
-                if (unitsSinceLastExam < 15)
-                    return "Zu wenig Trainingseinheiten ($unitsSinceLastExam)"
-            }
-            levels[7] -> {
-                if (unitsSinceLastExam < 22)
-                    return "Zu wenig Trainingseinheiten ($unitsSinceLastExam)"
-            }
-            levels[9] -> {
-                if (unitsSinceLastExam < 22)
-                    return "Zu wenig Trainingseinheiten ($unitsSinceLastExam)"
-            }
-        }
-    } else {
-        when (member.level) {
-            levels[0] -> {
-                return null
-            }
-            levels[4] -> { // gelb
-                if (unitsSinceLastExam < 10)
-                    return "Zu wenig Trainingseinheiten ($unitsSinceLastExam)"
-                if (monthsSinceLastExam < 3)
-                    return "Zu wenig Zeit zur letzten Prüfung vergangen ($monthsSinceLastExam monate)"
-                if (memberAge < 10)
-                    return "Zu jung ($memberAge Jahre)"
-            }
-            levels[6] -> { // orange
-                if (unitsSinceLastExam < 20)
-                    return "Zu wenig Trainingseinheiten ($unitsSinceLastExam)"
-                if (monthsSinceLastExam < 4)
-                    return "Zu wenig Zeit zur letzten Prüfung vergangen ($monthsSinceLastExam monate)"
-                if (memberAge < 9)
-                    return "Zu jung ($memberAge Jahre)"
-            }
-            levels[8] -> { // grün
-                if (unitsSinceLastExam < 30)
-                    return "Zu wenig Trainingseinheiten ($unitsSinceLastExam)"
-                if (monthsSinceLastExam < 5)
-                    return "Zu wenig Zeit zur letzten Prüfung vergangen ($monthsSinceLastExam monate)"
-                if (memberAge < 11)
-                    return "Zu jung ($memberAge Jahre)"
-            }
-            levels[10] -> { // blau
-                if (unitsSinceLastExam < 30)
-                    return "Zu wenig Trainingseinheiten ($unitsSinceLastExam)"
-                if (monthsSinceLastExam < 5)
-                    return "Zu wenig Zeit zur letzten Prüfung vergangen ($monthsSinceLastExam monate)"
-                if (memberAge < 13)
-                    return "Zu jung ($memberAge Jahre)"
-            }
-            levels[11] -> { // violett
-                if (unitsSinceLastExam < 45)
-                    return "Zu wenig Trainingseinheiten ($unitsSinceLastExam)"
-                if (monthsSinceLastExam < 8)
-                    return "Zu wenig Zeit zur letzten Prüfung vergangen ($monthsSinceLastExam monate)"
-                if (memberAge < 14)
-                    return "Zu jung ($memberAge Jahre)"
-            }
-            levels[12] -> {
-                if (unitsSinceLastExam < 45)
-                    return "Zu wenig Trainingseinheiten ($unitsSinceLastExam)"
-                if (monthsSinceLastExam < 8)
-                    return "Zu wenig Zeit zur letzten Prüfung vergangen ($monthsSinceLastExam monate)"
-                if (memberAge < 15)
-                    return "Zu jung ($memberAge Jahre)"
-            }
-            levels[13] -> {
-                if (unitsSinceLastExam < 45)
-                    return "Zu wenig Trainingseinheiten ($unitsSinceLastExam)"
-                if (monthsSinceLastExam < 8)
-                    return "Zu wenig Zeit zur letzten Prüfung vergangen ($monthsSinceLastExam monate)"
-                if (memberAge < 16)
-                    return "Zu jung ($memberAge Jahre)"
-            }
-            levels[14] -> {
-                if (unitsSinceLastExam < 60)
-                    return "Zu wenig Trainingseinheiten ($unitsSinceLastExam)"
-                if (monthsSinceLastExam < 9)
-                    return "Zu wenig Zeit zur letzten Prüfung vergangen ($monthsSinceLastExam monate)"
-                if (memberAge < 17)
-                    return "Zu jung ($memberAge Jahre)"
-            }
-            levels[15] -> {
-                if (unitsSinceLastExam < 60)
-                    return "Zu wenig Trainingseinheiten ($unitsSinceLastExam)"
-                if (monthsSinceLastExam < 10)
-                    return "Zu wenig Zeit zur letzten Prüfung vergangen ($monthsSinceLastExam monate)"
-                if (memberAge < 18)
-                    return "Zu jung ($memberAge Jahre)"
-            }
-        }
+    for (level in levels) {
+        if (unitsSinceLastExam < level.value.units)
+            return "Zu wenig Trainingseinheiten ($unitsSinceLastExam)"
+        if (monthsSinceLastExam < level.value.months)
+            return "Zu wenig Zeit zur letzten Prüfung vergange  n ($monthsSinceLastExam monate)"
+        if (memberAge < level.value.age)
+            return "Zu jung ($memberAge Jahre)"
     }
-
     return null
 }
