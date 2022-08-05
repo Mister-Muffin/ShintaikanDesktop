@@ -33,7 +33,6 @@ import models.loadStudents
 import org.jetbrains.exposed.sql.Database
 import pages.*
 import java.nio.file.Path
-import java.util.*
 import kotlin.io.path.copyTo
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createDirectory
@@ -149,7 +148,7 @@ fun main() {
             ) {
                 when (screenID) {
                     0 -> {
-                        startPage() { screenID = it }
+                        startPage { screenID = it }
                     }
                     1 -> {
                         trainerSelector { id, selectedTrainer -> screenID = id; activeTrainer = selectedTrainer }

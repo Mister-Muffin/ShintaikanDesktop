@@ -77,12 +77,12 @@ fun datenHolenWindow(onDismiss: () -> Unit) {
 }
 
 fun dumpCurrentDatabase() {
-    val writer = newBufferedWriter(Paths.get("${configFilePath}backups/backup-${LocalTime.now()}.csv"));
+    val writer = newBufferedWriter(Paths.get("${configFilePath}backups/backup-${LocalTime.now()}.csv"))
 
     val csvPrinter = CSVPrinter(
         writer, CSVFormat.DEFAULT
         //.withHeader(StudentTable.columns)
-    );
+    )
 
     val members = loadFullMemberTable()
     val messages = loadMessages()
@@ -105,7 +105,7 @@ fun dumpCurrentDatabase() {
             member.sticker_recieved,
             member.is_active,
             member.trainer_units
-        );
+        )
 
     }
     //csvPrinter.printRecords(members)
@@ -129,8 +129,8 @@ fun dumpCurrentDatabase() {
         )
     }
     //csvPrinter.printRecords(teilnahme)
-    csvPrinter.flush();
-    csvPrinter.close();
+    csvPrinter.flush()
+    csvPrinter.close()
 }
 
 private const val csvPath = "/home/julian/Entwicklung/transferHauseDojo.CSV"

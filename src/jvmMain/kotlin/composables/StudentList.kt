@@ -13,7 +13,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import models.Student
 
-class StudentList() {
+class StudentList {
     companion object {
         val textWidth: Dp = 300.dp
     }
