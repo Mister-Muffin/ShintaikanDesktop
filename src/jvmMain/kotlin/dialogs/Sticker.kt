@@ -128,12 +128,14 @@ fun stickerDialog(
             }
             Button(enabled = buttonEnabled(), modifier = Modifier.fillMaxWidth(.5f), onClick = {
                 mutableStudents.forEach { s ->
+                    val nextStickerRecieved = stickerUnits.next(s.sticker_recieved).first
+                    val nextStickerRecievedBy = "$nextStickerRecieved:${activeTrainer.id}"
                     if (s.stickerRecieved) {
                         editStudentSticker(
                             s.copy(
-                                sticker_recieved_by = activeTrainer.id,
+                                sticker_recieved_by = nextStickerRecievedBy,
                                 //sticker_animal = stickerUnitNames[stickerUnits.indexOf(s.sticker_recieved) + 1],
-                                sticker_recieved = stickerUnits.next(s.sticker_recieved).first
+                                sticker_recieved = nextStickerRecieved
                             )
                         )
 
@@ -141,10 +143,10 @@ fun stickerDialog(
                     if (s.sticker_recieved != stickerUnits.keys.toList()[stickerUnits.keys.size - 1]) {
                         mutableStudents[mutableStudents.indexOf(s)] =
                             s.copy(
-                                sticker_recieved_by = activeTrainer.id,
+                                sticker_recieved_by = nextStickerRecievedBy,
                                 radioClicked = false,
                                 //sticker_animal = stickerUnitNames[stickerUnits.indexOf(s.sticker_recieved) + 1],
-                                sticker_recieved = stickerUnits.next(s.sticker_recieved).first
+                                sticker_recieved = nextStickerRecieved
                             )
                     }
 

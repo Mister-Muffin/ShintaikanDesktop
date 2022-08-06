@@ -23,7 +23,7 @@ object StudentTable : Table("main") {
     val sticker_animal = text("sticker_animal")
     val sticker_recieved = integer("sticker_recieved")
     val sticker_date_recieved = date("sticker_date_recieved")
-    val sticker_recieved_by = integer("sticker_recieved_by")
+    val sticker_recieved_by = text("sticker_recieved_by")
     val is_active = bool("is_active")
     val trainer_units = integer("trainer_units")
 }
@@ -41,12 +41,17 @@ data class Student(
     val sticker_animal: String?,
     val sticker_recieved: Int,
     val sticker_date_recieved: LocalDate?,
-    val sticker_recieved_by: Int?,
+    val sticker_recieved_by: String?,
     val is_active: Boolean,
     val trainer_units: Int,
     val radioClicked: Boolean = false, // for sticker dialog (all radio buttons must be clicked before button activated)
     val stickerRecieved: Boolean = false, // for sticker dialog, if radio button is checked or not
     val sticker_show_again: Boolean = false, // for sticker dialog, if student is still missing stickers and the dialog should open again with this student
+)
+
+data class StudentWithIdAndString(
+    val id: Int,
+    val sticker_recieved_by: String?,
 )
 
 data class Trainer(
@@ -91,7 +96,7 @@ fun loadFullMemberTable(): List<Student> {
                 prename = it[StudentTable.prename],
                 group = it[StudentTable.group],
                 level = it[StudentTable.level],
-                total = if (it[StudentTable.total] == null) 0 else it[StudentTable.total],
+                total = it[StudentTable.total],
                 birthday = it[StudentTable.birthday],
                 date_last_exam = it[StudentTable.date_last_exam],
                 is_trainer = it[StudentTable.is_trainer],
@@ -139,12 +144,27 @@ fun increaseTrainerUnitCount(trainer: Trainer) {
     }
 }
 
+@Suppress("RemoveRedundantQualifierName")
 fun editStudentSticker(student: Student) {
+    val currentStickerRecievedBy = transaction {
+        StudentTable
+            .slice(StudentTable.id, StudentTable.sticker_recieved_by)
+            .select(where = StudentTable.id eq student.id).map {
+                StudentWithIdAndString(
+                    id = it[StudentTable.id],
+                    sticker_recieved_by = it[StudentTable.sticker_recieved_by]
+                )
+            }
+    }[0]
     return transaction {
         StudentTable.update(where = { StudentTable.id eq student.id }) {
             it[StudentTable.sticker_recieved] = student.sticker_recieved
-            it[StudentTable.sticker_recieved_by] = student.sticker_recieved_by!!
-            it[StudentTable.sticker_animal] = student.sticker_animal!!
+            it[StudentTable.sticker_recieved_by] =
+                if (currentStickerRecievedBy.sticker_recieved_by.isNullOrEmpty())
+                    "${student.sticker_recieved_by},"
+                else
+                    "${currentStickerRecievedBy.sticker_recieved_by}${student.sticker_recieved_by},"
+            //it[StudentTable.sticker_animal] = student.sticker_animal!!
             it[StudentTable.sticker_date_recieved] = LocalDate.now()
         }
     }
