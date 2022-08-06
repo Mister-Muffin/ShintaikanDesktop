@@ -85,7 +85,7 @@ fun main() {
         var showExamsDialog by remember { mutableStateOf(false) }
         var showManageTrainerDialog by remember { mutableStateOf(false) }
         var showDeleteMessageDialog by remember { mutableStateOf(false) }
-        var showMemberExportDialog by remember { mutableStateOf(true) }
+        var showMemberExportDialog by remember { mutableStateOf(false) }
 
         Window(
             onCloseRequest = ::exitApplication,

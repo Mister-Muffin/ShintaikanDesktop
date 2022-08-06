@@ -35,7 +35,7 @@ fun trainerSelector(changeScreen: (id: Int, activeTrainer: Trainer) -> Unit) {
             LazyVerticalGrid(
                 cells = GridCells.Fixed(4)
             ) {
-                items(trainers) { trainer ->
+                items(trainers.sortedBy { it.prename }) { trainer ->
                     var trainerNameExtended = trainer.prename
                     var trainerNameWasExtended = false
                     trainers.forEach { t ->

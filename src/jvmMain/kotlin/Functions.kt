@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 import models.Student
 import models.Teilnahme
 import java.time.LocalDate
