@@ -78,23 +78,24 @@ fun stickerDialog(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         item {
-                            val nextStickerName = stickerUnits.next(student.sticker_recieved).second
-                            if (
-                                student.sticker_recieved == stickerUnits.keys.toList()[stickerUnits.keys.size - 2] ||
-                                total < stickerUnits.next(stickerUnits.next(student.sticker_recieved).first).first
-                            ) {
-                                Text(
-                                    "${student.prename} ${student.surname}, hat " +
-                                            "$total Trainingseinheiten und bekommt einen " +
-                                            "$nextStickerName Aufkleber",
-                                    modifier = Modifier.padding(8.dp).width(300.dp)
-                                )
-                            } else {
-                                Text(
-                                    "${student.prename} ${student.surname}, hat $total Trainingseinheiten und bekommt aber immer noch einen " +
-                                            "$nextStickerName Aufkleber",
-                                    modifier = Modifier.padding(8.dp).width(300.dp)
-                                )
+                            if (student.sticker_recieved != stickerUnits.keys.last()) {
+                                if (
+                                    student.sticker_recieved == stickerUnits.keys.toList()[stickerUnits.keys.size - 2] ||
+                                    total < stickerUnits.next(stickerUnits.next(student.sticker_recieved).first).first
+                                ) {
+                                    Text(
+                                        "${student.prename} ${student.surname}, hat " +
+                                                "$total Trainingseinheiten und bekommt einen " +
+                                                "${stickerUnits.next(student.sticker_recieved).second} Aufkleber",
+                                        modifier = Modifier.padding(8.dp).width(300.dp)
+                                    )
+                                } else {
+                                    Text(
+                                        "${student.prename} ${student.surname}, hat $total Trainingseinheiten und bekommt aber immer noch einen " +
+                                                "${stickerUnits.next(student.sticker_recieved).second} Aufkleber",
+                                        modifier = Modifier.padding(8.dp).width(300.dp)
+                                    )
+                                }
                             }
                         }
                         item {
