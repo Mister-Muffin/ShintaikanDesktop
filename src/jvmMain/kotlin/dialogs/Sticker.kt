@@ -21,6 +21,7 @@ import models.editStudentSticker
 import models.loadTeilnahme
 import next
 import stickerUnits
+import java.time.LocalDate
 
 @Composable
 fun stickerDialog(
@@ -130,7 +131,7 @@ fun stickerDialog(
             Button(enabled = buttonEnabled(), modifier = Modifier.fillMaxWidth(.5f), onClick = {
                 mutableStudents.forEach { s ->
                     val nextStickerRecieved = stickerUnits.next(s.sticker_recieved).first
-                    val nextStickerRecievedBy = "$nextStickerRecieved:${activeTrainer.id}"
+                    val nextStickerRecievedBy = "$nextStickerRecieved:${activeTrainer.id}:${LocalDate.now()}"
                     if (s.stickerRecieved) {
                         editStudentSticker(
                             s.copy(
