@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
@@ -22,6 +23,7 @@ import countId
 import getTotalTrainingSessions
 import models.Student
 import models.Teilnahme
+import models.loadStudents
 import models.loadTeilnahme
 import next
 import stickerUnits
@@ -95,29 +97,45 @@ fun examsDialog(students: List<Student>, onDismiss: () -> Unit) {
 @Composable
 private fun studentStats(student: Student) { //datum letzte prüfung | wie lange her y m d | einheiten seit l prüf | einheiten gesamt
     val teilnahme = loadTeilnahme()
+    val students = loadStudents()
     return Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
             val nameString: String = student.prename + " " + student.surname // Join pre- and surname
 
             Text(
                 "$nameString${if (student.is_trainer) " (Trainer)" else ""}", // This adds "(Trainer)" to the name string if the member is also a trainer
-                style = MaterialTheme.typography.h6
+                style = MaterialTheme.typography.h6,
+                textDecoration = TextDecoration.Underline,
+                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
             ) // Name of the member
         }
-        Divider(modifier = Modifier.padding(vertical = 16.dp))
+        //Divider(modifier = Modifier.padding(vertical = 16.dp))
 
         if (student.birthday != null) // TODO: Remove this null-check when database is complete
-            Text("Hat Geburtstag am: ${DateTimeFormatter.ofPattern("dd.MM.yyyy").format(student.birthday)}")
+            Text(
+                "Hat am: ${
+                    DateTimeFormatter.ofPattern("dd.MM.yyyy").format(student.birthday)
+                } Geburtstag, ist ${Period.between(student.birthday, LocalDate.now()).years} Jahre alt"
+            )
         else
             Text("Kein Geburtsdatum angegeben")
 
         // Show member's group and replace "Benjamini" with "Karamini" if so
         Text("Gruppe: ${if (student.group == "Benjamini") "Karamini" else student.group}")
 
+        Text("Grad: ${student.level}")
+
+        textTotalTrainingSessions(student, teilnahme)
+
+        Divider()
+
         // Sollte die Person bereits eine Prüfung gemacht haben,
         // zeige das Datum der letzten Prüfung und bau den string für die Differenz zu diesem Datum zusammen
         if (student.date_last_exam != null) {
             textLastExam(student)
+            Text(
+                "Einheiten seit der letzten Prüfung: ${countId(student.id, teilnahme, student.date_last_exam)}"
+            )
 
             // Zeitraum zwischen der letzten Prüfung und dem heutigen Datum
             val period = Period.between(student.date_last_exam, LocalDate.now())
@@ -150,26 +168,36 @@ private fun studentStats(student: Student) { //datum letzte prüfung | wie lange
             //</editor-fold>
 
             Text(
-                "Letzte Prüfung vor: ${if (years.isNotEmpty()) "$years, " else ""}${if (months.isNotEmpty()) months else ""}${if (days.isNotEmpty() && months.isNotEmpty()) "und" else ""}${if (days.isNotEmpty()) days else ""}"
+                "Letzte Prüfung vor: ${if (years.isNotEmpty()) "$years, " else ""}${if (months.isNotEmpty()) months else ""}${if (days.isNotEmpty() && months.isNotEmpty()) " und " else ""}${if (days.isNotEmpty()) days else ""}"
             )
 
-            Text(
-                "Einheiten seit der letzten Prüfung: ${countId(student.id, teilnahme, student.date_last_exam)}"
-            )
         } else {
             Text("Noch keine Prüfung")
         }
 
-        textTotalTrainingSessions(student, teilnahme)
+        if (student.date_last_exam != null) Text(isReadyForExam(student, teilnahme).first)
 
         if (student.trainer_units != 0) Text("Hat ${student.trainer_units} mal Training gegeben")
+
+        Divider()
 
         val activeStickerCount = student.sticker_recieved
         if (student.sticker_recieved == 0) {
             Text("Hat noch keinen Sticker bekommen")
         } else {
-            val activeStickerName = stickerUnits[activeStickerCount]
-            Text("Aktueller Sticker: $activeStickerName($activeStickerCount)")
+            val stickerHistoryList = student.sticker_recieved_by.toString().trim(',').split(",")
+            stickerHistoryList.forEach {
+                val singleStats = it.split(":")
+                val stickerUnit: Int = singleStats[0].toInt()
+                val stickerName = stickerUnits[stickerUnit]
+                val stickerBy: Int = singleStats[1].toInt()
+                val stickerByTrainer = students.filter { f -> stickerBy == f.id }[0]
+                val stickerByTrainerName = "${stickerByTrainer.prename} ${stickerByTrainer.surname}"
+                val stickerDate = singleStats[2]
+                val stickerDateFormatted = LocalDate.parse(stickerDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                    .format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
+                Text("Sticker $stickerName ($stickerUnit) bekommen von $stickerByTrainerName am $stickerDateFormatted")
+            }
         }
 
         if (student.sticker_recieved == stickerUnits.keys.last())
@@ -177,7 +205,7 @@ private fun studentStats(student: Student) { //datum letzte prüfung | wie lange
         else {
             val nextStickerCount = stickerUnits.next(activeStickerCount).first
             val nextStickerName = stickerUnits[nextStickerCount]
-            Text("Nächster Sticker: $nextStickerName($nextStickerCount)")
+            Text("Nächster Sticker: $nextStickerName ($nextStickerCount)")
         }
     }
 }

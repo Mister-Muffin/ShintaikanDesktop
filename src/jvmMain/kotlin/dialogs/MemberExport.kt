@@ -64,12 +64,12 @@ fun memberExportDialog(
                     }) { member ->
                         val isReadyString = isReadyForExam(member, teilnahme)
                         Row {
-                            nameText(member, isReadyString)
+                            nameText(member, isReadyString.second)
                             oldLevel(member)
                             newLevel(member)
                             unitsSinceLastExam(member, teilnahme)
                             periodLastExam(member)
-                            reasonText(isReadyString)
+                            reasonText(isReadyString.second)
                         }
                     }
                 }
@@ -134,37 +134,73 @@ private fun reasonText(isReadyString: String?) {
 //</editor-fold>
 
 /**
- * @return null if the given member can make the next exam OR:
+ * @return Pair<String, String?>
+ *
+ * First part contains a text with all (three) requirememnts, satisfied or not,
+ * with according description
+ *
+ * Secord part is null if the given member can make the next exam OR:
  *
  * a string with the reason why the given member can't make the next exam
  *
+ * First part is longer, like a detailed description, second part is shorter, for use in a one-liner
+ *
  * @param member member to check
+ * @see studentStats
+ * @see memberExportDialog
  */
-private fun isReadyForExam(member: Student, teilnahme: List<Teilnahme>): String? {
+internal fun isReadyForExam(member: Student, teilnahme: List<Teilnahme>): Pair<String, String?> {
+    val dateLastExam: LocalDate? = getLastExamOrFirstTrainingDate(member, teilnahme)
+
+    val unitsSinceLastExam = countId(member.id, teilnahme, dateLastExam!!)
+    val monthsSinceLastExam = Period.between(dateLastExam, LocalDate.now()).toTotalMonths()
+    val memberAge = Period.between(member.birthday, LocalDate.now().plusMonths(2)).years
+
+    var returnString = ""
+
+    for (level in levels) {
+        returnString = ""
+
+        if (unitsSinceLastExam < level.value.units)
+            returnString += "❌ Zu wenig Trainingseinheiten ($unitsSinceLastExam)" // TODO:
+        else returnString += "✔️ Genug Trainingseinheiten"
+
+        if (monthsSinceLastExam < level.value.months)
+            returnString += "\n❌ Zu wenig Zeit seit der letzten Prüfung vergangen (mind. $monthsSinceLastExam Monate) noch ${level.value.months - monthsSinceLastExam} ${if (level.value.months - monthsSinceLastExam == 1.toLong()) "Monat" else "Monate"}"
+        else returnString += "\n✔️ Genug Zeit seit der letzten Prüfung"
+
+        if (memberAge < level.value.age)
+            returnString += "\n❌ Zu jung ($memberAge Jahre)" // TODO:
+        else returnString += "\n✔️ Alt genug"
+
+        // stop the loop and return the pair when at least on condition is not satisfied (❌)
+        // TODO: Implement one-line reason (returns empty string)!
+        if (returnString.contains('❌')) return Pair<String, String?>(returnString, "")
+    }
+    //else, if all requirements are satisfied, return null as the second part (sse JavaDoc)
+    return Pair<String, String?>(returnString, null)
+}
+
+/**
+ * @return Date from the students last exam.
+ *
+ * If the student hasn't done an exam yet, the function returns the date of the
+ * students first training sesstion.
+ *
+ * If the student wasn't in training ever, the funtion returns null
+ */
+fun getLastExamOrFirstTrainingDate(member: Student, teilnahme: List<Teilnahme>): LocalDate? {
     var dateLastExam: LocalDate?
     if (member.date_last_exam == null) { // set date last exam to first traing unit
         val totalTrainingSessions = getTotalTrainingSessions(member, teilnahme)
         dateLastExam = if (totalTrainingSessions == 0) null else getFirstDate(member.id, teilnahme)
         if (dateLastExam == null) {
-            return "Der Schüler war noch nie im Training"
+            return null // "Der Schüler war noch nie im Training."
         } else {
             dateLastExam = getFirstDate(member.id, teilnahme)
         }
     } else {
         dateLastExam = member.date_last_exam
     }
-
-    val unitsSinceLastExam = countId(member.id, teilnahme, dateLastExam!!)
-    val monthsSinceLastExam = Period.between(dateLastExam, LocalDate.now()).toTotalMonths()
-    val memberAge = Period.between(member.birthday, LocalDate.now().plusMonths(2)).years
-
-    for (level in levels) {
-        if (unitsSinceLastExam < level.value.units)
-            return "Zu wenig Trainingseinheiten ($unitsSinceLastExam)"
-        if (monthsSinceLastExam < level.value.months)
-            return "Zu wenig Zeit zur letzten Prüfung vergange  n ($monthsSinceLastExam monate)"
-        if (memberAge < level.value.age)
-            return "Zu jung ($memberAge Jahre)"
-    }
-    return null
+    return dateLastExam
 }
