@@ -252,12 +252,41 @@ private fun customFilter(filterOptions: Array<String>, checked: MutableList<Stri
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
                         checked = checked.contains(option),
-                        colors = CheckboxDefaults.colors(checkedColor = Color.Gray),
-                        onCheckedChange = { handleChecked() })
+                        colors = getCheckBoxColor(option),
+                        onCheckedChange = { handleChecked() },
+                    )
                     Text(text = if (option == "Benjamini") "Karamini" else option)
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun getCheckBoxColor(option: String): CheckboxColors {
+    when (option) {
+        "Weiss" -> {
+            return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.WHITE.color, checkmarkColor = Color.Black)
+        }
+        "Gelb" -> {
+            return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.YELLOW.color, checkmarkColor = Color.Black)
+        }
+        "Orange" -> {
+            return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.ORANGE.color)
+        }
+        "Grün" -> {
+            return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.GREEN.color)
+        }
+        "Blau" -> {
+            return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.BLUE.color)
+        }
+        "Violett" -> {
+            return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.PURPLE.color)
+        }
+        "Braun" -> {
+            return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.BROWN.color)
+        }
+        else -> return CheckboxDefaults.colors(MaterialTheme.colors.primary)
     }
 }
 
