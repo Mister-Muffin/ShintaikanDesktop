@@ -176,7 +176,7 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Checkbox(
                                 checked = handleAsExam,
-                                colors = CheckboxDefaults.colors(checkedColor = Color.Gray),
+                                colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary),
                                 onCheckedChange = {
                                     // just remove the tick if it was checked without password
                                     if (handleAsExam) handleAsExam = false
@@ -203,7 +203,6 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
 
                     Button( // eingabe bestätigen
                         enabled = newStudents.isNotEmpty(),
-                        colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
                         modifier = Modifier.fillMaxWidth().height(60.dp),
                         onClick = { submit(handleAsExam) }) {
                         Text(

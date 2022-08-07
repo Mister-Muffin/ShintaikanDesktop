@@ -130,7 +130,7 @@ fun main() {
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
                     ),
-                    body1 = TextStyle(fontSize = 24.sp) // All 'Text' use this as default as it seems
+                    body1 = TextStyle(fontSize = 18.sp) // All 'Text' use this as default as it seems
                 ),
                 shapes = Shapes(RoundedCornerShape(0.dp)),
                 colors = lightColors(

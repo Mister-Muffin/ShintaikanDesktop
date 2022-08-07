@@ -10,7 +10,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import models.Trainer
 import models.loadTrainers
@@ -26,7 +25,6 @@ fun trainerSelector(changeScreen: (id: Int, activeTrainer: Trainer) -> Unit) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceEvenly,
-
             modifier = Modifier.fillMaxSize(),
         ) {
             var selectedTrainer: Trainer? by remember { mutableStateOf(null) }
@@ -59,7 +57,7 @@ fun trainerSelector(changeScreen: (id: Int, activeTrainer: Trainer) -> Unit) {
                         RadioButton(
                             selectedTrainer == trainer,
                             onClick = null,
-                            colors = RadioButtonDefaults.colors(selectedColor = Color.Gray),
+                            colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colors.primary),
                             modifier = Modifier.size(32.dp)
                         )
                         Text(trainerNameExtended)
@@ -67,9 +65,7 @@ fun trainerSelector(changeScreen: (id: Int, activeTrainer: Trainer) -> Unit) {
                 }
             }
             Button(
-                enabled = selectedTrainer != null,
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
-                modifier = Modifier.width(350.dp).height(60.dp),
+                enabled = selectedTrainer != null, modifier = Modifier.width(350.dp).height(60.dp),
                 onClick = { changeScreen(2, selectedTrainer!!) }
             ) {
                 Text("Weiter")

@@ -60,9 +60,16 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
         Divider(
             modifier = Modifier.padding(vertical = 16.dp)
         )
-        Box {
-            buttonRow(changeScreen)
+
+        Row {
+            Button(
+                modifier = Modifier.width(250.dp),
+                onClick = { changeScreen(1) }
+            ) {
+                Text(text = "Teilnehmer eintragen")
+            }
         }
+        
         Row(
             verticalAlignment = Alignment.Top,
             modifier = Modifier.fillMaxSize().padding(top = 24.dp)
@@ -195,28 +202,6 @@ private fun message(message: Message) {
     Row {
         Text(text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(message.dateCreated).toString() + ": ")
         Text(text = message.message)
-    }
-}
-
-
-@Composable
-private fun buttonRow(changeScreen: (id: Int) -> Unit) {
-
-    @Composable
-    fun rowButton(text: String, onClick: () -> Unit) {
-        Button(
-            //colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
-            modifier = Modifier.width(250.dp),
-            onClick = onClick
-        ) {
-            Text(text)
-        }
-    }
-
-    Row {
-        rowButton(
-            text = "Teilnehmer eintragen",
-            onClick = { changeScreen(1) })
     }
 }
 
