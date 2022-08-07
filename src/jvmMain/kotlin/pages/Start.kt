@@ -10,7 +10,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -206,7 +205,7 @@ private fun buttonRow(changeScreen: (id: Int) -> Unit) {
     @Composable
     fun rowButton(text: String, onClick: () -> Unit) {
         Button(
-            colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
+            //colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
             modifier = Modifier.width(250.dp),
             onClick = onClick
         ) {

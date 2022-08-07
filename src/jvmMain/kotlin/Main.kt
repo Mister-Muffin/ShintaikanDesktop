@@ -1,7 +1,6 @@
 import androidx.compose.foundation.clickable
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.Typography
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -120,18 +119,6 @@ fun main() {
                 }
             }
 
-            //region Dialog
-            if (showManageTrainerDialog) {
-                manageTrainerDialog(students) { showManageTrainerDialog = false }
-            }
-            if (showExamsDialog) {
-                examsDialog(students, onDismiss = { showExamsDialog = false })
-            }
-            if (showDatenHolenDialog) datenHolenWindow { showDatenHolenDialog = false }
-            if (showDeleteMessageDialog) deleteDialog(messages) { showDeleteMessageDialog = false }
-            if (showMemberExportDialog) memberExportDialog { showMemberExportDialog = false }
-            //endregion
-
             MaterialTheme(
                 typography = Typography(
                     h1 = TextStyle(
@@ -144,8 +131,23 @@ fun main() {
                         fontWeight = FontWeight.Bold,
                     ),
                     body1 = TextStyle(fontSize = 24.sp) // All 'Text' use this as default as it seems
+                ),
+                shapes = Shapes(RoundedCornerShape(0.dp)),
+                colors = lightColors(
+                    primary = Color(0xFF212121)
                 )
             ) {
+                //region Dialog
+                if (showManageTrainerDialog) {
+                    manageTrainerDialog(students) { showManageTrainerDialog = false }
+                }
+                if (showExamsDialog) {
+                    examsDialog(students, onDismiss = { showExamsDialog = false })
+                }
+                if (showDatenHolenDialog) datenHolenWindow { showDatenHolenDialog = false }
+                if (showDeleteMessageDialog) deleteDialog(messages) { showDeleteMessageDialog = false }
+                if (showMemberExportDialog) memberExportDialog { showMemberExportDialog = false }
+                //endregion
                 when (screenID) {
                     0 -> {
                         startPage { screenID = it }
