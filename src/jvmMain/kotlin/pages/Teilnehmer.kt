@@ -28,6 +28,8 @@ import next
 import stickerUnits
 import java.util.*
 
+private val farben = arrayOf("Weiss", "Gelb", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
+
 @Composable
 fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeScreen: (id: Int) -> Unit) {
 
@@ -44,7 +46,6 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
 
     val teilnahme = loadTeilnahme()
 
-    val farben = arrayOf("Weiss", "Gelb", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
     val checkedColors = remember { mutableStateListOf<String>() }
 
     val groups = arrayOf("Benjamini", "Kinder Karate", "Jugend Karate", "Karate")
@@ -265,25 +266,25 @@ private fun customFilter(filterOptions: Array<String>, checked: MutableList<Stri
 @Composable
 private fun getCheckBoxColor(option: String): CheckboxColors {
     when (option) {
-        "Weiss" -> {
+        farben[0] -> {
             return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.WHITE.color, checkmarkColor = Color.Black)
         }
-        "Gelb" -> {
+        farben[1] -> {
             return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.YELLOW.color, checkmarkColor = Color.Black)
         }
-        "Orange" -> {
+        farben[2] -> {
             return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.ORANGE.color)
         }
-        "Grün" -> {
+        farben[3] -> {
             return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.GREEN.color)
         }
-        "Blau" -> {
+        farben[4] -> {
             return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.BLUE.color)
         }
-        "Violett" -> {
+        farben[5] -> {
             return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.PURPLE.color)
         }
-        "Braun" -> {
+        farben[6] -> {
             return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.BROWN.color)
         }
         else -> return CheckboxDefaults.colors(MaterialTheme.colors.primary)
