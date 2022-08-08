@@ -1,22 +1,25 @@
 package pages
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.WindowPosition
-import androidx.compose.ui.window.rememberDialogState
 import models.*
 import java.time.LocalDate
 import java.time.Period
@@ -38,23 +41,12 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
             allMessages.add(message)
         }
     }
-    val showDeleteMessageDialog = remember { mutableStateOf(false) }
 
     val birthdays = remember { loadBirthdays(students) }
 
     val newMessage = remember { mutableStateOf("") }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
-        if (showDeleteMessageDialog.value) deleteDialog(
-            m = allMessages,
-            onDismiss = {
-                showDeleteMessageDialog.value = false
-                allMessages.clear()
-                for (message in loadMessages()) {
-                    allMessages.add(message)
-                }
-            })
-
 
         Text("Willkommen", style = MaterialTheme.typography.h1)
         Divider(
@@ -124,25 +116,20 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
                         },
                         modifier = Modifier.fillMaxWidth(0.8F),
                         trailingIcon = {
-                            Row(modifier = Modifier.padding(end = 4.dp)) {
-                                IconButton(onClick = {
-                                    val newMessageObj = Message(-1, newMessage.value, "", LocalDate.now())
-                                    val id = addMessage(newMessageObj)
-                                    allMessages.add(
-                                        Message(
-                                            id = id,
-                                            message = newMessage.value,
-                                            short = "",
-                                            newMessageObj.dateCreated
-                                        )
+                            IconButton(onClick = {
+                                val newMessageObj = Message(-1, newMessage.value, "", LocalDate.now())
+                                val id = addMessage(newMessageObj)
+                                allMessages.add(
+                                    Message(
+                                        id = id,
+                                        message = newMessage.value,
+                                        short = "",
+                                        newMessageObj.dateCreated
                                     )
-                                    newMessage.value = ""
-                                }) {
-                                    Icon(Icons.Default.Add, contentDescription = null)
-                                }
-                                IconButton(onClick = { showDeleteMessageDialog.value = true }) {
-                                    Icon(Icons.Default.Delete, contentDescription = null)
-                                }
+                                )
+                                newMessage.value = ""
+                            }) {
+                                Icon(Icons.Default.Add, contentDescription = null)
                             }
                         },
                         singleLine = true,
@@ -153,45 +140,7 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
                     modifier = Modifier.fillMaxWidth().padding(top = 24.dp, start = 24.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    items(allMessages.sortedBy { it.dateCreated }) { message(it) }
-                }
-            }
-        }
-    }
-}
-
-
-@Composable
-internal fun deleteDialog(m: List<Message> = loadMessages(), onDismiss: () -> Unit) {
-    var messages by remember { mutableStateOf(m) }
-    MaterialTheme {
-        Dialog(
-            state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 750.dp, height = 600.dp),
-            title = "Nachrichten löschen",
-            onCloseRequest = onDismiss
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text("Nachichten löschen", style = MaterialTheme.typography.subtitle1)
-                LazyColumn(horizontalAlignment = Alignment.Start) {
-                    items(messages) {
-                        Row {
-                            Text(
-                                text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(it.dateCreated)
-                                    .toString() + ": "
-                            )
-                            Text(text = it.message.slice(0 until it.message.length.coerceAtMost(30)) + "...")
-                            IconButton(modifier = Modifier.size(20.dp), onClick = {
-                                deleteMessage(it.id)
-                                messages = loadMessages()
-                            }) {
-                                Icon(Icons.Default.Delete, contentDescription = null)
-                            }
-                        }
-                        Divider()
-                    }
+                    items(allMessages.sortedBy { it.dateCreated }) { message(it) { allMessages.remove(it) } }
                 }
             }
         }
@@ -199,10 +148,21 @@ internal fun deleteDialog(m: List<Message> = loadMessages(), onDismiss: () -> Un
 }
 
 @Composable
-private fun message(message: Message) {
-    Row {
-        Text(text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(message.dateCreated).toString() + ": ")
-        Text(text = message.message)
+private fun message(message: Message, onMessageDeleted: (message: Message) -> Unit) {
+    LazyRow(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth(.9f)) {
+        item {
+            Text(text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(message.dateCreated).toString() + ": ")
+            Text(text = message.message)
+        }
+        item {
+            Icon(Icons.Default.Edit, null, modifier = Modifier.padding(2.dp).clickable {
+
+            })
+            Icon(Icons.Default.Delete, null, modifier = Modifier.padding(2.dp).clickable {
+                deleteMessage(message.id)
+                onMessageDeleted(message)
+            })
+        }
     }
 }
 

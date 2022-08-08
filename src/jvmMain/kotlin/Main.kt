@@ -27,10 +27,12 @@ import dialogs.examsDialog
 import dialogs.manageTrainerDialog
 import dialogs.memberExportDialog
 import models.Trainer
-import models.loadMessages
 import models.loadStudents
 import org.jetbrains.exposed.sql.Database
-import pages.*
+import pages.startPage
+import pages.successPage
+import pages.teilnehmerSelector
+import pages.trainerSelector
 import java.nio.file.Path
 import kotlin.io.path.copyTo
 import kotlin.io.path.createDirectories
@@ -77,14 +79,12 @@ fun main() {
         )
 
         val students = loadStudents()
-        val messages = loadMessages()
 
         val imageBitmap = remember { useResource("pelli2.jpg") { loadImageBitmap(it) } }
 
         var showDatenHolenDialog by remember { mutableStateOf(false) }
         var showExamsDialog by remember { mutableStateOf(false) }
         var showManageTrainerDialog by remember { mutableStateOf(false) }
-        var showDeleteMessageDialog by remember { mutableStateOf(false) }
         var showMemberExportDialog by remember { mutableStateOf(false) }
 
         Window(
@@ -113,10 +113,6 @@ fun main() {
                 Menu("Administration", mnemonic = 'A', enabled = screenID == 0) {
                     Item("Trainer verwalten", onClick = { showManageTrainerDialog = true })
                     Item("Daten holen", onClick = { showDatenHolenDialog = true })
-                }
-                Menu("Kurznachichten", enabled = false, mnemonic = 'K') {
-                    Item("Kurznachicht schreiben", onClick = { }, mnemonic = 'S')
-                    Item("Kurznachicht löschen", onClick = { showDeleteMessageDialog = true }, mnemonic = 'L')
                 }
                 Menu("Mitglieder", mnemonic = 'P') {
                     Item("Daten abfragen", onClick = { showExamsDialog = true })
@@ -150,7 +146,6 @@ fun main() {
                     examsDialog(students, onDismiss = { showExamsDialog = false })
                 }
                 if (showDatenHolenDialog) datenHolenWindow { showDatenHolenDialog = false }
-                if (showDeleteMessageDialog) deleteDialog(messages) { showDeleteMessageDialog = false }
                 if (showMemberExportDialog) memberExportDialog { showMemberExportDialog = false }
                 //endregion
                 when (screenID) {
