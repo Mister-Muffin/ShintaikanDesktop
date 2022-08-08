@@ -1,10 +1,13 @@
 package pages
 
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -48,6 +51,8 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
 
     val birthdays = remember { loadBirthdays(students) }
     val newMessage = remember { mutableStateOf("") }
+
+    val lazyMessagesListState = rememberLazyListState()
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
 
@@ -140,19 +145,25 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
                     "CTRL / SHIFT + Enter oder '+' zum erstellen drücken",
                     style = TextStyle.Default.copy(fontSize = 12.sp)
                 )
-
-                LazyColumn(
-                    modifier = Modifier.fillMaxWidth().padding(top = 24.dp, start = 24.dp),
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    items(allMessages.sortedBy { it.dateCreated }) {
-                        message(it, onMessagesChanged = {
-                            allMessages.clear()
-                            for (message in loadMessages()) {
-                                allMessages.add(message)
-                            }
-                        })
+                Row(modifier = Modifier.fillMaxWidth().padding(top = 24.dp, start = 24.dp)) {
+                    LazyColumn(
+                        horizontalAlignment = Alignment.Start,
+                        state = lazyMessagesListState
+                    ) {
+                        items(allMessages.sortedBy { it.dateCreated }) {
+                            message(it, onMessagesChanged = {
+                                // reload messages
+                                allMessages.clear()
+                                for (message in loadMessages()) {
+                                    allMessages.add(message)
+                                }
+                            })
+                        }
                     }
+                    VerticalScrollbar(
+                        modifier = Modifier.fillMaxHeight().requiredWidth(10.dp).offset(8.dp),
+                        adapter = rememberScrollbarAdapter(scrollState = lazyMessagesListState)
+                    )
                 }
             }
         }
