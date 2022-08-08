@@ -11,6 +11,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
@@ -24,6 +25,7 @@ import models.Teilnahme
 import models.loadStudents
 import models.loadTeilnahme
 import next
+import windowWidth
 import java.time.LocalDate
 import java.time.Period
 
@@ -33,13 +35,16 @@ fun memberExportDialog(
 ) {
     val members = loadStudents()
     val teilnahme = loadTeilnahme()
-//name | bish grad| next grad| training seit letzt brüf| dauer seit letzter prüf | warum kann keine prüfunge machen
     MaterialTheme {
 
         var searchFieldValue by remember { mutableStateOf("") }
 
         Dialog(
-            state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 900.dp, height = 600.dp),
+            state = rememberDialogState(
+                position = WindowPosition(Alignment.Center),
+                width = windowWidth,
+                height = 700.dp
+            ),
             title = "Teilnahme",
             onCloseRequest = onDismiss,
         ) {
@@ -59,6 +64,16 @@ fun memberExportDialog(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.fillMaxHeight(.9f).fillMaxWidth().padding(bottom = 8.dp)
                 ) {
+                    item {
+                        Row {
+                            Text("Name", modifier = Modifier.width(150.dp))
+                            Text("Alter Grad", modifier = Modifier.width(180.dp))
+                            Text("Neuer Grad", modifier = Modifier.width(180.dp))
+                            Text("Einh.", modifier = Modifier.width(90.dp))
+                            Text("Mon.", modifier = Modifier.width(90.dp))
+                            Text("Bereit?", modifier = Modifier.width(350.dp))
+                        }
+                    }
                     items(members.filter {
                         (it.prename + it.surname).lowercase().contains(searchFieldValue.lowercase().replace(" ", ""))
                     }) { member ->
@@ -112,7 +127,7 @@ private fun unitsSinceLastExam(member: Student, teilnahme: List<Teilnahme>) {
                 member.date_last_exam
             )
         }",
-        modifier = Modifier.width(30.dp)
+        modifier = Modifier.width(90.dp), textAlign = TextAlign.Center
     )
 }
 
@@ -120,16 +135,16 @@ private fun unitsSinceLastExam(member: Student, teilnahme: List<Teilnahme>) {
 @Composable
 private fun periodLastExam(member: Student) {
     if (member.date_last_exam == null) {
-        Text("", modifier = Modifier.width(30.dp))
+        Text("", modifier = Modifier.width(90.dp))
     } else {
         val period = Period.between(member.date_last_exam, LocalDate.now())
-        Text("${period.toTotalMonths()},${period.days}", modifier = Modifier.width(30.dp))
+        Text("${period.toTotalMonths()},${period.days}", textAlign = TextAlign.Center, modifier = Modifier.width(90.dp))
     }
 }
 
 @Composable
 private fun reasonText(isReadyString: String?) {
-    Text(isReadyString ?: "", modifier = Modifier.width(300.dp))
+    Text(isReadyString ?: "Kann nächste Prüfung machen!", modifier = Modifier.width(500.dp))
 }
 //</editor-fold>
 
@@ -150,32 +165,50 @@ private fun reasonText(isReadyString: String?) {
  * @see memberExportDialog
  */
 internal fun isReadyForExam(member: Student, teilnahme: List<Teilnahme>): Pair<String, String?> {
-    val dateLastExam: LocalDate? = getLastExamOrFirstTrainingDate(member, teilnahme)
+    val dateLastExam: LocalDate = getLastExamOrFirstTrainingDate(member, teilnahme) ?: return Pair<String, String?>(
+        "❌ Der Schüler war noch nie im Training",
+        "Der Schüler war noch nie im Training"
+    )
 
-    val unitsSinceLastExam = countId(member.id, teilnahme, dateLastExam!!)
+    val unitsSinceLastExam = countId(member.id, teilnahme, dateLastExam)
     val monthsSinceLastExam = Period.between(dateLastExam, LocalDate.now()).toTotalMonths()
     val memberAge = Period.between(member.birthday, LocalDate.now().plusMonths(2)).years
 
     var returnString = ""
+    var returnString2 = ""
 
     for (level in levels) {
+        if (level.key == levels.next(member.level).first)
+            return Pair<String, String?>(returnString, null)
+
         returnString = ""
 
-        if (unitsSinceLastExam < level.value.units)
-            returnString += "❌ Zu wenig Trainingseinheiten ($unitsSinceLastExam)" // TODO:
-        else returnString += "✔️ Genug Trainingseinheiten"
+        if (unitsSinceLastExam < level.value.units) {
+            val s = "Zu wenig Trainingseinheiten"
+            val text = "❌ $s ($unitsSinceLastExam) ${level.value.units - unitsSinceLastExam}"
+            returnString += text
+            returnString2 = s
+        } else returnString += "✔️ Genug Trainingseinheiten"
 
-        if (monthsSinceLastExam < level.value.months)
-            returnString += "\n❌ Zu wenig Zeit seit der letzten Prüfung vergangen (mind. $monthsSinceLastExam Monate) noch ${level.value.months - monthsSinceLastExam} ${if (level.value.months - monthsSinceLastExam == 1.toLong()) "Monat" else "Monate"}"
-        else returnString += "\n✔️ Genug Zeit seit der letzten Prüfung"
+        if (monthsSinceLastExam < level.value.months) {
+            val remainingMonths = level.value.months - monthsSinceLastExam
+            val s = "Zu wenig Zeit seit der letzten Prüfung vergangen"
+            val text =
+                "\n❌ $s (mind. $monthsSinceLastExam Monate) noch $remainingMonths ${if (remainingMonths == 1.toLong()) "Monat" else "Monate"}"
+            returnString += text
+            returnString2 = s
+        } else returnString += "\n✔️ Genug Zeit seit der letzten Prüfung"
 
-        if (memberAge < level.value.age)
-            returnString += "\n❌ Zu jung ($memberAge Jahre)" // TODO:
-        else returnString += "\n✔️ Alt genug"
+        if (memberAge < level.value.age) {
+            val s = "Zu jung"
+            val textAge = "\n❌ $s ($memberAge Jahre) ${level.value.age - memberAge}"
+            returnString += textAge
+            returnString2 = s
+        } else returnString += "\n✔️ Alt genug"
 
         // stop the loop and return the pair when at least on condition is not satisfied (❌)
         // TODO: Implement one-line reason (returns empty string)!
-        if (returnString.contains('❌')) return Pair<String, String?>(returnString, "")
+        if (returnString.contains('❌')) return Pair<String, String?>(returnString, returnString2)
     }
     //else, if all requirements are satisfied, return null as the second part (sse JavaDoc)
     return Pair<String, String?>(returnString, null)

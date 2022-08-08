@@ -38,7 +38,8 @@ import kotlin.io.path.createDirectory
 import kotlin.io.path.notExists
 
 const val configFileName = "config.toml"
-
+val windowWidth = 1152.dp
+val windowHeight = 864.dp
 internal val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -90,7 +91,11 @@ fun main() {
             onCloseRequest = ::exitApplication,
             title = "Teilnahme",
             icon = BitmapPainter(image = imageBitmap),
-            state = rememberWindowState(position = WindowPosition(Alignment.Center), width = 1152.dp, height = 864.dp),
+            state = rememberWindowState(
+                position = WindowPosition(Alignment.Center),
+                width = windowWidth,
+                height = windowHeight
+            ),
         ) {
             var screenID by remember { mutableStateOf(0) }
             var activeTrainer: Trainer? by remember { mutableStateOf(null) }
@@ -152,15 +157,19 @@ fun main() {
                     0 -> {
                         startPage { screenID = it }
                     }
+
                     1 -> {
                         trainerSelector { id, selectedTrainer -> screenID = id; activeTrainer = selectedTrainer }
                     }
+
                     2 -> {
                         teilnehmerSelector(students, activeTrainer!!) { screenID = it }
                     }
+
                     3 -> {
                         successPage { screenID = it }
                     }
+
                     else -> Text("Missing page", modifier = Modifier.clickable { screenID = 0 })
                 }
             }
