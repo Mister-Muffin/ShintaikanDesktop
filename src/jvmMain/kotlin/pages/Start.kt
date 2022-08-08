@@ -11,8 +11,11 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -25,6 +28,7 @@ import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun startPage(changeScreen: (id: Int) -> Unit) {
     val students = loadStudents()
@@ -113,26 +117,24 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
                                 style = TextStyle.Default.copy(fontSize = 16.sp)
                             )
                         },
-                        modifier = Modifier.fillMaxWidth(0.8F),
+                        modifier = Modifier.fillMaxWidth(0.8F).onKeyEvent { keyEvent ->
+                            // ↓ otherwise, it would submit every letter typed into a new message instantly
+                            if (keyEvent.key != Key.Enter) return@onKeyEvent false
+                            // submit
+                            if (keyEvent.type == KeyEventType.KeyDown) {
+                                submitNewMessage(newMessage, allMessages)
+                            }
+                            true
+                        },
                         trailingIcon = {
                             IconButton(onClick = {
-                                val newMessageObj = Message(-1, newMessage.value, "", LocalDate.now())
-                                val id = addMessage(newMessageObj)
-                                allMessages.add(
-                                    Message(
-                                        id = id,
-                                        message = newMessage.value,
-                                        short = "",
-                                        newMessageObj.dateCreated
-                                    )
-                                )
-                                newMessage.value = ""
+                                submitNewMessage(newMessage, allMessages)
                             }) {
                                 Icon(Icons.Default.Add, contentDescription = null)
                             }
                         },
                         singleLine = true,
-                        onValueChange = { newMessage.value = it }
+                        onValueChange = { newMessage.value = it },
                     )
                 }
                 LazyColumn(
@@ -151,6 +153,23 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
             }
         }
     }
+}
+
+private fun submitNewMessage(
+    newMessage: MutableState<String>,
+    allMessages: SnapshotStateList<Message>
+) {
+    val newMessageObj = Message(-1, newMessage.value, "", LocalDate.now())
+    val id = addMessage(newMessageObj)
+    allMessages.add(
+        Message(
+            id = id,
+            message = newMessage.value,
+            short = "",
+            newMessageObj.dateCreated
+        )
+    )
+    newMessage.value = ""
 }
 
 @Composable
