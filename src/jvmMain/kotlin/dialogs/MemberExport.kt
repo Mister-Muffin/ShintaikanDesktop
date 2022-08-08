@@ -11,8 +11,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
@@ -55,7 +57,9 @@ fun memberExportDialog(
                 TextField(
                     searchFieldValue,
                     onValueChange = { searchFieldValue = it },
-                    placeholder = { Text("Hier suchen...") },
+                    placeholder = {
+                        Text("Hier suchen...", style = TextStyle.Default.copy(fontSize = 16.sp))
+                    },
                     singleLine = true,
                     modifier = Modifier.padding(horizontal = 8.dp)
                 )

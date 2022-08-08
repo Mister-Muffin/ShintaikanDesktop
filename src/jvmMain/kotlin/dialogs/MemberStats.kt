@@ -13,8 +13,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
@@ -66,7 +68,12 @@ fun examsDialog(students: List<Student>, onDismiss: () -> Unit) {
                 OutlinedTextField(
                     value = searchFieldVal.value,
                     onValueChange = { searchFieldVal.value = it },
-                    placeholder = { Text("Suchen... (mind. 3 Zeichen)") },
+                    placeholder = {
+                        Text(
+                            "Suchen... (mind. 3 Zeichen)",
+                            style = TextStyle.Default.copy(fontSize = 16.sp)
+                        )
+                    },
                     modifier = Modifier.padding(bottom = 10.dp).width(300.dp)
                 )
                 LazyColumn {
