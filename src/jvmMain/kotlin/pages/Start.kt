@@ -10,16 +10,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.rememberDialogState
 import models.*
 import java.time.LocalDate
 import java.time.Period
@@ -43,7 +43,6 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
     }
 
     val birthdays = remember { loadBirthdays(students) }
-
     val newMessage = remember { mutableStateOf("") }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
@@ -140,7 +139,14 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
                     modifier = Modifier.fillMaxWidth().padding(top = 24.dp, start = 24.dp),
                     horizontalAlignment = Alignment.Start
                 ) {
-                    items(allMessages.sortedBy { it.dateCreated }) { message(it) { allMessages.remove(it) } }
+                    items(allMessages.sortedBy { it.dateCreated }) {
+                        message(it, onMessagesChanged = {
+                            allMessages.clear()
+                            for (message in loadMessages()) {
+                                allMessages.add(message)
+                            }
+                        })
+                    }
                 }
             }
         }
@@ -148,7 +154,11 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
 }
 
 @Composable
-private fun message(message: Message, onMessageDeleted: (message: Message) -> Unit) {
+private fun message(message: Message, onMessagesChanged: () -> Unit) {
+
+    var showEditMessageDialog by remember { mutableStateOf(false) }
+
+    if (showEditMessageDialog) editMessageDialog(message) { showEditMessageDialog = false; onMessagesChanged() }
     LazyRow(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth(.9f)) {
         item {
             Text(text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(message.dateCreated).toString() + ": ")
@@ -156,12 +166,37 @@ private fun message(message: Message, onMessageDeleted: (message: Message) -> Un
         }
         item {
             Icon(Icons.Default.Edit, null, modifier = Modifier.padding(2.dp).clickable {
-
+                showEditMessageDialog = true
             })
             Icon(Icons.Default.Delete, null, modifier = Modifier.padding(2.dp).clickable {
                 deleteMessage(message.id)
-                onMessageDeleted(message)
+                onMessagesChanged()
             })
+        }
+    }
+}
+
+@Composable
+private fun editMessageDialog(message: Message, onDismiss: () -> Unit) {
+
+    var textFieldValue by remember { mutableStateOf(message.message) }
+
+    Dialog(
+        state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 600.dp, height = 250.dp),
+        title = "Kurznachricht bearbeiten",
+        onCloseRequest = { onDismiss() }
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            OutlinedTextField(textFieldValue, onValueChange = { textFieldValue = it })
+            Button(onClick = {
+                editMessage(message.copy(message = textFieldValue))
+                onDismiss()
+            }) {
+                Text("Nachicht ändern")
+            }
         }
     }
 }
