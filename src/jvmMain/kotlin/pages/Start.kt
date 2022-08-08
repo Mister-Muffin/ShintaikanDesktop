@@ -117,14 +117,13 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
                                 style = TextStyle.Default.copy(fontSize = 16.sp)
                             )
                         },
-                        modifier = Modifier.fillMaxWidth(0.8F).onKeyEvent { keyEvent ->
-                            // ↓ otherwise, it would submit every letter typed into a new message instantly
-                            if (keyEvent.key != Key.Enter) return@onKeyEvent false
-                            // submit
-                            if (keyEvent.type == KeyEventType.KeyDown) {
+                        modifier = Modifier.fillMaxWidth(0.8F).onPreviewKeyEvent {
+                            // submit new message when either "ctrl" or "shift" is pressed
+                            // together with "Enter"
+                            if (((it.isCtrlPressed || it.isShiftPressed) && it.key == Key.Enter && it.type == KeyEventType.KeyUp)) {
                                 submitNewMessage(newMessage, allMessages)
-                            }
-                            true
+                                true
+                            } else false
                         },
                         trailingIcon = {
                             IconButton(onClick = {
@@ -133,10 +132,15 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
                                 Icon(Icons.Default.Add, contentDescription = null)
                             }
                         },
-                        singleLine = true,
+                        singleLine = false,
                         onValueChange = { newMessage.value = it },
                     )
                 }
+                Text(
+                    "CTRL / SHIFT + Enter oder '+' zum erstellen drücken",
+                    style = TextStyle.Default.copy(fontSize = 12.sp)
+                )
+
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth().padding(top = 24.dp, start = 24.dp),
                     horizontalAlignment = Alignment.Start
@@ -181,7 +185,7 @@ private fun message(message: Message, onMessagesChanged: () -> Unit) {
     LazyRow(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth(.9f)) {
         item {
             Text(text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(message.dateCreated).toString() + ": ")
-            Text(text = message.message)
+            Text(text = message.message, modifier = Modifier.fillParentMaxWidth(.6f))
         }
         item {
             Icon(Icons.Default.Edit, null, modifier = Modifier.padding(2.dp).clickable {
