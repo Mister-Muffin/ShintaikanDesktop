@@ -69,7 +69,7 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
                 Text(text = "Teilnehmer eintragen")
             }
         }
-        
+
         Row(
             verticalAlignment = Alignment.Top,
             modifier = Modifier.fillMaxSize().padding(top = 24.dp)
@@ -83,20 +83,21 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
                 }
                 items(birthdays) {
                     Row {
-                        val period = Period.between(it.birthday, LocalDate.now()).days
+                        val birthday = it.birthday!!.plusYears(((LocalDate.now().year - it.birthday.year).toLong()))
+                        val period = Period.between(LocalDate.now(), birthday).days
                         Text(
                             text = "${it.surname}, ${it.prename}: ",
                             fontWeight = FontWeight.Normal,
                         )
                         Text(
                             text = if (period == 1) {
-                                "gestern"
-                            } else if (period <= 2) {
-                                "vor $period Tagen"
-                            } else if (period == -1) {
                                 "morgen"
-                            } else if (period >= -2) {
-                                "in ${period * (-1)} Tagen"
+                            } else if (period in 1..3) {
+                                "in $period Tagen"
+                            } else if (period == -1) {
+                                "gestern"
+                            } else if (period >= -3 && period < 0) {
+                                "vor ${period * (-1)} Tagen"
                             } else {
                                 "heute \uD83E\uDD73"
                             },
@@ -211,8 +212,9 @@ private fun loadBirthdays(students: List<Student>): MutableList<Student> {
 
     for (student in students) {
         if (student.birthday == null) continue
-        if (student.birthday >= (LocalDate.now().minusDays(3)) &&
-            student.birthday <= LocalDate.now().plusDays(3)
+        val birthday = student.birthday.plusYears((LocalDate.now().year - student.birthday.year).toLong())
+        if (birthday >= (LocalDate.now().minusDays(3)) &&
+            birthday <= LocalDate.now().plusDays(3)
         ) {
             birthdays.add(student)
         }
