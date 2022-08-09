@@ -22,9 +22,9 @@ import countId
 import getFirstDate
 import getTotalTrainingSessions
 import levels
-import models.Student
+import models.Member
 import models.Teilnahme
-import models.loadStudents
+import models.loadMembers
 import models.loadTeilnahme
 import next
 import windowWidth
@@ -35,7 +35,7 @@ import java.time.Period
 fun memberExportDialog(
     onDismiss: () -> Unit
 ) {
-    val members = loadStudents()
+    val members = loadMembers()
     val teilnahme = loadTeilnahme()
     MaterialTheme {
 
@@ -103,7 +103,7 @@ fun memberExportDialog(
 
 //<editor-fold desc="'Table' fields (textComposables)">
 @Composable
-private fun nameText(member: Student, isReadyString: String?) {
+private fun nameText(member: Member, isReadyString: String?) {
     Text(
         "${member.prename} ${member.surname}",
         color = if (isReadyString == null) Color.Unspecified else Color.Red,
@@ -112,17 +112,17 @@ private fun nameText(member: Student, isReadyString: String?) {
 }
 
 @Composable
-private fun oldLevel(member: Student) {
+private fun oldLevel(member: Member) {
     Text(member.level, modifier = Modifier.width(180.dp))
 }
 
 @Composable
-private fun newLevel(member: Student) {
+private fun newLevel(member: Member) {
     Text(levels.next(member.level).first, modifier = Modifier.width(180.dp))
 }
 
 @Composable
-private fun unitsSinceLastExam(member: Student, teilnahme: List<Teilnahme>) {
+private fun unitsSinceLastExam(member: Member, teilnahme: List<Teilnahme>) {
     Text(
         if (member.date_last_exam == null) "" else "${
             countId(
@@ -137,7 +137,7 @@ private fun unitsSinceLastExam(member: Student, teilnahme: List<Teilnahme>) {
 
 
 @Composable
-private fun periodLastExam(member: Student) {
+private fun periodLastExam(member: Member) {
     if (member.date_last_exam == null) {
         Text("", modifier = Modifier.width(90.dp))
     } else {
@@ -168,7 +168,7 @@ private fun reasonText(isReadyString: String?) {
  * @see studentStats
  * @see memberExportDialog
  */
-internal fun isReadyForExam(member: Student, teilnahme: List<Teilnahme>): Pair<String, String?> {
+internal fun isReadyForExam(member: Member, teilnahme: List<Teilnahme>): Pair<String, String?> {
     val dateLastExam: LocalDate = getLastExamOrFirstTrainingDate(member, teilnahme) ?: return Pair<String, String?>(
         "❌ Der Schüler war noch nie im Training",
         "Der Schüler war noch nie im Training"
@@ -226,7 +226,7 @@ internal fun isReadyForExam(member: Student, teilnahme: List<Teilnahme>): Pair<S
  *
  * If the student wasn't in training ever, the funtion returns null
  */
-fun getLastExamOrFirstTrainingDate(member: Student, teilnahme: List<Teilnahme>): LocalDate? {
+fun getLastExamOrFirstTrainingDate(member: Member, teilnahme: List<Teilnahme>): LocalDate? {
     var dateLastExam: LocalDate?
     if (member.date_last_exam == null) { // set date last exam to first traing unit
         val totalTrainingSessions = getTotalTrainingSessions(member, teilnahme)

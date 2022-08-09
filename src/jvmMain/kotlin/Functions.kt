@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-import models.Student
+import models.Member
 import models.Teilnahme
 import java.time.LocalDate
 import kotlin.random.Random
@@ -39,8 +39,8 @@ fun getFirstDate(id: Int, teilnahme: List<Teilnahme>): LocalDate? {
  * student.total sind die Trainingseinheiten, die zu den in der neuen Datenbank vorhandenen Trainingseinheiten dazu addiert werden müssen,
  * da diese Trainingseinheiten sonst nicht berücksichtigt werden würden
  */
-fun getTotalTrainingSessions(student: Student, teilnahme: List<Teilnahme>): Int {
-    return student.total!! + countId(student.id, teilnahme)
+fun getTotalTrainingSessions(member: Member, teilnahme: List<Teilnahme>): Int {
+    return member.total!! + countId(member.id, teilnahme)
 }
 
 /**

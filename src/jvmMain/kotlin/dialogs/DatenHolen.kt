@@ -164,7 +164,7 @@ private suspend fun exMembers(text: MutableState<String>) {
             if (!exMember.isNullOrEmpty()) {
                 val exMemberName = splitName(exMember)
                 text.value = "${exMemberName.first}|${exMemberName.second}"
-                deactivateStudent(exMemberName)
+                deactivateMember(exMemberName)
             }
 
         } catch (_: ArrayIndexOutOfBoundsException) {
@@ -208,7 +208,7 @@ private suspend fun renameMembers(text: MutableState<String>) {
                 val newName1 = splitName(newName)
 
                 text.value = "${oldName1.first}|${oldName1.second}"
-                renameStudent(oldName1, newName1)
+                renameMember(oldName1, newName1)
             }
 
 
@@ -253,7 +253,7 @@ private suspend fun updateMembers(text: MutableState<String>) {
                 val namePair = splitName(name)
 
                 text.value = name
-                updateStudent(namePair, group, level, birthday)
+                updateMember(namePair, group, level, birthday)
             }
 
         } catch (_: ArrayIndexOutOfBoundsException) {

@@ -23,9 +23,9 @@ import androidx.compose.ui.window.rememberDialogState
 import composables.StudentList
 import countId
 import getTotalTrainingSessions
-import models.Student
+import models.Member
 import models.Teilnahme
-import models.loadStudents
+import models.loadMembers
 import models.loadTeilnahme
 import next
 import stickerUnits
@@ -34,20 +34,20 @@ import java.time.Period
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun examsDialog(students: List<Student>, onDismiss: () -> Unit) {
+fun examsDialog(members: List<Member>, onDismiss: () -> Unit) {
 
-    val allStudents = remember { mutableStateListOf<Student>() }
-    val searchStudents = remember { mutableStateListOf<Student>() }
+    val allMembers = remember { mutableStateListOf<Member>() }
+    val searchMembers = remember { mutableStateListOf<Member>() }
     remember {
-        for (student in students) {
-            allStudents.add(student)
-            searchStudents.add(student)
+        for (student in members) {
+            allMembers.add(student)
+            searchMembers.add(student)
         }
     }
 
     val searchFieldVal = remember { mutableStateOf("") }
 
-    val studentFilter = allStudents.filter {
+    val studentFilter = allMembers.filter {
         (it.prename + it.surname)
             .lowercase()
             .contains(searchFieldVal.value.lowercase().replace(" ", ""))
@@ -79,14 +79,14 @@ fun examsDialog(students: List<Student>, onDismiss: () -> Unit) {
                 LazyColumn {
                     if (searchFieldVal.value.length > 2) {
                         if (studentFilter.size >= 2) {
-                            items(allStudents.filter {
+                            items(allMembers.filter {
                                 (it.prename + it.surname)
                                     .lowercase()
                                     .contains(searchFieldVal.value.lowercase().replace(" ", ""))
                             }) {
                                 StudentList().studentList(
                                     it.id,
-                                    students,
+                                    members,
                                     onClick = { nameString -> searchFieldVal.value = nameString })
                             }
                         } else if (studentFilter.size == 1) {
@@ -102,15 +102,15 @@ fun examsDialog(students: List<Student>, onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun studentStats(student: Student) { //datum letzte prüfung | wie lange her y m d | einheiten seit l prüf | einheiten gesamt
+private fun studentStats(member: Member) { //datum letzte prüfung | wie lange her y m d | einheiten seit l prüf | einheiten gesamt
     val teilnahme = loadTeilnahme()
-    val students = loadStudents()
+    val students = loadMembers()
     return Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-            val nameString: String = student.prename + " " + student.surname // Join pre- and surname
+            val nameString: String = member.prename + " " + member.surname // Join pre- and surname
 
             Text(
-                "$nameString${if (student.is_trainer) " (Trainer)" else ""}", // This adds "(Trainer)" to the name string if the member is also a trainer
+                "$nameString${if (member.is_trainer) " (Trainer)" else ""}", // This adds "(Trainer)" to the name string if the member is also a trainer
                 style = MaterialTheme.typography.h6,
                 textDecoration = TextDecoration.Underline,
                 modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
@@ -118,34 +118,34 @@ private fun studentStats(student: Student) { //datum letzte prüfung | wie lange
         }
         //Divider(modifier = Modifier.padding(vertical = 16.dp))
 
-        if (student.birthday != null) // TODO: Remove this null-check when database is complete
+        if (member.birthday != null) // TODO: Remove this null-check when database is complete
             Text(
                 "Hat am: ${
-                    DateTimeFormatter.ofPattern("dd.MM.yyyy").format(student.birthday)
-                } Geburtstag, ist ${Period.between(student.birthday, LocalDate.now()).years} Jahre alt"
+                    DateTimeFormatter.ofPattern("dd.MM.yyyy").format(member.birthday)
+                } Geburtstag, ist ${Period.between(member.birthday, LocalDate.now()).years} Jahre alt"
             )
         else
             Text("Kein Geburtsdatum angegeben")
 
         // Show member's group and replace "Benjamini" with "Karamini" if so
-        Text("Gruppe: ${if (student.group == "Benjamini") "Karamini" else student.group}")
+        Text("Gruppe: ${if (member.group == "Benjamini") "Karamini" else member.group}")
 
-        Text("Grad: ${student.level}")
+        Text("Grad: ${member.level}")
 
-        textTotalTrainingSessions(student, teilnahme)
+        textTotalTrainingSessions(member, teilnahme)
 
         Divider()
 
         // Sollte die Person bereits eine Prüfung gemacht haben,
         // zeige das Datum der letzten Prüfung und bau den string für die Differenz zu diesem Datum zusammen
-        if (student.date_last_exam != null) {
-            textLastExam(student)
+        if (member.date_last_exam != null) {
+            textLastExam(member)
             Text(
-                "Einheiten seit der letzten Prüfung: ${countId(student.id, teilnahme, student.date_last_exam)}"
+                "Einheiten seit der letzten Prüfung: ${countId(member.id, teilnahme, member.date_last_exam)}"
             )
 
             // Zeitraum zwischen der letzten Prüfung und dem heutigen Datum
-            val period = Period.between(student.date_last_exam, LocalDate.now())
+            val period = Period.between(member.date_last_exam, LocalDate.now())
 
 
             //<editor-fold desc="Date constants">
@@ -182,17 +182,17 @@ private fun studentStats(student: Student) { //datum letzte prüfung | wie lange
             Text("Noch keine Prüfung")
         }
 
-        if (student.date_last_exam != null) Text(isReadyForExam(student, teilnahme).first)
+        if (member.date_last_exam != null) Text(isReadyForExam(member, teilnahme).first)
 
-        if (student.trainer_units != 0) Text("Hat ${student.trainer_units} mal Training gegeben")
+        if (member.trainer_units != 0) Text("Hat ${member.trainer_units} mal Training gegeben")
 
         Divider()
 
-        val activeStickerCount = student.sticker_recieved
-        if (student.sticker_recieved == 0) {
+        val activeStickerCount = member.sticker_recieved
+        if (member.sticker_recieved == 0) {
             Text("Hat noch keinen Sticker bekommen")
         } else {
-            val stickerHistoryList = student.sticker_recieved_by.toString().trim(',').split(",")
+            val stickerHistoryList = member.sticker_recieved_by.toString().trim(',').split(",")
             stickerHistoryList.forEach {
                 val singleStats = it.split(":")
                 val stickerUnit: Int = singleStats[0].toInt()
@@ -207,7 +207,7 @@ private fun studentStats(student: Student) { //datum letzte prüfung | wie lange
             }
         }
 
-        if (student.sticker_recieved == stickerUnits.keys.last())
+        if (member.sticker_recieved == stickerUnits.keys.last())
             Text("Es gibt keinen weiteren Sticker")
         else {
             val nextStickerCount = stickerUnits.next(activeStickerCount).first
@@ -221,18 +221,18 @@ private fun studentStats(student: Student) { //datum letzte prüfung | wie lange
  * Text composable with displays the date of the student's total trainings sessions with some additional text
  */
 @Composable
-private fun textTotalTrainingSessions(student: Student, teilnahme: List<Teilnahme>) {
-    Text("Alle Trainingseinheiten: " + getTotalTrainingSessions(student, teilnahme))
+private fun textTotalTrainingSessions(member: Member, teilnahme: List<Teilnahme>) {
+    Text("Alle Trainingseinheiten: " + getTotalTrainingSessions(member, teilnahme))
 }
 
 /**
  * Text composable with displays the date of the student's last exam with some additional text
  */
 @Composable
-private fun textLastExam(student: Student) {
+private fun textLastExam(member: Member) {
     Text(
         "Letzte Prüfung am: ${
-            DateTimeFormatter.ofPattern("dd.MM.yyyy").format(student.date_last_exam)
+            DateTimeFormatter.ofPattern("dd.MM.yyyy").format(member.date_last_exam)
         }"
     )
 }

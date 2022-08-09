@@ -15,17 +15,17 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
 import composables.StudentList
-import models.Student
+import models.Member
 import models.editIsTrainer
-import models.loadStudents
+import models.loadMembers
 
 @Composable
-fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
+fun manageTrainerDialog(students1: List<Member>, onDismiss: () -> Unit) {
 
-    val students = remember { mutableStateListOf<Student>() }
+    val members = remember { mutableStateListOf<Member>() }
     remember {
         for (student in students1) {
-            students.add(student)
+            members.add(student)
         }
     }
 
@@ -34,7 +34,7 @@ fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
 
     val lazyState = rememberLazyListState()
 
-    val studentFilter = students.filter {
+    val studentFilter = members.filter {
         (it.prename + it.surname)
             .lowercase()
             .contains(searchFieldVal.lowercase().replace(" ", ""))
@@ -66,11 +66,11 @@ fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
                     ) {
                         Text("Aktuelle Trainer:", style = MaterialTheme.typography.h6)
                         Divider(modifier = Modifier.padding(4.dp))
-                        currentTrainerList(students) { newVal, student ->
+                        currentTrainerList(members) { newVal, student ->
                             editIsTrainer(student.id, newVal)
-                            students.clear()
-                            for (s in loadStudents()) {
-                                students.add(s)
+                            members.clear()
+                            for (s in loadMembers()) {
+                                members.add(s)
                             }
                         }
                     }
@@ -91,14 +91,14 @@ fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
                             LazyColumn(state = lazyState) {
                                 if (searchFieldVal.length > 2) {
                                     if (studentFilter.size >= 2) {
-                                        items(students.filter {
+                                        items(members.filter {
                                             (it.prename + it.surname)
                                                 .lowercase()
                                                 .contains(searchFieldVal.lowercase().replace(" ", ""))
                                         }) {
                                             StudentList().studentList(
                                                 it.id,
-                                                students,
+                                                members,
                                                 onClick = { nameString -> searchFieldVal = nameString })
                                         }
                                     } else if (studentFilter.size == 1) {
@@ -112,9 +112,9 @@ fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
                                                     checked = studentFilter[0].is_trainer,
                                                     onCheckedChange = {
                                                         editIsTrainer(studentFilter[0].id, it)
-                                                        students.clear()
-                                                        for (s in loadStudents()) {
-                                                            students.add(s)
+                                                        members.clear()
+                                                        for (s in loadMembers()) {
+                                                            members.add(s)
                                                         }
                                                         searchFieldVal = ""
                                                     })
@@ -144,13 +144,13 @@ fun manageTrainerDialog(students1: List<Student>, onDismiss: () -> Unit) {
 
 @Composable
 private fun currentTrainerList(
-    students: MutableList<Student>,
-    onCheckedChange: (newVal: Boolean, student: Student) -> Unit
+    members: MutableList<Member>,
+    onCheckedChange: (newVal: Boolean, member: Member) -> Unit
 ) {
     val lazyState = rememberLazyListState()
     Row {
         LazyColumn(state = lazyState) {
-            items(students.filter { it.is_trainer }) { student ->
+            items(members.filter { it.is_trainer }) { student ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(student.prename + " " + student.surname, style = MaterialTheme.typography.body1)
                     Checkbox(

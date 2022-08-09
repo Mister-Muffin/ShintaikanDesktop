@@ -31,16 +31,16 @@ import java.util.*
 private val farben = arrayOf("Weiss", "Gelb", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
 
 @Composable
-fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeScreen: (id: Int) -> Unit) {
+fun teilnehmerSelector(members: List<Member>, activeTrainer: Trainer, changeScreen: (id: Int) -> Unit) {
 
     val searchQuery = remember { mutableStateOf("") }
     var handleAsExam by remember { mutableStateOf(false) }
 
-    val newStudents = remember { mutableStateListOf<Student>() }
-    val allStudents = remember { mutableStateListOf<Student>() }
+    val newMembers = remember { mutableStateListOf<Member>() }
+    val allMembers = remember { mutableStateListOf<Member>() }
     remember {
-        for (student in students) {
-            allStudents.add(student)
+        for (student in members) {
+            allMembers.add(student)
         }
     }
 
@@ -59,11 +59,11 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
     var showStickerDialog by remember { mutableStateOf(false) }
     var showCheckboxPasswordDialog by remember { mutableStateOf(false) }
 
-    val studentsStickers = remember { mutableListOf<Student>() }
+    val studentsStickers = remember { mutableListOf<Member>() }
 
     fun submit(isExam: Boolean) {
         var teilnahmeString = ""
-        for (student in newStudents) {
+        for (student in newMembers) {
             teilnahmeString = teilnahmeString + student.id + ","
 
             if (student.sticker_recieved != stickerUnits.keys.last()) // Wer 800 aufkelber hat, bekommt keinen weiteren (catch indexOutOfBounds)
@@ -114,7 +114,7 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
         Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
             Row {
                 LazyColumn(state = leftLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
-                    items(allStudents.asSequence()
+                    items(allMembers.asSequence()
                         .filter { s ->
                             // filter color checkboxes
                             if (checkedColors.isEmpty()) true
@@ -135,8 +135,8 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
                     )
                     { /* linke spalte */ student ->
                         listBox(student) {
-                            newStudents.add(student)
-                            allStudents.remove(student)
+                            newMembers.add(student)
+                            allMembers.remove(student)
                             searchQuery.value = ""
                         }
                         Divider(modifier = Modifier.width(250.dp))
@@ -203,12 +203,12 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
                     }
 
                     Button( // eingabe bestätigen
-                        enabled = newStudents.isNotEmpty(),
+                        enabled = newMembers.isNotEmpty(),
                         modifier = Modifier.fillMaxWidth().height(60.dp),
                         onClick = { submit(handleAsExam) }) {
                         Text(
                             textAlign = TextAlign.Center,
-                            text = if (newStudents.isEmpty()) "Teilnehmen aus der ersten Spalte auswählen" else "Eingabe bestätigen!"
+                            text = if (newMembers.isEmpty()) "Teilnehmen aus der ersten Spalte auswählen" else "Eingabe bestätigen!"
                         )
                     }
                 }
@@ -217,10 +217,10 @@ fun teilnehmerSelector(students: List<Student>, activeTrainer: Trainer, changeSc
 
             Row {
                 LazyColumn(state = rightLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
-                    items(newStudents) { student ->
+                    items(newMembers) { student ->
                         listBox(student) {
-                            allStudents.add(student)
-                            newStudents.remove(student)
+                            allMembers.add(student)
+                            newMembers.remove(student)
                         }
                         Divider(modifier = Modifier.width(250.dp))
                     }
@@ -269,30 +269,37 @@ private fun getCheckBoxColor(option: String): CheckboxColors {
         farben[0] -> {
             return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.WHITE.color, checkmarkColor = Color.Black)
         }
+
         farben[1] -> {
             return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.YELLOW.color, checkmarkColor = Color.Black)
         }
+
         farben[2] -> {
             return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.ORANGE.color)
         }
+
         farben[3] -> {
             return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.GREEN.color)
         }
+
         farben[4] -> {
             return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.BLUE.color)
         }
+
         farben[5] -> {
             return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.PURPLE.color)
         }
+
         farben[6] -> {
             return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.BROWN.color)
         }
+
         else -> return CheckboxDefaults.colors(MaterialTheme.colors.primary)
     }
 }
 
 @Composable
-private fun listBox(student: Student, onBoxClicked: () -> Unit) {
+private fun listBox(member: Member, onBoxClicked: () -> Unit) {
     Box(
         modifier = Modifier
             .width(250.dp)
@@ -300,8 +307,8 @@ private fun listBox(student: Student, onBoxClicked: () -> Unit) {
             .drawWithCache {
                 val gradient = Brush.horizontalGradient(
                     colors = listOf(
-                        boxColor(student)[0],
-                        boxColor(student)[1]
+                        boxColor(member)[0],
+                        boxColor(member)[1]
                     ),
                     startX = size.width / 2 - 1,
                     endX = size.width / 2 + 1,
@@ -318,59 +325,72 @@ private fun listBox(student: Student, onBoxClicked: () -> Unit) {
             fontFamily = FontFamily.SansSerif,
             fontWeight = FontWeight.W500,
             color = if (
-                student.level.contains("5. Kyu blau") ||
-                student.level.contains("4. Kyu violett") ||
-                student.level.contains(". Kyu braun") ||
-                student.level.contains(". Dan schwarz")
+                member.level.contains("5. Kyu blau") ||
+                member.level.contains("4. Kyu violett") ||
+                member.level.contains(". Kyu braun") ||
+                member.level.contains(". Dan schwarz")
             ) Color.White
             else Color.Black,
             modifier = Modifier.padding(start = 8.dp),
-            text = "${student.prename} ${student.surname}"
+            text = "${member.prename} ${member.surname}"
         )
     }
 }
 
-private fun boxColor(student: Student): Array<Color> {
+private fun boxColor(member: Member): Array<Color> {
     val boxColor: Array<Color> = when {
-        student.level.contains("z Kyu weiss") -> {
+        member.level.contains("z Kyu weiss") -> {
             arrayOf(DEGREECOLORS.WHITE.color, DEGREECOLORS.WHITE.color)
         }
-        student.level.contains("9. Kyu weiss-gelb") -> {
+
+        member.level.contains("9. Kyu weiss-gelb") -> {
             arrayOf(DEGREECOLORS.WHITE.color, DEGREECOLORS.YELLOW.color)
         }
-        student.level.contains("9/10 Kyu  weiss-rot") -> {
+
+        member.level.contains("9/10 Kyu  weiss-rot") -> {
             arrayOf(DEGREECOLORS.WHITE.color, DEGREECOLORS.RED.color)
         }
-        student.level.contains("8. Kyu gelb") -> {
+
+        member.level.contains("8. Kyu gelb") -> {
             arrayOf(DEGREECOLORS.YELLOW.color, DEGREECOLORS.YELLOW.color)
         }
-        student.level.contains("7. Kyu orange") -> {
+
+        member.level.contains("7. Kyu orange") -> {
             arrayOf(DEGREECOLORS.ORANGE.color, DEGREECOLORS.ORANGE.color)
         }
-        student.level.contains("7/8 Kyu gelb-orange") -> {
+
+        member.level.contains("7/8 Kyu gelb-orange") -> {
             arrayOf(DEGREECOLORS.YELLOW.color, DEGREECOLORS.ORANGE.color)
         }
-        student.level.contains("6. Kyu grün") -> {
+
+        member.level.contains("6. Kyu grün") -> {
             arrayOf(DEGREECOLORS.GREEN.color, DEGREECOLORS.GREEN.color)
         }
-        student.level.contains("6/7 Kyu orange-grün") -> {
+
+        member.level.contains("6/7 Kyu orange-grün") -> {
             arrayOf(DEGREECOLORS.ORANGE.color, DEGREECOLORS.GREEN.color)
         }
-        student.level.contains("5. Kyu blau") -> {
+
+        member.level.contains("5. Kyu blau") -> {
             arrayOf(DEGREECOLORS.BLUE.color, DEGREECOLORS.BLUE.color)
         }
-        student.level.contains("5/6 Kyu grün-blau") -> {
+
+        member.level.contains("5/6 Kyu grün-blau") -> {
             arrayOf(DEGREECOLORS.GREEN.color, DEGREECOLORS.BLUE.color)
         }
-        student.level.contains("4. Kyu violett") -> {
+
+        member.level.contains("4. Kyu violett") -> {
             arrayOf(DEGREECOLORS.PURPLE.color, DEGREECOLORS.PURPLE.color)
         }
-        student.level.contains(". Kyu braun") -> {
+
+        member.level.contains(". Kyu braun") -> {
             arrayOf(DEGREECOLORS.BROWN.color, DEGREECOLORS.BROWN.color)
         }
-        student.level.contains(". Dan schwarz") -> {
+
+        member.level.contains(". Dan schwarz") -> {
             arrayOf(DEGREECOLORS.BLACK.color, DEGREECOLORS.BLACK.color)
         }
+
         else -> {
             arrayOf(Color.White, Color.White)
         }

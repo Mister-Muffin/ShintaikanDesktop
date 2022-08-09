@@ -34,12 +34,12 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun startPage(changeScreen: (id: Int) -> Unit) {
-    val students = loadStudents()
+    val students = loadMembers()
     val messages = loadMessages()
-    val allStudents = remember { mutableStateListOf<Student>() }
+    val allMembers = remember { mutableStateListOf<Member>() }
     remember {
         for (student in students) {
-            allStudents.add(student)
+            allMembers.add(student)
         }
     }
     val allMessages = remember { mutableStateListOf<Message>() }
@@ -236,10 +236,10 @@ private fun editMessageDialog(message: Message, onDismiss: () -> Unit) {
 }
 
 
-private fun loadBirthdays(students: List<Student>): MutableList<Student> {
-    val birthdays = mutableListOf<Student>()
+private fun loadBirthdays(members: List<Member>): MutableList<Member> {
+    val birthdays = mutableListOf<Member>()
 
-    for (student in students) {
+    for (student in members) {
         if (student.birthday == null) continue
         val birthday = student.birthday.plusYears((LocalDate.now().year - student.birthday.year).toLong())
         if (birthday >= (LocalDate.now().minusDays(3)) &&

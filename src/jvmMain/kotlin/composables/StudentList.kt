@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import models.Student
+import models.Member
 
 class StudentList {
     companion object {
@@ -19,8 +19,8 @@ class StudentList {
     }
 
     @Composable
-    fun studentList(id: Int, students: List<Student>, onClick: (nameString: String) -> Unit) {
-        val student = students.find { it.id == id }
+    fun studentList(id: Int, members: List<Member>, onClick: (nameString: String) -> Unit) {
+        val student = members.find { it.id == id }
         return if (student != null) {
             Row(horizontalArrangement = Arrangement.Center) {
                 val nameString: String = student.prename + " " + student.surname

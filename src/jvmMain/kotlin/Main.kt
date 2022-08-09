@@ -27,7 +27,7 @@ import dialogs.examsDialog
 import dialogs.manageTrainerDialog
 import dialogs.memberExportDialog
 import models.Trainer
-import models.loadStudents
+import models.loadMembers
 import org.jetbrains.exposed.sql.Database
 import pages.startPage
 import pages.successPage
@@ -78,7 +78,7 @@ fun main() {
             password = password
         )
 
-        val students = loadStudents()
+        val students = loadMembers()
 
         val imageBitmap = remember { useResource("pelli2.jpg") { loadImageBitmap(it) } }
 

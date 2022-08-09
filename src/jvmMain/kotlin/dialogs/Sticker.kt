@@ -15,7 +15,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
 import getTotalTrainingSessions
-import models.Student
+import models.Member
 import models.Trainer
 import models.editStudentSticker
 import models.loadTeilnahme
@@ -25,15 +25,15 @@ import java.time.LocalDate
 
 @Composable
 fun stickerDialog(
-    stickerStudentsList: List<Student>,
+    stickerStudentsList: List<Member>,
     activeTrainer: Trainer,
-    onDismiss: (students: List<Student>) -> Unit
+    onDismiss: (members: List<Member>) -> Unit
 ) {
 
-    val mutableStudents = remember { mutableStateListOf<Student>() }
+    val mutableMembers = remember { mutableStateListOf<Member>() }
     remember {
         for (student in stickerStudentsList) {
-            mutableStudents.add(student)
+            mutableMembers.add(student)
         }
     }
 
@@ -45,7 +45,7 @@ fun stickerDialog(
      * that the user has made his desicion for each student
      */
     fun buttonEnabled(): Boolean {
-        mutableStudents.forEach { s ->
+        mutableMembers.forEach { s ->
             if (!s.radioClicked) {
                 return false
             }
@@ -71,7 +71,7 @@ fun stickerDialog(
                     Text("Folgende Teilnehmer bekommen Aufkleber:", style = MaterialTheme.typography.subtitle1)
                 }
                 item { Divider(modifier = Modifier.padding(vertical = 10.dp)) }
-                items(mutableStudents) { student ->
+                items(mutableMembers) { student ->
                     val total = getTotalTrainingSessions(student, teilnahme)
                     LazyRow(
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -104,7 +104,7 @@ fun stickerDialog(
                             RadioButton(
                                 student.stickerRecieved && student.radioClicked,
                                 onClick = {
-                                    mutableStudents[mutableStudents.indexOf(student)] =
+                                    mutableMembers[mutableMembers.indexOf(student)] =
                                         student.copy(
                                             stickerRecieved = true,
                                             radioClicked = true,
@@ -117,7 +117,7 @@ fun stickerDialog(
                             RadioButton(
                                 !student.stickerRecieved && student.radioClicked,
                                 onClick = {
-                                    mutableStudents[mutableStudents.indexOf(student)] =
+                                    mutableMembers[mutableMembers.indexOf(student)] =
                                         student.copy(
                                             stickerRecieved = false,
                                             radioClicked = true,
@@ -129,7 +129,7 @@ fun stickerDialog(
                 }
             }
             Button(enabled = buttonEnabled(), modifier = Modifier.fillMaxWidth(.5f), onClick = {
-                mutableStudents.forEach { s ->
+                mutableMembers.forEach { s ->
                     val nextStickerRecieved = stickerUnits.next(s.sticker_recieved).first
                     val nextStickerRecievedBy = "$nextStickerRecieved:${activeTrainer.id}:${LocalDate.now()}"
                     if (s.stickerRecieved) {
@@ -143,7 +143,7 @@ fun stickerDialog(
 
                     }
                     if (s.sticker_recieved != stickerUnits.keys.toList()[stickerUnits.keys.size - 1]) {
-                        mutableStudents[mutableStudents.indexOf(s)] =
+                        mutableMembers[mutableMembers.indexOf(s)] =
                             s.copy(
                                 sticker_recieved_by = nextStickerRecievedBy,
                                 radioClicked = false,
@@ -152,7 +152,7 @@ fun stickerDialog(
                             )
                     }
 
-                    onDismiss(mutableStudents)
+                    onDismiss(mutableMembers)
                 }
             }) {
                 Text("OK")
