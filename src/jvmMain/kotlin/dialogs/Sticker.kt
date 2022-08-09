@@ -39,7 +39,6 @@ fun stickerDialog(
 
     val teilnahme = loadTeilnahme()
 
-
     /**
      * This function returns true if all radio buttons have been clicked at lease once to ensure,
      * that the user has made his desicion for each student
@@ -129,29 +128,33 @@ fun stickerDialog(
                 }
             }
             Button(enabled = buttonEnabled(), modifier = Modifier.fillMaxWidth(.5f), onClick = {
-                mutableMembers.forEach { s ->
-                    val nextStickerRecieved = stickerUnits.next(s.sticker_recieved).first
+                mutableMembers.forEach { member ->
+                    val nextStickerRecieved = stickerUnits.next(member.sticker_recieved).first
                     val nextStickerRecievedBy = "$nextStickerRecieved:${activeTrainer.id}:${LocalDate.now()}"
-                    if (s.stickerRecieved) {
+                    if (member.stickerRecieved) {
                         editStudentSticker(
-                            s.copy(
+                            member.copy(
                                 sticker_recieved_by = nextStickerRecievedBy,
-                                //sticker_animal = stickerUnitNames[stickerUnits.indexOf(s.sticker_recieved) + 1],
                                 sticker_recieved = nextStickerRecieved
                             )
                         )
 
                     }
-                    if (s.sticker_recieved != stickerUnits.keys.toList()[stickerUnits.keys.size - 1]) {
-                        mutableMembers[mutableMembers.indexOf(s)] =
-                            s.copy(
+                    if (member.sticker_recieved != stickerUnits.keys.toList()[stickerUnits.keys.size - 1]) {
+                        mutableMembers[mutableMembers.indexOf(member)] =
+                            member.copy(
                                 sticker_recieved_by = nextStickerRecievedBy,
                                 radioClicked = false,
-                                //sticker_animal = stickerUnitNames[stickerUnits.indexOf(s.sticker_recieved) + 1],
                                 sticker_recieved = nextStickerRecieved
                             )
                     }
-
+                    /* Die geänderten 'members' müssen zurückgegeben werden, da bei den 'member', die
+                     nochmal aufgelistet werden sollen, 'sticker_show_again' auf true gesetzt wird.
+                     Würden die Mitglieder hier nicht zurückgegeben werden,
+                     sondern die Daten neu geladen werden, wäre diese Eigenschaft (sticker_show_again)
+                     wieder false, und der Dialog würde erst bei der nächsten Trainingseintragung
+                     wieder kommen.
+                     */
                     onDismiss(mutableMembers)
                 }
             }) {
@@ -159,5 +162,4 @@ fun stickerDialog(
             }
         }
     }
-
 }

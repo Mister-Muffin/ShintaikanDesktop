@@ -87,8 +87,9 @@ fun teilnehmerSelector(members: List<Member>, activeTrainer: Trainer, changeScre
 
         if (showStickerDialog) {
             stickerDialog(studentsStickers, activeTrainer) {
-                it.forEach { s ->
-                    if (s.sticker_show_again) {
+                // hier werden alle member wieder aufgelistet, bei denen 'sticker_show_again' true war
+                it.forEach { member ->
+                    if (member.sticker_show_again) {
                         studentsStickers.clear()
                         it.forEach { studentsStickers.add(it) }
                     } else {
