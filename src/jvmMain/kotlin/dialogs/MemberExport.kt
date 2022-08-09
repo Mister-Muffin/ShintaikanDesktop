@@ -211,7 +211,6 @@ internal fun isReadyForExam(member: Member, teilnahme: List<Teilnahme>): Pair<St
         } else returnString += "\n✔️ Alt genug"
 
         // stop the loop and return the pair when at least on condition is not satisfied (❌)
-        // TODO: Implement one-line reason (returns empty string)!
         if (returnString.contains('❌')) return Pair<String, String?>(returnString, returnString2)
     }
     //else, if all requirements are satisfied, return null as the second part (sse JavaDoc)

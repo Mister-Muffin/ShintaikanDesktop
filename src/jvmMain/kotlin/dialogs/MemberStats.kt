@@ -118,14 +118,11 @@ private fun studentStats(member: Member) { //datum letzte prüfung | wie lange h
         }
         //Divider(modifier = Modifier.padding(vertical = 16.dp))
 
-        if (member.birthday != null) // TODO: Remove this null-check when database is complete
-            Text(
-                "Hat am: ${
-                    DateTimeFormatter.ofPattern("dd.MM.yyyy").format(member.birthday)
-                } Geburtstag, ist ${Period.between(member.birthday, LocalDate.now()).years} Jahre alt"
-            )
-        else
-            Text("Kein Geburtsdatum angegeben")
+        Text(
+            "Hat am: ${
+                DateTimeFormatter.ofPattern("dd.MM.yyyy").format(member.birthday)
+            } Geburtstag, ist ${Period.between(member.birthday, LocalDate.now()).years} Jahre alt"
+        )
 
         // Show member's group and replace "Benjamini" with "Karamini" if so
         Text("Gruppe: ${if (member.group == "Benjamini") "Karamini" else member.group}")
