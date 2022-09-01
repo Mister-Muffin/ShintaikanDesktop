@@ -45,128 +45,126 @@ val windowHeight = 864.dp
 internal val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
 
 @OptIn(ExperimentalComposeUiApi::class)
-fun main() {
-    application {
-        // create file/directories in case the config file does not exist
-        if (Path.of(configFilePath + configFileName).notExists()) {
-            //Create root folder
-            Path.of(configFilePath).createDirectories()
-            //Create folder for upcomming database backups
-            Path.of(configFilePath + "backups/").createDirectory()
-            // copy sample config to config location
-            Path.of("src/jvmMain/resources/config.sample.toml")
-                .copyTo(Path.of(configFilePath + configFileName), false)
+fun main() = application {
+    // create file/directories in case the config file does not exist
+    if (Path.of(configFilePath + configFileName).notExists()) {
+        //Create root folder
+        Path.of(configFilePath).createDirectories()
+        //Create folder for upcomming database backups
+        Path.of(configFilePath + "backups/").createDirectory()
+        // copy sample config to config location
+        Path.of("src/jvmMain/resources/config.sample.toml")
+            .copyTo(Path.of(configFilePath + configFileName), false)
+    }
+
+    // Create a TOML mapper without any custom configuration
+    val mapper = tomlMapper { }
+
+    // Read our config from file
+    val tomlFile = Path.of(configFilePath + configFileName)
+    val config = mapper.decode<Config>(tomlFile)
+    //println(config.settings)
+
+    val ip: String = config.settings.ip //System.getenv("S_DSK_IP") ?: "172.17.0.1"
+    val port: String = config.settings.port //System.getenv("S_DSK_PORT") ?: "5434"
+    val user: String = config.settings.user //System.getenv("S_DSK_USER") ?: "postgres"
+    val password: String = config.settings.password //System.getenv("S_DSK_PASSWORD") ?: "mysecretpassword"
+
+    Database.connect(
+        "jdbc:postgresql://${ip}:${port}/",
+        driver = "org.postgresql.Driver",
+        user = user,
+        password = password
+    )
+
+    val students = loadMembers()
+
+    val imageBitmap = remember { useResource("pelli2.jpg") { loadImageBitmap(it) } }
+
+    var showDatenHolenDialog by remember { mutableStateOf(false) }
+    var showExamsDialog by remember { mutableStateOf(false) }
+    var showManageTrainerDialog by remember { mutableStateOf(false) }
+    var showMemberExportDialog by remember { mutableStateOf(false) }
+
+    Window(
+        onCloseRequest = ::exitApplication,
+        title = "Teilnahme",
+        icon = BitmapPainter(image = imageBitmap),
+        state = rememberWindowState(
+            position = WindowPosition(Alignment.Center),
+            width = windowWidth,
+            height = windowHeight
+        ),
+    ) {
+        var screenID by remember { mutableStateOf(0) }
+        var activeTrainer: Trainer? by remember { mutableStateOf(null) }
+
+        MenuBar {
+            Menu("Datei", mnemonic = 'F') {
+                Item(
+                    "Startseite",
+                    onClick = { screenID = 0 },
+                    shortcut = KeyShortcut(Key.Escape),
+                    enabled = screenID != 0
+                )
+                Item("Beenden", onClick = { exitApplication() }, mnemonic = 'E')
+            }
+            Menu("Administration", mnemonic = 'A', enabled = screenID == 0) {
+                Item("Trainer verwalten", onClick = { showManageTrainerDialog = true })
+                Item("Daten holen", onClick = { showDatenHolenDialog = true })
+            }
+            Menu("Mitglieder", mnemonic = 'P') {
+                Item("Daten abfragen", onClick = { showExamsDialog = true })
+                Item("Daten exportieren", onClick = { showMemberExportDialog = true })
+            }
         }
 
-        // Create a TOML mapper without any custom configuration
-        val mapper = tomlMapper { }
-
-        // Read our config from file
-        val tomlFile = Path.of(configFilePath + configFileName)
-        val config = mapper.decode<Config>(tomlFile)
-        //println(config.settings)
-
-        val ip: String = config.settings.ip //System.getenv("S_DSK_IP") ?: "172.17.0.1"
-        val port: String = config.settings.port //System.getenv("S_DSK_PORT") ?: "5434"
-        val user: String = config.settings.user //System.getenv("S_DSK_USER") ?: "postgres"
-        val password: String = config.settings.password //System.getenv("S_DSK_PASSWORD") ?: "mysecretpassword"
-
-        Database.connect(
-            "jdbc:postgresql://${ip}:${port}/",
-            driver = "org.postgresql.Driver",
-            user = user,
-            password = password
-        )
-
-        val students = loadMembers()
-
-        val imageBitmap = remember { useResource("pelli2.jpg") { loadImageBitmap(it) } }
-
-        var showDatenHolenDialog by remember { mutableStateOf(false) }
-        var showExamsDialog by remember { mutableStateOf(false) }
-        var showManageTrainerDialog by remember { mutableStateOf(false) }
-        var showMemberExportDialog by remember { mutableStateOf(false) }
-
-        Window(
-            onCloseRequest = ::exitApplication,
-            title = "Teilnahme",
-            icon = BitmapPainter(image = imageBitmap),
-            state = rememberWindowState(
-                position = WindowPosition(Alignment.Center),
-                width = windowWidth,
-                height = windowHeight
-            ),
-        ) {
-            var screenID by remember { mutableStateOf(0) }
-            var activeTrainer: Trainer? by remember { mutableStateOf(null) }
-
-            MenuBar {
-                Menu("Datei", mnemonic = 'F') {
-                    Item(
-                        "Startseite",
-                        onClick = { screenID = 0 },
-                        shortcut = KeyShortcut(Key.Escape),
-                        enabled = screenID != 0
-                    )
-                    Item("Beenden", onClick = { exitApplication() }, mnemonic = 'E')
-                }
-                Menu("Administration", mnemonic = 'A', enabled = screenID == 0) {
-                    Item("Trainer verwalten", onClick = { showManageTrainerDialog = true })
-                    Item("Daten holen", onClick = { showDatenHolenDialog = true })
-                }
-                Menu("Mitglieder", mnemonic = 'P') {
-                    Item("Daten abfragen", onClick = { showExamsDialog = true })
-                    Item("Daten exportieren", onClick = { showMemberExportDialog = true })
-                }
-            }
-
-            MaterialTheme(
-                typography = Typography(
-                    h1 = TextStyle(
-                        color = Color(0xffff8f06), fontSize = 40.sp,
-                        fontWeight = FontWeight.Light,
-                        fontFamily = FontFamily.Monospace
-                    ),
-                    subtitle1 = TextStyle(
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                    body1 = TextStyle(fontSize = 18.sp) // All 'Text' use this as default as it seems
+        MaterialTheme(
+            typography = Typography(
+                h1 = TextStyle(
+                    color = Color(0xffff8f06), fontSize = 40.sp,
+                    fontWeight = FontWeight.Light,
+                    fontFamily = FontFamily.Monospace
                 ),
-                shapes = Shapes(RoundedCornerShape(0.dp)),
-                colors = lightColors(
-                    primary = Color(0xFF212121)
-                )
-            ) {
-                //region Dialog
-                if (showManageTrainerDialog) {
-                    manageTrainerDialog(students) { showManageTrainerDialog = false }
+                subtitle1 = TextStyle(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                ),
+                body1 = TextStyle(fontSize = 18.sp) // All 'Text' use this as default as it seems
+            ),
+            shapes = Shapes(RoundedCornerShape(0.dp)),
+            colors = lightColors(
+                primary = Color(0xFF212121)
+            )
+        ) {
+            //region Dialog
+            if (showManageTrainerDialog) {
+                manageTrainerDialog(students) { showManageTrainerDialog = false }
+            }
+            if (showExamsDialog) {
+                examsDialog(students, onDismiss = { showExamsDialog = false })
+            }
+            if (showDatenHolenDialog) datenHolenWindow { showDatenHolenDialog = false }
+            if (showMemberExportDialog) memberExportDialog { showMemberExportDialog = false }
+            //endregion
+            when (screenID) {
+                0 -> {
+                    startPage { screenID = it }
                 }
-                if (showExamsDialog) {
-                    examsDialog(students, onDismiss = { showExamsDialog = false })
+
+                1 -> {
+                    trainerSelector { id, selectedTrainer -> screenID = id; activeTrainer = selectedTrainer }
                 }
-                if (showDatenHolenDialog) datenHolenWindow { showDatenHolenDialog = false }
-                if (showMemberExportDialog) memberExportDialog { showMemberExportDialog = false }
-                //endregion
-                when (screenID) {
-                    0 -> {
-                        startPage { screenID = it }
-                    }
 
-                    1 -> {
-                        trainerSelector { id, selectedTrainer -> screenID = id; activeTrainer = selectedTrainer }
-                    }
-
-                    2 -> {
-                        teilnehmerSelector(students, activeTrainer!!) { screenID = it }
-                    }
-
-                    3 -> {
-                        successPage { screenID = it }
-                    }
-
-                    else -> Text("Missing page", modifier = Modifier.clickable { screenID = 0 })
+                2 -> {
+                    teilnehmerSelector(students, activeTrainer!!) { screenID = it }
                 }
+
+                3 -> {
+                    successPage { screenID = it }
+                }
+
+                else -> Text("Missing page", modifier = Modifier.clickable { screenID = 0 })
             }
         }
     }
