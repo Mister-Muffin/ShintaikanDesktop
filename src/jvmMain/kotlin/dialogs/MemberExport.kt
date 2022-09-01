@@ -18,16 +18,18 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
+import configFilePath
 import countId
 import getFirstDate
 import getTotalTrainingSessions
 import levels
-import models.Member
-import models.Teilnahme
-import models.loadMembers
-import models.loadTeilnahme
+import models.*
 import next
+import org.apache.commons.csv.CSVFormat
+import org.apache.commons.csv.CSVPrinter
 import windowWidth
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.Period
 
@@ -92,7 +94,7 @@ fun memberExportDialog(
                         }
                     }
                 }
-                Button(modifier = Modifier.fillMaxWidth(.5f), onClick = { }) {
+                Button(modifier = Modifier.fillMaxWidth(.5f), onClick = { exportMembers() }) {
                     Text("Exportieren")
                 }
             }
@@ -239,4 +241,35 @@ fun getLastExamOrFirstTrainingDate(member: Member, teilnahme: List<Teilnahme>): 
         dateLastExam = member.date_last_exam
     }
     return dateLastExam
+}
+
+private fun exportMembers() {
+    val teilnahme = loadTeilnahme()
+    val writer = Files.newBufferedWriter(Paths.get("${configFilePath}member_export.csv"))
+
+    val csvPrinter = CSVPrinter(
+        writer, CSVFormat.DEFAULT
+        //.withHeader(StudentTable.columns)
+    )
+
+    val members = loadFullMemberTable()
+
+    members.forEach { member ->
+        if (!member.is_active) return@forEach
+        if (member.date_last_exam == null) return@forEach
+
+        csvPrinter.printRecord(
+            member.surname + " " + member.prename,
+            member.date_last_exam,
+            countId(
+                member.id,
+                teilnahme,
+                member.date_last_exam
+            )
+        )
+
+    }
+
+    csvPrinter.flush()
+    csvPrinter.close()
 }
