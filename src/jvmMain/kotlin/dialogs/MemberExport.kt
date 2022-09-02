@@ -22,6 +22,10 @@ import configFilePath
 import countId
 import getFirstDate
 import getTotalTrainingSessions
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import levels
 import models.*
 import next
@@ -42,6 +46,10 @@ fun memberExportDialog(
     MaterialTheme {
 
         var searchFieldValue by remember { mutableStateOf("") }
+        var showTimedSuccessDialog by remember { mutableStateOf(false) }
+        val coroutineScope = rememberCoroutineScope()
+
+        if (showTimedSuccessDialog) timedSuccessDialog()
 
         Dialog(
             state = rememberDialogState(
@@ -94,7 +102,15 @@ fun memberExportDialog(
                         }
                     }
                 }
-                Button(modifier = Modifier.fillMaxWidth(.5f), onClick = { exportMembers() }) {
+                Button(modifier = Modifier.fillMaxWidth(.5f), onClick = {
+                    coroutineScope.launch { exportMembers() }.invokeOnCompletion {
+                        coroutineScope.launch {
+                            showTimedSuccessDialog = true
+                            delay(2000)
+                            showTimedSuccessDialog = false
+                        }
+                    }
+                }) {
                     Text("Exportieren")
                 }
             }
@@ -243,17 +259,19 @@ fun getLastExamOrFirstTrainingDate(member: Member, teilnahme: List<Teilnahme>): 
     return dateLastExam
 }
 
-private fun exportMembers() {
+private suspend fun exportMembers() {
     val teilnahme = loadTeilnahme()
-    val writer = Files.newBufferedWriter(Paths.get("${configFilePath}member_export.csv"))
+    val writer = withContext(Dispatchers.IO) {
+        Files.newBufferedWriter(Paths.get("${configFilePath}pruefungsabfrage.csv"))
+    }
 
     val csvPrinter = CSVPrinter(
-        writer, CSVFormat.DEFAULT
+        writer, CSVFormat.EXCEL
         //.withHeader(StudentTable.columns)
     )
 
     val members = loadFullMemberTable()
-
+    csvPrinter.printRecord("Name", "Dat. lzt. Prüf.", "Einh. s. l. Prüf.")
     members.forEach { member ->
         if (!member.is_active) return@forEach
         if (member.date_last_exam == null) return@forEach
@@ -272,4 +290,26 @@ private fun exportMembers() {
 
     csvPrinter.flush()
     csvPrinter.close()
+}
+
+@Composable
+internal fun timedSuccessDialog() {
+    Dialog(
+        state = rememberDialogState(
+            position = WindowPosition(Alignment.Center),
+            width = 300.dp,
+            height = 100.dp
+        ),
+        title = "",
+        undecorated = true,
+        onCloseRequest = { }
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text("Erfolg!")
+        }
+    }
 }
