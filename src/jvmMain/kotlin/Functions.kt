@@ -12,11 +12,11 @@ import kotlin.random.Random
  *
  * @param since nur Einheiten ab dem dann gegebenen Datum
  **/
-fun countId(id: Int, teilnahme: List<Teilnahme>, since: LocalDate = LocalDate.EPOCH): Int {
+fun countId(member: Member, teilnahme: List<Teilnahme>, since: LocalDate = LocalDate.EPOCH): Int {
     var counter = 0
     for (day in teilnahme) {
         if (day.userIds != null && day.date > since) {
-            counter += day.userIds.split(",").filter { id.toString() == it }.size
+            counter += day.userIds.split(",").filter { member.id.toString() == it }.size
         }
     }
     return counter
@@ -40,7 +40,7 @@ fun getFirstDate(id: Int, teilnahme: List<Teilnahme>): LocalDate? {
  * da diese Trainingseinheiten sonst nicht berücksichtigt werden würden
  */
 fun getTotalTrainingSessions(member: Member, teilnahme: List<Teilnahme>): Int {
-    return member.total!! + countId(member.id, teilnahme)
+    return member.total!! + countId(member, teilnahme)
 }
 
 /**

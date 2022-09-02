@@ -26,6 +26,7 @@ object MemberTable : Table("main") {
     val sticker_recieved_by = text("sticker_recieved_by")
     val is_active = bool("is_active")
     val trainer_units = integer("trainer_units")
+    val add_units_since_last_exam = integer("add_units_since_last_exam")
 }
 
 data class Member(
@@ -44,6 +45,7 @@ data class Member(
     val sticker_recieved_by: String?,
     val is_active: Boolean,
     val trainer_units: Int,
+    val add_units_since_last_exam: Int,
     val radioClicked: Boolean = false, // for sticker dialog (all radio buttons must be clicked before button activated)
     val stickerRecieved: Boolean = false, // for sticker dialog, if radio button is checked or not
     val sticker_show_again: Boolean = false, // for sticker dialog, if student is still missing stickers and the dialog should open again with this student
@@ -81,7 +83,8 @@ fun loadMembers(): List<Member> {
                     sticker_date_recieved = it[MemberTable.sticker_date_recieved],
                     sticker_recieved_by = it[MemberTable.sticker_recieved_by],
                     is_active = it[MemberTable.is_active],
-                    trainer_units = it[MemberTable.trainer_units]
+                    trainer_units = it[MemberTable.trainer_units],
+                    add_units_since_last_exam = it[MemberTable.add_units_since_last_exam]
                 )
             }
     }
@@ -105,7 +108,8 @@ fun loadFullMemberTable(): List<Member> {
                 sticker_date_recieved = it[MemberTable.sticker_date_recieved],
                 sticker_recieved_by = it[MemberTable.sticker_recieved_by],
                 is_active = it[MemberTable.is_active],
-                trainer_units = it[MemberTable.trainer_units]
+                trainer_units = it[MemberTable.trainer_units],
+                add_units_since_last_exam = it[MemberTable.add_units_since_last_exam]
             )
         }
     }

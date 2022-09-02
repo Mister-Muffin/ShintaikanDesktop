@@ -144,7 +144,7 @@ private fun unitsSinceLastExam(member: Member, teilnahme: List<Teilnahme>) {
     Text(
         if (member.date_last_exam == null) "" else "${
             countId(
-                member.id,
+                member,
                 teilnahme,
                 member.date_last_exam
             )
@@ -192,45 +192,47 @@ internal fun isReadyForExam(member: Member, teilnahme: List<Teilnahme>): Pair<St
         "Der Schüler war noch nie im Training"
     )
 
-    val unitsSinceLastExam = countId(member.id, teilnahme, dateLastExam)
+    val unitsSinceLastExam = countId(member, teilnahme, dateLastExam)
     val monthsSinceLastExam = Period.between(dateLastExam, LocalDate.now()).toTotalMonths()
     val memberAge = Period.between(member.birthday, LocalDate.now().plusMonths(2)).years
 
     var returnString = ""
     var returnString2 = ""
 
-    for (level in levels) {
-        if (level.key == levels.next(member.level).first)
-            return Pair<String, String?>(returnString, null)
+    val key = levels.next(member.level).first
+    val level = levels[key] ?: throw Exception()
 
-        returnString = ""
+//    if (key == levels.next(member.level).first)
+//        return Pair<String, String?>(returnString, null)
 
-        if (unitsSinceLastExam < level.value.units) {
-            val s = "Zu wenig Trainingseinheiten"
-            val text = "❌ $s ($unitsSinceLastExam) ${level.value.units - unitsSinceLastExam}"
-            returnString += text
-            returnString2 = s
-        } else returnString += "✔️ Genug Trainingseinheiten"
+    returnString = ""
 
-        if (monthsSinceLastExam < level.value.months) {
-            val remainingMonths = level.value.months - monthsSinceLastExam
-            val s = "Zu wenig Zeit seit der letzten Prüfung vergangen"
-            val text =
-                "\n❌ $s (mind. $monthsSinceLastExam Monate) noch $remainingMonths ${if (remainingMonths == 1.toLong()) "Monat" else "Monate"}"
-            returnString += text
-            returnString2 = s
-        } else returnString += "\n✔️ Genug Zeit seit der letzten Prüfung"
+    if (unitsSinceLastExam < level.units) {
+        val s = "Zu wenig Trainingseinheiten"
+        val text = "❌ $s ($unitsSinceLastExam) ${level.units - unitsSinceLastExam}"
+        returnString += text
+        returnString2 = s
+    } else returnString += "✔️ Genug Trainingseinheiten"
 
-        if (memberAge < level.value.age) {
-            val s = "Zu jung"
-            val textAge = "\n❌ $s ($memberAge Jahre) ${level.value.age - memberAge}"
-            returnString += textAge
-            returnString2 = s
-        } else returnString += "\n✔️ Alt genug"
+    if (monthsSinceLastExam < level.months) {
+        val remainingMonths = level.months - monthsSinceLastExam
+        val s = "Zu wenig Zeit seit der letzten Prüfung vergangen"
+        val text =
+            "\n❌ $s (mind. $monthsSinceLastExam Monate) noch $remainingMonths ${if (remainingMonths == 1.toLong()) "Monat" else "Monate"}"
+        returnString += text
+        returnString2 = s
+    } else returnString += "\n✔️ Genug Zeit seit der letzten Prüfung"
 
-        // stop the loop and return the pair when at least on condition is not satisfied (❌)
-        if (returnString.contains('❌')) return Pair<String, String?>(returnString, returnString2)
-    }
+    if (memberAge < level.age) {
+        val s = "Zu jung"
+        val textAge = "\n❌ $s ($memberAge Jahre) ${level.age - memberAge}"
+        returnString += textAge
+        returnString2 = s
+    } else returnString += "\n✔️ Alt genug"
+
+    // stop the loop and return the pair when at least on condition is not satisfied (❌)
+    if (returnString.contains('❌')) return Pair<String, String?>(returnString, returnString2)
+
     //else, if all requirements are satisfied, return null as the second part (sse JavaDoc)
     return Pair<String, String?>(returnString, null)
 }
@@ -280,7 +282,7 @@ private suspend fun exportMembers() {
             member.surname + " " + member.prename,
             member.date_last_exam,
             countId(
-                member.id,
+                member,
                 teilnahme,
                 member.date_last_exam
             )
