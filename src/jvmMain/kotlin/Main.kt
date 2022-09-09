@@ -22,10 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.*
 import cc.ekblad.toml.decode
 import cc.ekblad.toml.tomlMapper
-import dialogs.datenHolenWindow
-import dialogs.examsDialog
-import dialogs.manageTrainerDialog
-import dialogs.memberExportDialog
+import dialogs.*
 import models.Trainer
 import models.loadMembers
 import org.jetbrains.exposed.sql.Database
@@ -81,10 +78,7 @@ fun main() = application {
 
     val imageBitmap = remember { useResource("pelli2.jpg") { loadImageBitmap(it) } }
 
-    var showDatenHolenDialog by remember { mutableStateOf(false) }
-    var showExamsDialog by remember { mutableStateOf(false) }
-    var showManageTrainerDialog by remember { mutableStateOf(false) }
-    var showMemberExportDialog by remember { mutableStateOf(false) }
+    var forwardedScreenId = 0
 
     Window(
         onCloseRequest = ::exitApplication,
@@ -110,12 +104,12 @@ fun main() = application {
                 Item("Beenden", onClick = { exitApplication() }, mnemonic = 'E')
             }
             Menu("Administration", mnemonic = 'A', enabled = screenID == 0) {
-                Item("Trainer verwalten", onClick = { showManageTrainerDialog = true })
-                Item("Daten holen", onClick = { showDatenHolenDialog = true })
+                Item("Trainer verwalten", onClick = { screenID = 4; forwardedScreenId = 5 })
+                Item("Daten holen", onClick = { screenID = 4; forwardedScreenId = 7 })
             }
             Menu("Mitglieder", mnemonic = 'P') {
-                Item("Daten abfragen", onClick = { showExamsDialog = true })
-                Item("Daten exportieren", onClick = { showMemberExportDialog = true })
+                Item("Daten abfragen", onClick = { screenID = 6 })
+                Item("Daten exportieren", onClick = { screenID = 8 })
             }
         }
 
@@ -137,16 +131,6 @@ fun main() = application {
                 primary = Color(0xFF212121)
             )
         ) {
-            //region Dialog
-            if (showManageTrainerDialog) {
-                manageTrainerDialog(students) { showManageTrainerDialog = false }
-            }
-            if (showExamsDialog) {
-                examsDialog(students, onDismiss = { showExamsDialog = false })
-            }
-            if (showDatenHolenDialog) datenHolenWindow { showDatenHolenDialog = false }
-            if (showMemberExportDialog) memberExportDialog { showMemberExportDialog = false }
-            //endregion
             when (screenID) {
                 0 -> {
                     startPage { screenID = it }
@@ -163,8 +147,20 @@ fun main() = application {
                 3 -> {
                     successPage { screenID = it }
                 }
+                // needed because dialog windows don't work on Raspberry Pi
+                4 -> passwordPrompt(result = { if (it) screenID = forwardedScreenId }, onDissmiss = { screenID = 0 })
 
-                else -> Text("Missing page", modifier = Modifier.clickable { screenID = 0 })
+                5 -> manageTrainerDialog(students, onDismiss = { screenID = 0 })
+
+                6 -> examsDialog(students, onDismiss = { screenID = 0 })
+
+                7 -> datenHolenWindow { screenID = 0 }
+
+                8 -> memberExportDialog { screenID = 0 }
+
+                else -> Text(
+                    "Missing page, click the screen to go back",
+                    modifier = Modifier.clickable { screenID = 0 })
             }
         }
     }

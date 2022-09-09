@@ -17,9 +17,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.WindowPosition
-import androidx.compose.ui.window.rememberDialogState
 import composables.StudentList
 import countId
 import getTotalTrainingSessions
@@ -52,49 +49,41 @@ fun examsDialog(members: List<Member>, onDismiss: () -> Unit) {
             .lowercase()
             .contains(searchFieldVal.value.lowercase().replace(" ", ""))
     }
-
-    MaterialTheme {
-        Dialog(
-            state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 750.dp, height = 600.dp),
-            title = "Daten abfragen",
-            onCloseRequest = onDismiss
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text("Mitgliedsdaten abfragen", style = MaterialTheme.typography.h6)
-                Divider(modifier = Modifier.padding(vertical = 16.dp))
-                OutlinedTextField(
-                    value = searchFieldVal.value,
-                    onValueChange = { searchFieldVal.value = it },
-                    placeholder = {
-                        Text(
-                            "Suchen... (mind. 3 Zeichen)",
-                            style = TextStyle.Default.copy(fontSize = 16.sp)
-                        )
-                    },
-                    modifier = Modifier.padding(bottom = 10.dp).width(300.dp)
+    
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text("Mitgliedsdaten abfragen", style = MaterialTheme.typography.h6)
+        Divider(modifier = Modifier.padding(vertical = 16.dp))
+        OutlinedTextField(
+            value = searchFieldVal.value,
+            onValueChange = { searchFieldVal.value = it },
+            placeholder = {
+                Text(
+                    "Suchen... (mind. 3 Zeichen)",
+                    style = TextStyle.Default.copy(fontSize = 16.sp)
                 )
-                LazyColumn {
-                    if (searchFieldVal.value.length > 2) {
-                        if (studentFilter.size >= 2) {
-                            items(allMembers.filter {
-                                (it.prename + it.surname)
-                                    .lowercase()
-                                    .contains(searchFieldVal.value.lowercase().replace(" ", ""))
-                            }) {
-                                StudentList().studentList(
-                                    it.id,
-                                    members,
-                                    onClick = { nameString -> searchFieldVal.value = nameString })
-                            }
-                        } else if (studentFilter.size == 1) {
-                            item { studentStats(studentFilter[0]) }
-                        } else {
-                            item { Text("Keine Personen gefunden") }
-                        }
+            },
+            modifier = Modifier.padding(bottom = 10.dp).width(300.dp)
+        )
+        LazyColumn {
+            if (searchFieldVal.value.length > 2) {
+                if (studentFilter.size >= 2) {
+                    items(allMembers.filter {
+                        (it.prename + it.surname)
+                            .lowercase()
+                            .contains(searchFieldVal.value.lowercase().replace(" ", ""))
+                    }) {
+                        StudentList().studentList(
+                            it.id,
+                            members,
+                            onClick = { nameString -> searchFieldVal.value = nameString })
                     }
+                } else if (studentFilter.size == 1) {
+                    item { studentStats(studentFilter[0]) }
+                } else {
+                    item { Text("Keine Personen gefunden") }
                 }
             }
         }

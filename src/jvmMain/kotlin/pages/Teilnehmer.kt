@@ -19,7 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dialogs.passwordDialog
+import dialogs.passwordPrompt
 import dialogs.stickerDialog
 import getTotalTrainingSessions
 import gretting
@@ -101,7 +101,7 @@ fun teilnehmerSelector(members: List<Member>, activeTrainer: Trainer, changeScre
         }
 
         if (showCheckboxPasswordDialog) {
-            passwordDialog(
+            passwordPrompt(
                 result = { pwCorrect ->
                     handleAsExam = pwCorrect
                     showCheckboxPasswordDialog = !pwCorrect

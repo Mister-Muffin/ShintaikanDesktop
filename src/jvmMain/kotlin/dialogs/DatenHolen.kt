@@ -7,9 +7,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.WindowPosition
-import androidx.compose.ui.window.rememberDialogState
 import configFilePath
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -27,50 +24,33 @@ private const val textWhenDone = "Complete!"
 
 @Composable
 fun datenHolenWindow(onDismiss: () -> Unit) {
-
-    var requirePassword by remember { mutableStateOf(true) }
-
     val textFieldValue = remember { mutableStateOf("") }
 
     val coroutineScope = rememberCoroutineScope()
 
-    if (requirePassword) {
-        passwordDialog(
-            result = { pwCorrect -> requirePassword = !pwCorrect }, // if password correct, set requirePasswort to false
-            onDissmiss = onDismiss
-        )
-    } else {
-        coroutineScope.launch(Dispatchers.IO) {
-            dumpCurrentDatabase()
-            exMembers(textFieldValue)
-            renameMembers(textFieldValue)
-            updateMembers(textFieldValue)
-        }.invokeOnCompletion {
-            textFieldValue.value = textWhenDone
-        }
+    coroutineScope.launch(Dispatchers.IO) {
+        dumpCurrentDatabase()
+        exMembers(textFieldValue)
+        renameMembers(textFieldValue)
+        updateMembers(textFieldValue)
+    }.invokeOnCompletion {
+        textFieldValue.value = textWhenDone
+    }
 
-        Dialog(
-            state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 600.dp, height = 250.dp),
-            title = "Daten holen",
-            onCloseRequest = { if (textFieldValue.value == textWhenDone) onDismiss() }
-        ) {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
 
-                // csv structure: Name;Gruppe;Grad;Geb.Dat;e;f;g
-                //                0   ;  1   ; 2  ; 3     ;4;5;6
-                //exMembers(csvParser)
-                Text("Bitte warten...")
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(textFieldValue.value)
-                Spacer(modifier = Modifier.fillMaxHeight(.5f))
-                Button(enabled = textFieldValue.value == textWhenDone, onClick = onDismiss) {
-                    Text("Fenster schließen")
-                }
-
-            }
+        // csv structure: Name;Gruppe;Grad;Geb.Dat;e;f;g
+        //                0   ;  1   ; 2  ; 3     ;4;5;6
+        //exMembers(csvParser)
+        Text("Bitte warten...")
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(textFieldValue.value)
+        Spacer(modifier = Modifier.fillMaxHeight(.5f))
+        Button(enabled = textFieldValue.value == textWhenDone, onClick = onDismiss) {
+            Text("Fenster schließen")
         }
 
     }

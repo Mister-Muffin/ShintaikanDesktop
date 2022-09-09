@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.*
@@ -15,15 +14,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.WindowPosition
-import androidx.compose.ui.window.rememberDialogState
 import configFilePath
 import countId
 import getFirstDate
 import getTotalTrainingSessions
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import levels
@@ -31,7 +26,6 @@ import models.*
 import next
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
-import windowWidth
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
@@ -43,79 +37,68 @@ fun memberExportDialog(
 ) {
     val members = loadMembers()
     val teilnahme = loadTeilnahme()
-    MaterialTheme {
 
-        var searchFieldValue by remember { mutableStateOf("") }
-        var showTimedSuccessDialog by remember { mutableStateOf(false) }
-        val coroutineScope = rememberCoroutineScope()
+    var searchFieldValue by remember { mutableStateOf("") }
+    var showTimedSuccessDialog by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
-        if (showTimedSuccessDialog) timedSuccessDialog()
+    //if (showTimedSuccessDialog) timedSuccessDialog()
 
-        Dialog(
-            state = rememberDialogState(
-                position = WindowPosition(Alignment.Center),
-                width = windowWidth,
-                height = 700.dp
-            ),
-            title = "Teilnahme",
-            onCloseRequest = onDismiss,
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        TextField(
+            searchFieldValue,
+            onValueChange = { searchFieldValue = it },
+            placeholder = {
+                Text("Hier suchen...", style = TextStyle.Default.copy(fontSize = 16.sp))
+            },
+            singleLine = true,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
+        LazyColumn(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxHeight(.9f).fillMaxWidth().padding(bottom = 8.dp)
         ) {
-            Column(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                TextField(
-                    searchFieldValue,
-                    onValueChange = { searchFieldValue = it },
-                    placeholder = {
-                        Text("Hier suchen...", style = TextStyle.Default.copy(fontSize = 16.sp))
-                    },
-                    singleLine = true,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
-                LazyColumn(
-                    verticalArrangement = Arrangement.Top,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.fillMaxHeight(.9f).fillMaxWidth().padding(bottom = 8.dp)
-                ) {
-                    item {
-                        Row {
-                            Text("Name", modifier = Modifier.width(150.dp))
-                            Text("Alter Grad", modifier = Modifier.width(180.dp))
-                            Text("Neuer Grad", modifier = Modifier.width(180.dp))
-                            Text("Einh.", modifier = Modifier.width(90.dp))
-                            Text("Mon.", modifier = Modifier.width(90.dp))
-                            Text("Bereit?", modifier = Modifier.width(350.dp))
-                        }
-                    }
-                    items(members.filter {
-                        (it.prename + it.surname).lowercase().contains(searchFieldValue.lowercase().replace(" ", ""))
-                    }) { member ->
-                        val isReadyString = isReadyForExam(member, teilnahme)
-                        Row {
-                            nameText(member, isReadyString.second)
-                            oldLevel(member)
-                            newLevel(member)
-                            unitsSinceLastExam(member, teilnahme)
-                            periodLastExam(member)
-                            reasonText(isReadyString.second)
-                        }
-                    }
+            item {
+                Row {
+                    Text("Name", modifier = Modifier.width(150.dp))
+                    Text("Alter Grad", modifier = Modifier.width(180.dp))
+                    Text("Neuer Grad", modifier = Modifier.width(180.dp))
+                    Text("Einh.", modifier = Modifier.width(90.dp))
+                    Text("Mon.", modifier = Modifier.width(90.dp))
+                    Text("Bereit?", modifier = Modifier.width(350.dp))
                 }
-                Button(modifier = Modifier.fillMaxWidth(.5f), onClick = {
-                    coroutineScope.launch { exportMembers() }.invokeOnCompletion {
-                        coroutineScope.launch {
-                            showTimedSuccessDialog = true
-                            delay(2000)
-                            showTimedSuccessDialog = false
-                        }
-                    }
-                }) {
-                    Text("Exportieren")
+            }
+            items(members.filter {
+                (it.prename + it.surname).lowercase().contains(searchFieldValue.lowercase().replace(" ", ""))
+            }) { member ->
+                val isReadyString = isReadyForExam(member, teilnahme)
+                Row {
+                    nameText(member, isReadyString.second)
+                    oldLevel(member)
+                    newLevel(member)
+                    unitsSinceLastExam(member, teilnahme)
+                    periodLastExam(member)
+                    reasonText(isReadyString.second)
                 }
             }
         }
-
+        Button(modifier = Modifier.fillMaxWidth(.5f), onClick = {
+            coroutineScope.launch { exportMembers() }.invokeOnCompletion {
+                /* commented out because dialogs don't work on Raspberry Pi (yet?)
+                coroutineScope.launch {
+                    showTimedSuccessDialog = true
+                    delay(2000)
+                    showTimedSuccessDialog = false
+                }*/
+                showTimedSuccessDialog = true
+            }
+        }) {
+            Text(if (showTimedSuccessDialog) "Erfolgreich exportiert" else "Exportieren")
+        }
     }
 }
 
@@ -293,8 +276,9 @@ private suspend fun exportMembers() {
     csvPrinter.close()
 }
 
+/*
 @Composable
-internal fun timedSuccessDialog() {
+private fun timedSuccessDialog() {
     Dialog(
         state = rememberDialogState(
             position = WindowPosition(Alignment.Center),
@@ -313,4 +297,4 @@ internal fun timedSuccessDialog() {
             Text("Erfolg!")
         }
     }
-}
+}*/
