@@ -31,7 +31,12 @@ import java.util.*
 private val farben = arrayOf("Weiss", "Gelb", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
 
 @Composable
-fun teilnehmerSelector(members: List<Member>, activeTrainer: Trainer, changeScreen: (id: Int) -> Unit) {
+fun teilnehmerSelector(
+    members: List<Member>,
+    activeTrainer: Trainer,
+    password: String,
+    changeScreen: (id: Int) -> Unit
+) {
 
     val searchQuery = remember { mutableStateOf("") }
     var handleAsExam by remember { mutableStateOf(false) }
@@ -102,11 +107,11 @@ fun teilnehmerSelector(members: List<Member>, activeTrainer: Trainer, changeScre
 
         if (showCheckboxPasswordDialog) {
             passwordPrompt(
+                password = password,
                 result = { pwCorrect ->
                     handleAsExam = pwCorrect
                     showCheckboxPasswordDialog = !pwCorrect
-                }, // if password correct, set requirePasswort to false
-                onDissmiss = { showCheckboxPasswordDialog = false }
+                } // if password correct, set requirePasswort to false
             )
         }
 

@@ -139,7 +139,7 @@ fun main() = application {
                 }
 
                 2 -> {
-                    teilnehmerSelector(students, activeTrainer!!) { screenID = it }
+                    teilnehmerSelector(students, activeTrainer!!, password) { screenID = it }
                 }
 
                 3 -> {
