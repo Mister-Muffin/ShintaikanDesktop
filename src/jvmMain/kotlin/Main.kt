@@ -66,6 +66,8 @@ fun main() = application {
     val user: String = config.settings.user //System.getenv("S_DSK_USER") ?: "postgres"
     val password: String = config.settings.password //System.getenv("S_DSK_PASSWORD") ?: "mysecretpassword"
     val database: String = config.settings.database
+    val appPassword: String = config.settings.appPassword
+    val exportPath: String = config.settings.exportPath
 
     Database.connect(
         "jdbc:postgresql://${ip}:${port}/${database}",
@@ -144,7 +146,7 @@ fun main() = application {
                     successPage { screenID = it }
                 }
                 // needed because dialog windows don't work on Raspberry Pi
-                4 -> passwordPrompt(result = { if (it) screenID = forwardedScreenId }, onDissmiss = { screenID = 0 })
+                4 -> passwordPrompt(password = appPassword) { if (it) screenID = forwardedScreenId }
 
                 5 -> manageTrainerDialog(students, onDismiss = { screenID = 0 })
 
@@ -153,7 +155,7 @@ fun main() = application {
                 7 -> datenHolenWindow { screenID = 0 }
 
                 8 -> memberExportDialog { screenID = 0 }
-
+                //
                 else -> Text(
                     "Missing page, click the screen to go back",
                     modifier = Modifier.clickable { screenID = 0 })

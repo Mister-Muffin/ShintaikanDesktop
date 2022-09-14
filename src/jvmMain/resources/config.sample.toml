@@ -1,6 +1,8 @@
 [settings]
 ip = "172.17.0.1"
-port = "5434"
+port = "5432"
 user = "postgres"
 password = "mysecretpassword"
 database = "postgres"
+appPassword = "gFdxnnNb.1-"
+exportPath = ""

@@ -15,10 +15,10 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun passwordPrompt(result: (pwCorrect: Boolean) -> Unit, onDissmiss: () -> Unit) {
+fun passwordPrompt(password: String, result: (pwCorrect: Boolean) -> Unit) {
 
     var textViewText by remember { mutableStateOf("Bitte gib das Passwort ein") }
-    var passwordFieldVal by remember { mutableStateOf("test") } //TODO: Set empty string for production
+    var passwordFieldVal by remember { mutableStateOf("") } //TODO: Set empty string for production
     var errorTextField by remember { mutableStateOf(false) }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -35,7 +35,7 @@ fun passwordPrompt(result: (pwCorrect: Boolean) -> Unit, onDissmiss: () -> Unit)
             modifier = Modifier.padding(bottom = 16.dp),
             onValueChange = { passwordFieldVal = it })
         Button(onClick = {
-            val passwordCorrect = passwordFieldVal == "test" // <- Password
+            val passwordCorrect = passwordFieldVal == password // <- Password
             errorTextField = !passwordCorrect
             textViewText = if (passwordCorrect) textViewText else "Passwort falsch!"
 
