@@ -5,7 +5,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -66,9 +65,10 @@ fun main() = application {
     val port: String = config.settings.port //System.getenv("S_DSK_PORT") ?: "5434"
     val user: String = config.settings.user //System.getenv("S_DSK_USER") ?: "postgres"
     val password: String = config.settings.password //System.getenv("S_DSK_PASSWORD") ?: "mysecretpassword"
+    val database: String = config.settings.database
 
     Database.connect(
-        "jdbc:postgresql://${ip}:${port}/",
+        "jdbc:postgresql://${ip}:${port}/${database}",
         driver = "org.postgresql.Driver",
         user = user,
         password = password
@@ -84,11 +84,7 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = "Teilnahme",
         icon = BitmapPainter(image = imageBitmap),
-        state = rememberWindowState(
-            position = WindowPosition(Alignment.Center),
-            width = windowWidth,
-            height = windowHeight
-        ),
+        state = rememberWindowState(placement = WindowPlacement.Maximized),
     ) {
         var screenID by remember { mutableStateOf(0) }
         var activeTrainer: Trainer? by remember { mutableStateOf(null) }
