@@ -49,7 +49,7 @@ fun examsDialog(members: List<Member>, onDismiss: () -> Unit) {
             .lowercase()
             .contains(searchFieldVal.value.lowercase().replace(" ", ""))
     }
-    
+
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -116,7 +116,13 @@ private fun studentStats(member: Member) { //datum letzte prüfung | wie lange h
         // Show member's group and replace "Benjamini" with "Karamini" if so
         Text("Gruppe: ${if (member.group == "Benjamini") "Karamini" else member.group}")
 
-        Text("Grad: ${member.level}")
+        var level: String = member.level
+        if (member.level.contains("Dan")) {
+            level = level.drop(2) // drop the first two letters
+        } else if (member.level == "z Kyu weiss") {
+            level = level.drop(2)
+        }
+        Text("Grad: $level")
 
         textTotalTrainingSessions(member, teilnahme)
 

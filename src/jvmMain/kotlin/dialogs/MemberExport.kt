@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Button
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.*
@@ -31,6 +32,12 @@ import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.Period
 
+private val nameWidth = 200.dp
+private val levelWidth = 180.dp
+private val unitsWidth = 90.dp
+private val monthWidth = 90.dp
+private val readyWidth = 500.dp
+
 @Composable
 fun memberExportDialog(
     onDismiss: () -> Unit
@@ -57,21 +64,31 @@ fun memberExportDialog(
             singleLine = true,
             modifier = Modifier.padding(horizontal = 8.dp)
         )
+        Column(
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row {
+                Text("Name", modifier = Modifier.width(nameWidth))
+                Text("Alter Grad", modifier = Modifier.width(levelWidth))
+                Text("Neuer Grad", modifier = Modifier.width(levelWidth))
+                Text("Einh.", modifier = Modifier.width(unitsWidth))
+                Text("Mon.", modifier = Modifier.width(monthWidth))
+                Text("Bereit?", modifier = Modifier.width(readyWidth))
+            }
+            Divider(
+                modifier = Modifier.width(
+                    (nameWidth.value + (2 * levelWidth.value) + unitsWidth.value + monthWidth.value + readyWidth.value).dp
+                )
+            )
+        }
+
         LazyColumn(
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxHeight(.9f).fillMaxWidth().padding(bottom = 8.dp)
         ) {
-            item {
-                Row {
-                    Text("Name", modifier = Modifier.width(150.dp))
-                    Text("Alter Grad", modifier = Modifier.width(180.dp))
-                    Text("Neuer Grad", modifier = Modifier.width(180.dp))
-                    Text("Einh.", modifier = Modifier.width(90.dp))
-                    Text("Mon.", modifier = Modifier.width(90.dp))
-                    Text("Bereit?", modifier = Modifier.width(350.dp))
-                }
-            }
             items(members.filter {
                 (it.prename + it.surname).lowercase().contains(searchFieldValue.lowercase().replace(" ", ""))
             }) { member ->
@@ -108,18 +125,24 @@ private fun nameText(member: Member, isReadyString: String?) {
     Text(
         "${member.prename} ${member.surname}",
         color = if (isReadyString == null) Color.Unspecified else Color.Red,
-        modifier = Modifier.width(150.dp)
+        modifier = Modifier.width(nameWidth)
     )
 }
 
 @Composable
 private fun oldLevel(member: Member) {
-    Text(member.level, modifier = Modifier.width(180.dp))
+    var level: String = member.level
+    if (member.level.contains("Dan")) {
+        level = level.drop(2) // drop the first two letters
+    } else if (member.level == "z Kyu weiss") {
+        level = level.drop(2)
+    }
+    Text(level, modifier = Modifier.width(levelWidth))
 }
 
 @Composable
 private fun newLevel(member: Member) {
-    Text(levels.next(member.level).first, modifier = Modifier.width(180.dp))
+    Text(levels.next(member.level).first, modifier = Modifier.width(levelWidth))
 }
 
 @Composable
@@ -132,7 +155,7 @@ private fun unitsSinceLastExam(member: Member, teilnahme: List<Teilnahme>) {
                 member.date_last_exam
             )
         }",
-        modifier = Modifier.width(90.dp), textAlign = TextAlign.Center
+        modifier = Modifier.width(unitsWidth), textAlign = TextAlign.Center
     )
 }
 
@@ -140,7 +163,7 @@ private fun unitsSinceLastExam(member: Member, teilnahme: List<Teilnahme>) {
 @Composable
 private fun periodLastExam(member: Member) {
     if (member.date_last_exam == null) {
-        Text("", modifier = Modifier.width(90.dp))
+        Text("", modifier = Modifier.width(monthWidth))
     } else {
         val period = Period.between(member.date_last_exam, LocalDate.now())
         Text("${period.toTotalMonths()},${period.days}", textAlign = TextAlign.Center, modifier = Modifier.width(90.dp))
@@ -149,7 +172,7 @@ private fun periodLastExam(member: Member) {
 
 @Composable
 private fun reasonText(isReadyString: String?) {
-    Text(isReadyString ?: "Kann nächste Prüfung machen!", modifier = Modifier.width(500.dp))
+    Text(isReadyString ?: "Kann nächste Prüfung machen!", modifier = Modifier.width(readyWidth))
 }
 //</editor-fold>
 
