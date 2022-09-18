@@ -15,7 +15,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import configFilePath
 import countId
 import getFirstDate
 import getTotalTrainingSessions
@@ -269,7 +268,7 @@ fun getLastExamOrFirstTrainingDate(member: Member, teilnahme: List<Teilnahme>): 
 private suspend fun exportMembers() {
     val teilnahme = loadTeilnahme()
     val writer = withContext(Dispatchers.IO) {
-        Files.newBufferedWriter(Paths.get("${configFilePath}pruefungsabfrage.csv"))
+        Files.newBufferedWriter(Paths.get("/mnt/papa_stick/pruefungsabfrage.csv"))
     }
 
     val csvPrinter = CSVPrinter(

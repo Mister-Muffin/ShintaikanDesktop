@@ -32,7 +32,7 @@ kotlin {
     sourceSets {
         named("jvmMain") {
             dependencies {
-                implementation(compose.desktop.currentOs)
+                implementation(compose.desktop.linux_arm64)
                 implementation("org.slf4j:slf4j-nop:1.7.36")
                 implementation("org.jetbrains.exposed:exposed-core:0.39.2")
                 implementation("org.jetbrains.exposed:exposed-jdbc:0.39.2")

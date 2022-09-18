@@ -113,7 +113,7 @@ fun dumpCurrentDatabase() {
     csvPrinter.close()
 }
 
-private const val csvPath = "/home/julian/Entwicklung/transferHauseDojo.CSV"
+private const val csvPath = "/mnt/papa_stick/transferHauseDojo.CSV"
 
 private suspend fun exMembers(text: MutableState<String>) {
     val reader = withContext(Dispatchers.IO) {
