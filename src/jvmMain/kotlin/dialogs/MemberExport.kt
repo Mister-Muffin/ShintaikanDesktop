@@ -32,7 +32,7 @@ import java.time.LocalDate
 import java.time.Period
 
 private val nameWidth = 200.dp
-private val levelWidth = 180.dp
+private val levelWidth = 200.dp
 private val unitsWidth = 90.dp
 private val monthWidth = 90.dp
 private val readyWidth = 500.dp
