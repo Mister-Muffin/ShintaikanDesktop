@@ -64,7 +64,7 @@ fun main() = application {
     val ip: String = config.settings.ip //System.getenv("S_DSK_IP") ?: "172.17.0.1"
     val port: String = config.settings.port //System.getenv("S_DSK_PORT") ?: "5434"
     val user: String = config.settings.user //System.getenv("S_DSK_USER") ?: "postgres"
-    val password: String = config.settings.password //System.getenv("S_DSK_PASSWORD") ?: "mysecretpassword"
+    val dbPassword: String = config.settings.password //System.getenv("S_DSK_PASSWORD") ?: "mysecretpassword"
     val database: String = config.settings.database
     val appPassword: String = config.settings.appPassword
     val exportPath: String = config.settings.exportPath
@@ -73,7 +73,7 @@ fun main() = application {
         "jdbc:postgresql://${ip}:${port}/${database}",
         driver = "org.postgresql.Driver",
         user = user,
-        password = password
+        password = dbPassword
     )
 
     val students = loadMembers()
@@ -139,7 +139,7 @@ fun main() = application {
                 }
 
                 2 -> {
-                    teilnehmerSelector(students, activeTrainer!!, password) { screenID = it }
+                    teilnehmerSelector(students, activeTrainer!!, appPassword) { screenID = it }
                 }
 
                 3 -> {
