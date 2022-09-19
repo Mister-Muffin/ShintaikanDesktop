@@ -214,7 +214,7 @@ internal fun isReadyForExam(member: Member, teilnahme: List<Teilnahme>): Pair<St
     if (unitsSinceLastExam < level.units) {
         val s = "Zu wenig Trainingseinheiten"
         val text =
-            "❌ $s (hat: $unitsSinceLastExam, braucht: ${level.units}, fehlen: ${level.units - unitsSinceLastExam})"
+            "❌ $s (braucht: ${level.units}, hat: $unitsSinceLastExam, fehlen: ${level.units - unitsSinceLastExam})"
         returnString += text
         returnString2 = s
     } else returnString += "✔️ Genug Trainingseinheiten"
