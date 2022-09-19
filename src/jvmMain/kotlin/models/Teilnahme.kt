@@ -84,3 +84,11 @@ fun insertTeilnahme(ids: String, isExam: Boolean) {
         }
     }
 }
+
+fun setAddUnitsSinceLastExam(member: Member) {
+    transaction {
+        MemberTable.update(where = { MemberTable.id eq member.id }) {
+            it[add_units_since_last_exam] = 0
+        }
+    }
+}

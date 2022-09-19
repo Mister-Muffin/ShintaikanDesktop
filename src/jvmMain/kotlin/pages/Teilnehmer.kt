@@ -25,7 +25,10 @@ import getTotalTrainingSessions
 import gretting
 import models.*
 import next
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.transactions.transaction
 import stickerUnits
+import java.time.LocalDate
 import java.util.*
 
 private val farben = arrayOf("Weiss", "Gelb", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
@@ -68,13 +71,15 @@ fun teilnehmerSelector(
 
     fun submit(isExam: Boolean) {
         var teilnahmeString = ""
-        for (student in newMembers) {
-            teilnahmeString = teilnahmeString + student.id + ","
+        for (member in newMembers) {
+            teilnahmeString = teilnahmeString + member.id + ","
 
-            if (student.sticker_recieved != stickerUnits.keys.last()) // Wer 800 aufkelber hat, bekommt keinen weiteren (catch indexOutOfBounds)
-                if (getTotalTrainingSessions(student, teilnahme) // ALLE Trainingseinheiten
-                    >= stickerUnits.next(student.sticker_recieved).first
-                ) studentsStickers.add(student)
+            if (isExam) setAddUnitsSinceLastExam(member) // set this to 0, so it won't get added in the future
+
+            if (member.sticker_recieved != stickerUnits.keys.last()) // Wer 800 aufkelber hat, bekommt keinen weiteren (catch indexOutOfBounds)
+                if (getTotalTrainingSessions(member, teilnahme) // ALLE Trainingseinheiten
+                    >= stickerUnits.next(member.sticker_recieved).first
+                ) studentsStickers.add(member)
         }
         insertTeilnahme(teilnahmeString, isExam)
         increaseTrainerUnitCount(activeTrainer)

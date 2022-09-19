@@ -197,7 +197,7 @@ internal fun isReadyForExam(member: Member, teilnahme: List<Teilnahme>): Pair<St
         "Der Schüler war noch nie im Training"
     )
 
-    val unitsSinceLastExam = countId(member, teilnahme, dateLastExam)
+    val unitsSinceLastExam = countId(member, teilnahme, dateLastExam) + member.add_units_since_last_exam
     val monthsSinceLastExam = Period.between(dateLastExam, LocalDate.now()).toTotalMonths()
     // add two months to the birthday in case of holidays
     val memberAge = Period.between(member.birthday, LocalDate.now().plusMonths(2)).years
@@ -213,7 +213,8 @@ internal fun isReadyForExam(member: Member, teilnahme: List<Teilnahme>): Pair<St
 
     if (unitsSinceLastExam < level.units) {
         val s = "Zu wenig Trainingseinheiten"
-        val text = "❌ $s ($unitsSinceLastExam) ${level.units - unitsSinceLastExam}"
+        val text =
+            "❌ $s (hat: $unitsSinceLastExam, braucht: ${level.units}, fehlen: ${level.units - unitsSinceLastExam})"
         returnString += text
         returnString2 = s
     } else returnString += "✔️ Genug Trainingseinheiten"
