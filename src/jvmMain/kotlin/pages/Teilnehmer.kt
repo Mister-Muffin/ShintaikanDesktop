@@ -25,10 +25,7 @@ import getTotalTrainingSessions
 import gretting
 import models.*
 import next
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.transactions.transaction
 import stickerUnits
-import java.time.LocalDate
 import java.util.*
 
 private val farben = arrayOf("Weiss", "Gelb", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
@@ -142,7 +139,7 @@ fun teilnehmerSelector(
                             ).joinToString(" ") // "prename surname"
                                 .contains(searchQuery.value)
                             // <- filter again for search
-                        }.sortedByDescending { it.id }.sortedByDescending { it.level }.toList()
+                        }.sortedBy { it.prename }.sortedByDescending { it.level }.toList()
                     )
                     { /* linke spalte */ student ->
                         listBox(student) {
@@ -219,7 +216,7 @@ fun teilnehmerSelector(
                         onClick = { submit(handleAsExam) }) {
                         Text(
                             textAlign = TextAlign.Center,
-                            text = if (newMembers.isEmpty()) "Teilnehmen aus der ersten Spalte auswählen" else "Eingabe bestätigen!"
+                            text = if (newMembers.isEmpty()) "Teilnehmen aus der ersten Spalte auswählen" else "${newMembers.size} Teilnehmer eintragen!"
                         )
                     }
                 }

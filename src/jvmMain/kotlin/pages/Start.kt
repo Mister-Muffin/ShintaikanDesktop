@@ -84,7 +84,7 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
                 items(birthdays) {
                     Row {
                         val birthday = it.birthday!!.plusYears(((LocalDate.now().year - it.birthday.year).toLong()))
-                        val period = Period.between(LocalDate.now(), birthday).days
+                        val period = Period.between(LocalDate.now(), birthday.plusDays(1)).days
                         Text(
                             text = "${it.surname}, ${it.prename}: ",
                             fontWeight = FontWeight.Normal,
