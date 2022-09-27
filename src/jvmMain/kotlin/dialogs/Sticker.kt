@@ -20,7 +20,7 @@ import androidx.compose.ui.window.rememberDialogState
 import getTotalTrainingSessions
 import models.Member
 import models.Trainer
-import models.editStudentSticker
+import models.editMemberSticker
 import models.loadTeilnahme
 import next
 import stickerUnits
@@ -30,7 +30,7 @@ import java.time.LocalDate
 fun stickerDialog(
     stickerStudentsList: List<Member>,
     activeTrainer: Trainer,
-    onDismiss: (members: List<Member>) -> Unit
+    onDismiss: () -> Unit
 ) {
 
     val mutableMembers = remember { mutableStateListOf<Member>() }
@@ -48,14 +48,7 @@ fun stickerDialog(
      * This function returns true if all radio buttons have been clicked at lease once to ensure,
      * that the user has made his desicion for each student
      */
-    fun buttonEnabled(): Boolean {
-        mutableMembers.forEach { s ->
-            if (!s.radioClicked) {
-                return false
-            }
-        }
-        return true
-    }
+    fun buttonEnabled() = mutableMembers.all { it.radioClicked }
 
     Dialog(
         state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 750.dp, height = 600.dp),
@@ -109,7 +102,7 @@ fun stickerDialog(
                         val nextStickerRecieved = stickerUnits.next(member.sticker_recieved).first
                         val nextStickerRecievedBy = "$nextStickerRecieved:${activeTrainer.id}:${LocalDate.now()}"
                         if (member.stickerRecieved) {
-                            editStudentSticker(
+                            editMemberSticker(
                                 member.copy(
                                     sticker_recieved_by = nextStickerRecievedBy,
                                     sticker_recieved = nextStickerRecieved
@@ -132,7 +125,21 @@ fun stickerDialog(
                          wieder false, und der Dialog würde erst bei der nächsten Trainingseintragung
                          wieder kommen.
                          */
-                        onDismiss(mutableMembers)
+
+                        val tmp: MutableList<Member> = mutableListOf()
+                        mutableMembers.forEach { tmp.add(it) }
+                        mutableMembers.clear()
+                        tmp.forEach {
+                            if (it.sticker_show_again) {
+                                mutableMembers.add(member)
+                            }
+                        }
+                        if (tmp.isEmpty()) {
+                            onDismiss()
+                        } else {
+                            mutableMembers.clear()
+                            tmp.forEach { mutableMembers.add(it) }
+                        }
                     }
                 } catch (e: java.util.ConcurrentModificationException) {
                     println("WARNING: Error catched")

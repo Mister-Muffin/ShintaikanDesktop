@@ -149,7 +149,7 @@ fun increaseTrainerUnitCount(trainer: Trainer) {
 }
 
 @Suppress("RemoveRedundantQualifierName")
-fun editStudentSticker(member: Member) {
+fun editMemberSticker(member: Member) {
     val currentStickerRecievedBy = transaction {
         MemberTable
             .slice(MemberTable.id, MemberTable.sticker_recieved_by)

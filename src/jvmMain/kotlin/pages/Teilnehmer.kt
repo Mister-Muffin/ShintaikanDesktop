@@ -93,17 +93,9 @@ fun teilnehmerSelector(
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
 
         if (showStickerDialog) {
-            stickerDialog(studentsStickers, activeTrainer) { list ->
-                // hier werden alle member wieder aufgelistet, bei denen 'sticker_show_again' true war
-                list.forEach { member ->
-                    if (member.sticker_show_again) {
-                        studentsStickers.clear()
-                        list.forEach { studentsStickers.add(it) }
-                    } else {
-                        showStickerDialog = false
-                        changeScreen(3)
-                    }
-                }
+            stickerDialog(studentsStickers, activeTrainer) {
+                showStickerDialog = false
+                changeScreen(3)
             }
         }
 
