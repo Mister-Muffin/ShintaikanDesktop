@@ -8,6 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import configFilePath
+import driveFilePath
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -113,7 +114,7 @@ fun dumpCurrentDatabase() {
     csvPrinter.close()
 }
 
-private const val csvPath = "/mnt/papa_stick/transferHauseDojo.CSV"
+private const val csvPath = "${driveFilePath}transferHauseDojo.CSV"
 
 private suspend fun exMembers(text: MutableState<String>) {
     val reader = withContext(Dispatchers.IO) {

@@ -1,13 +1,16 @@
 package dialogs
 
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -37,6 +40,8 @@ fun stickerDialog(
         }
     }
 
+    val lazyState = rememberLazyListState()
+
     val teilnahme = loadTeilnahme()
 
     /**
@@ -61,105 +66,142 @@ fun stickerDialog(
             modifier = Modifier.fillMaxSize().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LazyColumn(
-                verticalArrangement = Arrangement.Top,
-                horizontalAlignment = Alignment.CenterHorizontally,
+            Row(
                 modifier = Modifier.fillMaxHeight(.8f).padding(bottom = 8.dp)
             ) {
-                item {
-                    Text("Folgende Teilnehmer bekommen Aufkleber:", style = MaterialTheme.typography.subtitle1)
-                }
-                item { Divider(modifier = Modifier.padding(vertical = 10.dp)) }
-                items(mutableMembers) { student ->
-                    val total = getTotalTrainingSessions(student, teilnahme)
-                    LazyRow(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        item {
-                            if (student.sticker_recieved != stickerUnits.keys.last()) {
-                                if (
-                                    student.sticker_recieved == stickerUnits.keys.toList()[stickerUnits.keys.size - 2] ||
-                                    total < stickerUnits.next(stickerUnits.next(student.sticker_recieved).first).first
-                                ) {
-                                    Text(
-                                        "${student.prename} ${student.surname}, hat " +
-                                                "$total Trainingseinheiten und bekommt einen " +
-                                                "${stickerUnits.next(student.sticker_recieved).second} Aufkleber",
-                                        modifier = Modifier.padding(8.dp).width(300.dp)
-                                    )
-                                } else {
-                                    Text(
-                                        "${student.prename} ${student.surname}, hat $total Trainingseinheiten und bekommt aber immer noch einen " +
-                                                "${stickerUnits.next(student.sticker_recieved).second} Aufkleber",
-                                        modifier = Modifier.padding(8.dp).width(300.dp)
-                                    )
-                                }
-                            }
-                        }
-                        item {
-                            Text("Erhalten")
-                            RadioButton(
-                                student.stickerRecieved && student.radioClicked,
-                                onClick = {
-                                    mutableMembers[mutableMembers.indexOf(student)] =
-                                        student.copy(
-                                            stickerRecieved = true,
-                                            radioClicked = true,
-                                            sticker_show_again = if (student.sticker_recieved == stickerUnits.keys.toList()[stickerUnits.keys.size - 2]) false else
-                                                total >= stickerUnits.next(stickerUnits.next(student.sticker_recieved).first).first // erster Teil vor dem && ist das gegenereignis von der if oben < / >=
-                                        )
-                                })
+                LazyColumn(
+                    state = lazyState,
+                    verticalArrangement = Arrangement.Top,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth(.9f)
+                ) {
+                    item {
+                        Text("Folgende Teilnehmer bekommen Aufkleber:", style = MaterialTheme.typography.subtitle1)
+                    }
+                    item { Divider(modifier = Modifier.padding(vertical = 10.dp)) }
+                    items(mutableMembers) { student ->
+                        val total = getTotalTrainingSessions(student, teilnahme)
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            description(student, total)
+
+                            radioRecieved(student, mutableMembers, total)
+
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text("Nicht erhalten", style = MaterialTheme.typography.body1)
-                            RadioButton(
-                                !student.stickerRecieved && student.radioClicked,
-                                onClick = {
-                                    mutableMembers[mutableMembers.indexOf(student)] =
-                                        student.copy(
-                                            stickerRecieved = false,
-                                            radioClicked = true,
-                                            sticker_show_again = false
-                                        )
-                                })
+
+                            radioNotRecieved(student, mutableMembers)
                         }
                     }
                 }
+                VerticalScrollbar(
+                    modifier = Modifier.fillMaxHeight().padding(top = 35.dp),
+                    adapter = rememberScrollbarAdapter(
+                        scrollState = lazyState
+                    )
+                )
             }
             Button(enabled = buttonEnabled(), modifier = Modifier.fillMaxWidth(.5f), onClick = {
-                mutableMembers.forEach { member ->
-                    val nextStickerRecieved = stickerUnits.next(member.sticker_recieved).first
-                    val nextStickerRecievedBy = "$nextStickerRecieved:${activeTrainer.id}:${LocalDate.now()}"
-                    if (member.stickerRecieved) {
-                        editStudentSticker(
-                            member.copy(
-                                sticker_recieved_by = nextStickerRecievedBy,
-                                sticker_recieved = nextStickerRecieved
+                try {
+                    mutableMembers.forEach { member ->
+                        val nextStickerRecieved = stickerUnits.next(member.sticker_recieved).first
+                        val nextStickerRecievedBy = "$nextStickerRecieved:${activeTrainer.id}:${LocalDate.now()}"
+                        if (member.stickerRecieved) {
+                            editStudentSticker(
+                                member.copy(
+                                    sticker_recieved_by = nextStickerRecievedBy,
+                                    sticker_recieved = nextStickerRecieved
+                                )
                             )
-                        )
 
+                        }
+                        if (member.sticker_recieved != stickerUnits.keys.toList()[stickerUnits.keys.size - 1]) {
+                            mutableMembers[mutableMembers.indexOf(member)] =
+                                member.copy(
+                                    sticker_recieved_by = nextStickerRecievedBy,
+                                    radioClicked = false,
+                                    sticker_recieved = nextStickerRecieved
+                                )
+                        }
+                        /* Die geänderten 'members' müssen zurückgegeben werden, da bei den 'member', die
+                         nochmal aufgelistet werden sollen, 'sticker_show_again' auf true gesetzt wird.
+                         Würden die Mitglieder hier nicht zurückgegeben werden,
+                         sondern die Daten neu geladen werden, wäre diese Eigenschaft (sticker_show_again)
+                         wieder false, und der Dialog würde erst bei der nächsten Trainingseintragung
+                         wieder kommen.
+                         */
+                        onDismiss(mutableMembers)
                     }
-                    if (member.sticker_recieved != stickerUnits.keys.toList()[stickerUnits.keys.size - 1]) {
-                        mutableMembers[mutableMembers.indexOf(member)] =
-                            member.copy(
-                                sticker_recieved_by = nextStickerRecievedBy,
-                                radioClicked = false,
-                                sticker_recieved = nextStickerRecieved
-                            )
-                    }
-                    /* Die geänderten 'members' müssen zurückgegeben werden, da bei den 'member', die
-                     nochmal aufgelistet werden sollen, 'sticker_show_again' auf true gesetzt wird.
-                     Würden die Mitglieder hier nicht zurückgegeben werden,
-                     sondern die Daten neu geladen werden, wäre diese Eigenschaft (sticker_show_again)
-                     wieder false, und der Dialog würde erst bei der nächsten Trainingseintragung
-                     wieder kommen.
-                     */
-                    onDismiss(mutableMembers)
+                } catch (e: java.util.ConcurrentModificationException) {
+                    println("WARNING: Error catched")
                 }
             }) {
                 Text("OK")
             }
+        }
+    }
+}
+
+@Composable
+private fun radioRecieved(
+    student: Member,
+    mutableMembers: SnapshotStateList<Member>,
+    total: Int
+) {
+    Text("Erhalten")
+    RadioButton(
+        student.stickerRecieved && student.radioClicked,
+        onClick = {
+            mutableMembers[mutableMembers.indexOf(student)] =
+                student.copy(
+                    stickerRecieved = true,
+                    radioClicked = true,
+                    sticker_show_again = if (student.sticker_recieved == stickerUnits.keys.toList()[stickerUnits.keys.size - 2]) false else
+                        total >= stickerUnits.next(stickerUnits.next(student.sticker_recieved).first).first // erster Teil vor dem && ist das gegenereignis von der if oben < / >=
+                )
+        })
+}
+
+@Composable
+private fun radioNotRecieved(
+    student: Member,
+    mutableMembers: SnapshotStateList<Member>
+) {
+    Text("Nicht erhalten")
+    RadioButton(
+        !student.stickerRecieved && student.radioClicked,
+        onClick = {
+            mutableMembers[mutableMembers.indexOf(student)] =
+                student.copy(
+                    stickerRecieved = false,
+                    radioClicked = true,
+                    sticker_show_again = false
+                )
+        })
+}
+
+@Composable
+private fun description(student: Member, total: Int) {
+    val textModifier = Modifier.padding(8.dp).width(300.dp)
+    if (student.sticker_recieved != stickerUnits.keys.last()) {
+        if (
+            student.sticker_recieved == stickerUnits.keys.toList()[stickerUnits.keys.size - 2] ||
+            total < stickerUnits.next(stickerUnits.next(student.sticker_recieved).first).first
+        ) {
+            Text(
+                "${student.prename} ${student.surname}, hat " +
+                        "$total Trainingseinheiten und bekommt einen " +
+                        "${stickerUnits.next(student.sticker_recieved).second} Aufkleber",
+                modifier = textModifier
+            )
+        } else {
+            Text(
+                "${student.prename} ${student.surname}, hat $total Trainingseinheiten und bekommt aber immer noch einen " +
+                        "${stickerUnits.next(student.sticker_recieved).second} Aufkleber",
+                modifier = textModifier
+            )
         }
     }
 }

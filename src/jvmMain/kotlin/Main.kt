@@ -36,6 +36,7 @@ import kotlin.io.path.createDirectory
 import kotlin.io.path.notExists
 
 const val configFileName = "config.toml"
+const val driveFilePath = "/mnt/papa_stick/"
 val windowWidth = 1152.dp
 val windowHeight = 864.dp
 internal val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"

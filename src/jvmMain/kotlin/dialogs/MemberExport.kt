@@ -16,6 +16,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import countId
+import driveFilePath
 import getFirstDate
 import getTotalTrainingSessions
 import kotlinx.coroutines.Dispatchers
@@ -269,7 +270,7 @@ fun getLastExamOrFirstTrainingDate(member: Member, teilnahme: List<Teilnahme>): 
 private suspend fun exportMembers() {
     val teilnahme = loadTeilnahme()
     val writer = withContext(Dispatchers.IO) {
-        Files.newBufferedWriter(Paths.get("/mnt/papa_stick/pruefungsabfrage.csv"))
+        Files.newBufferedWriter(Paths.get("${driveFilePath}pruefungsabfrage.csv"))
     }
 
     val csvPrinter = CSVPrinter(
