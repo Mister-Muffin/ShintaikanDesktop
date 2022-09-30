@@ -73,7 +73,7 @@ fun gretting(): String {
 /**
  * Returns the legth of an array which is equal to Array.size - 1
  */
-val <T> Array<T>.length: Int
+val <T> Array<T>.lastIndex: Int
     get() {
         return this.size - 1
     }

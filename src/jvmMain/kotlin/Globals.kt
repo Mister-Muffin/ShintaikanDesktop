@@ -3,6 +3,9 @@ val stickerUnits = mapOf(
     200 to "Fuchs", 300 to "Phoenix", 500 to "Gottesanbeterin", 800 to "Reier"
 )
 
+fun Int.nextStickerUnit() = stickerUnits.next(this)
+fun Pair<Int, String?>.nextStickerUnit() = first.nextStickerUnit()
+
 val levels = mapOf(
     "z Kyu weiss" to LevelRequirements(units = 0),
     "9/10 Kyu weiss-rot" to LevelRequirements(months = 3, units = 10),
