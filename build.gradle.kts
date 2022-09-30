@@ -33,6 +33,11 @@ kotlin {
         named("jvmMain") {
             dependencies {
                 implementation(compose.desktop.linux_arm64)
+                // https://youtrack.jetbrains.com/issue/KTIJ-22262/Compose-IDE-False-positive-Cannot-access-class-androidxcomposeuigeometrySize-error#focus=Comments-27-6447983.0-0
+                implementation("org.jetbrains.compose.ui:ui-graphics-desktop:1.1.0")
+                implementation("org.jetbrains.compose.ui:ui-geometry-desktop:1.1.0")
+                implementation("org.jetbrains.compose.foundation:foundation-desktop:1.1.0")
+                //
                 implementation("org.slf4j:slf4j-nop:1.7.36")
                 implementation("org.jetbrains.exposed:exposed-core:0.39.2")
                 implementation("org.jetbrains.exposed:exposed-jdbc:0.39.2")
