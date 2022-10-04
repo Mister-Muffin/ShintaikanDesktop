@@ -130,21 +130,13 @@ fun main() = application {
             )
         ) {
             when (screenID) {
-                0 -> {
-                    startPage { screenID = it }
-                }
+                0 -> startPage { screenID = it }
 
-                1 -> {
-                    trainerSelector { id, selectedTrainer -> screenID = id; activeTrainer = selectedTrainer }
-                }
+                1 -> trainerSelector { id, selectedTrainer -> screenID = id; activeTrainer = selectedTrainer }
 
-                2 -> {
-                    teilnehmerSelector(students, activeTrainer!!, appPassword) { screenID = it }
-                }
+                2 -> teilnehmerSelector(students, activeTrainer!!, appPassword) { screenID = it }
 
-                3 -> {
-                    successPage { screenID = it }
-                }
+                3 -> successPage { screenID = it }
                 // needed because dialog windows don't work on Raspberry Pi
                 4 -> passwordPrompt(password = appPassword) { if (it) screenID = forwardedScreenId }
 
@@ -152,7 +144,7 @@ fun main() = application {
 
                 6 -> examsDialog(students, onDismiss = { screenID = 0 })
 
-                7 -> datenHolenWindow { screenID = 0 }
+                7 -> DatenHolenWindow(drivePath, { screenID = 0 })
 
                 8 -> memberExportDialog(drivePath, { screenID = 0 })
                 //

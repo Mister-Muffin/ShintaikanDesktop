@@ -22,9 +22,8 @@ import java.time.LocalTime
 private const val textWhenDone = "Complete!"
 
 @Composable
-fun datenHolenWindow(onDismiss: () -> Unit) {
-    val textFieldValue = remember { mutableStateOf("") }
-
+fun DatenHolenWindow(drivePath: String, onDismiss: () -> Unit) {
+    var textFieldValue by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
     val csvPath = "${drivePath}transferHauseDojo.CSV"
@@ -61,9 +60,9 @@ fun datenHolenWindow(onDismiss: () -> Unit) {
         //exMembers(csvParser)
         Text("Bitte warten...")
         Spacer(modifier = Modifier.height(8.dp))
-        Text(textFieldValue.value)
+        Text(textFieldValue)
         Spacer(modifier = Modifier.fillMaxHeight(.5f))
-        Button(enabled = textFieldValue.value == textWhenDone, onClick = onDismiss) {
+        Button(enabled = textFieldValue == textWhenDone, onClick = onDismiss) {
             Text("Fenster schließen")
         }
 
@@ -145,7 +144,7 @@ private suspend fun exMembers(setText: (String) -> Unit, csvParser: CSVParser) {
 
             if (!exMember.isNullOrEmpty()) {
                 val exMemberName = splitName(exMember)
-                text.value = "${exMemberName.first}|${exMemberName.second}"
+                setText("${exMemberName.first}|${exMemberName.second}")
                 deactivateMember(exMemberName)
             }
 
@@ -179,7 +178,7 @@ private suspend fun renameMembers(setText: (String) -> Unit, csvParser: CSVParse
                 val oldName1 = splitName(oldName)
                 val newName1 = splitName(newName)
 
-                text.value = "${oldName1.first}|${oldName1.second}"
+                setText("${oldName1.first}|${oldName1.second}")
                 renameMember(oldName1, newName1)
             }
 
@@ -214,7 +213,7 @@ private suspend fun updateMembers(setText: (String) -> Unit, csvParser: CSVParse
             if (!name.isNullOrEmpty()) {
                 val namePair = splitName(name)
 
-                text.value = name
+                setText(name)
                 updateMember(namePair, group, level, birthday)
             }
 
