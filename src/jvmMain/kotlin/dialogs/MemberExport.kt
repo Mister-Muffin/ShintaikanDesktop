@@ -16,7 +16,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import countId
-import driveFilePath
 import getFirstDate
 import getTotalTrainingSessions
 import kotlinx.coroutines.Dispatchers
@@ -39,9 +38,7 @@ private val monthWidth = 90.dp
 private val readyWidth = 500.dp
 
 @Composable
-fun memberExportDialog(
-    onDismiss: () -> Unit
-) {
+fun memberExportDialog(drivePath: String, onDismiss: () -> Unit) {
     val members = loadMembers()
     val teilnahme = loadTeilnahme()
 
@@ -104,7 +101,7 @@ fun memberExportDialog(
             }
         }
         Button(modifier = Modifier.fillMaxWidth(.5f), onClick = {
-            coroutineScope.launch { exportMembers() }.invokeOnCompletion {
+            coroutineScope.launch { exportMembers(drivePath) }.invokeOnCompletion {
                 /* commented out because dialogs don't work on Raspberry Pi (yet?)
                 coroutineScope.launch {
                     showTimedSuccessDialog = true
@@ -267,10 +264,10 @@ fun getLastExamOrFirstTrainingDate(member: Member, teilnahme: List<Teilnahme>): 
     return dateLastExam
 }
 
-private suspend fun exportMembers() {
+private suspend fun exportMembers(drivePath: String) {
     val teilnahme = loadTeilnahme()
     val writer = withContext(Dispatchers.IO) {
-        Files.newBufferedWriter(Paths.get("${driveFilePath}pruefungsabfrage.csv"))
+        Files.newBufferedWriter(Paths.get("${drivePath}pruefungsabfrage.csv"))
     }
 
     val csvPrinter = CSVPrinter(

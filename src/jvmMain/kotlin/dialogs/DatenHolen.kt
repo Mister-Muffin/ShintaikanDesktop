@@ -8,9 +8,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import configFilePath
-import driveFilePath
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import models.*
 import org.apache.commons.csv.CSVFormat
@@ -29,13 +27,28 @@ fun datenHolenWindow(onDismiss: () -> Unit) {
 
     val coroutineScope = rememberCoroutineScope()
 
-    coroutineScope.launch(Dispatchers.IO) {
+    val csvPath = "${drivePath}transferHauseDojo.CSV"
+
+    LaunchedEffect(Unit) {
+        //coroutineScope.launch(Dispatchers.IO) {
+        val reader = withContext(Dispatchers.IO) {
+            Files.newBufferedReader(Paths.get(csvPath))
+        }
+        val csvParser = CSVParser(
+            reader, CSVFormat.DEFAULT
+                .withDelimiter(';')
+                .withFirstRecordAsHeader()
+                .withIgnoreHeaderCase()
+                .withTrim()
+        )
+
         dumpCurrentDatabase()
-        exMembers(textFieldValue)
-        renameMembers(textFieldValue)
-        updateMembers(textFieldValue)
-    }.invokeOnCompletion {
-        textFieldValue.value = textWhenDone
+        exMembers({ textFieldValue = it }, csvParser)
+        renameMembers({ textFieldValue = it }, csvParser)
+        updateMembers({ textFieldValue = it }, csvParser)
+        //}.invokeOnCompletion {
+        textFieldValue = textWhenDone
+        //}
     }
 
     Column(
@@ -114,19 +127,7 @@ fun dumpCurrentDatabase() {
     csvPrinter.close()
 }
 
-private const val csvPath = "${driveFilePath}transferHauseDojo.CSV"
-
-private suspend fun exMembers(text: MutableState<String>) {
-    val reader = withContext(Dispatchers.IO) {
-        Files.newBufferedReader(Paths.get(csvPath))
-    }
-    val csvParser = CSVParser(
-        reader, CSVFormat.DEFAULT
-            .withDelimiter(';')
-            .withFirstRecordAsHeader()
-            .withIgnoreHeaderCase()
-            .withTrim()
-    )
+private suspend fun exMembers(setText: (String) -> Unit, csvParser: CSVParser) {
     for (csvRecord in csvParser) {
         try {
             // Accessing Values by Column Index
@@ -156,17 +157,7 @@ private suspend fun exMembers(text: MutableState<String>) {
 }
 
 
-private suspend fun renameMembers(text: MutableState<String>) {
-    val reader = withContext(Dispatchers.IO) {
-        Files.newBufferedReader(Paths.get(csvPath))
-    }
-    val csvParser = CSVParser(
-        reader, CSVFormat.DEFAULT
-            .withDelimiter(';')
-            .withFirstRecordAsHeader()
-            .withIgnoreHeaderCase()
-            .withTrim()
-    )
+private suspend fun renameMembers(setText: (String) -> Unit, csvParser: CSVParser) {
     for (csvRecord in csvParser) {
         try {
             // Accessing Values by Column Index
@@ -200,17 +191,7 @@ private suspend fun renameMembers(text: MutableState<String>) {
     }
 }
 
-private suspend fun updateMembers(text: MutableState<String>) {
-    val reader = withContext(Dispatchers.IO) {
-        Files.newBufferedReader(Paths.get(csvPath))
-    }
-    val csvParser = CSVParser(
-        reader, CSVFormat.DEFAULT
-            .withDelimiter(';')
-            .withFirstRecordAsHeader()
-            .withIgnoreHeaderCase()
-            .withTrim()
-    )
+private suspend fun updateMembers(setText: (String) -> Unit, csvParser: CSVParser) {
     for (csvRecord in csvParser) {
         try {
             // Accessing Values by Column Index

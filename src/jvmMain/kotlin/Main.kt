@@ -36,7 +36,6 @@ import kotlin.io.path.createDirectory
 import kotlin.io.path.notExists
 
 const val configFileName = "config.toml"
-const val driveFilePath = "/mnt/papa_stick/"
 val windowWidth = 1152.dp
 val windowHeight = 864.dp
 internal val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
@@ -68,7 +67,7 @@ fun main() = application {
     val dbPassword: String = config.settings.password //System.getenv("S_DSK_PASSWORD") ?: "mysecretpassword"
     val database: String = config.settings.database
     val appPassword: String = config.settings.appPassword
-    val exportPath: String = config.settings.exportPath
+    val drivePath: String = config.settings.exportPath
 
     Database.connect(
         "jdbc:postgresql://${ip}:${port}/${database}",
@@ -155,7 +154,7 @@ fun main() = application {
 
                 7 -> datenHolenWindow { screenID = 0 }
 
-                8 -> memberExportDialog { screenID = 0 }
+                8 -> memberExportDialog(drivePath, { screenID = 0 })
                 //
                 else -> Text(
                     "Missing page, click the screen to go back",
