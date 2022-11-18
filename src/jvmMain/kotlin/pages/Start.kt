@@ -57,6 +57,7 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
 
         Text("Willkommen", style = MaterialTheme.typography.h1)
+        Text("Heute ist der ${DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now())}")
         Divider(
             modifier = Modifier.padding(vertical = 16.dp)
         )
@@ -84,7 +85,7 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
                 items(birthdays) {
                     Row {
                         val birthday = it.birthday!!.plusYears(((LocalDate.now().year - it.birthday.year).toLong()))
-                        val period = Period.between(LocalDate.now(), birthday.plusDays(1)).days
+                        val period = Period.between(LocalDate.now(), birthday).days
                         Text(
                             text = "${it.surname}, ${it.prename}: ",
                             fontWeight = FontWeight.Normal,
@@ -99,7 +100,7 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
                             } else if (period >= -3 && period < 0) {
                                 "vor ${period * (-1)} Tagen"
                             } else {
-                                "heute \uD83E\uDD73"
+                                "heute!"
                             },
                             fontWeight = FontWeight.Bold,
                         )
