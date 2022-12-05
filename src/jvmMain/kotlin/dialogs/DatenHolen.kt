@@ -19,7 +19,7 @@ import java.nio.file.Files.newBufferedWriter
 import java.nio.file.Paths
 import java.time.LocalTime
 
-private const val textWhenDone = "Complete!"
+private const val textWhenDone = "Complete!\nExit Program."
 
 @Composable
 fun DatenHolenWindow(drivePath: String, onDismiss: () -> Unit) {

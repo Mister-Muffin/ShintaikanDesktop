@@ -144,7 +144,7 @@ fun main() = application {
 
                 6 -> examsDialog(students, onDismiss = { screenID = 0 })
 
-                7 -> DatenHolenWindow(drivePath, { screenID = 0 })
+                7 -> DatenHolenWindow(drivePath, { System.exit(0) })
 
                 8 -> memberExportDialog(drivePath, { screenID = 0 })
                 //
