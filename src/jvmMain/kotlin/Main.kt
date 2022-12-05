@@ -34,6 +34,7 @@ import kotlin.io.path.copyTo
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createDirectory
 import kotlin.io.path.notExists
+import kotlin.system.exitProcess
 
 const val configFileName = "config.toml"
 val windowWidth = 1152.dp
@@ -76,7 +77,7 @@ fun main() = application {
         password = dbPassword
     )
 
-    val students = loadMembers()
+    var students = loadMembers()
 
     val imageBitmap = remember { useResource("pelli2.jpg") { loadImageBitmap(it) } }
 
@@ -129,6 +130,7 @@ fun main() = application {
                 primary = Color(0xFF212121)
             )
         ) {
+            if (screenID == 0) students = loadMembers() // Reload database when moving to home screen
             when (screenID) {
                 0 -> startPage { screenID = it }
 
@@ -144,7 +146,7 @@ fun main() = application {
 
                 6 -> examsDialog(students, onDismiss = { screenID = 0 })
 
-                7 -> DatenHolenWindow(drivePath, { System.exit(0) })
+                7 -> DatenHolenWindow(drivePath, { exitProcess(0) })
 
                 8 -> memberExportDialog(drivePath, { screenID = 0 })
                 //
