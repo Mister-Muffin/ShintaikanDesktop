@@ -3,9 +3,9 @@ package pages
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.GridCells
-import androidx.compose.foundation.lazy.LazyVerticalGrid
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -30,9 +30,7 @@ fun trainerSelector(changeScreen: (id: Int, activeTrainer: Trainer) -> Unit) {
             var selectedTrainer: Trainer? by remember { mutableStateOf(null) }
             var selectedCotrainer: Trainer? by remember { mutableStateOf(null) }
 
-            LazyVerticalGrid(
-                cells = GridCells.Fixed(4)
-            ) {
+            LazyVerticalGrid(GridCells.Fixed(4)) {
                 items(trainers.sortedBy { it.prename }) { trainer ->
                     var trainerNameExtended = trainer.prename
                     var trainerNameWasExtended = false

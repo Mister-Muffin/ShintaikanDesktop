@@ -1,4 +1,3 @@
-import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
@@ -34,15 +33,15 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.linux_arm64)
                 // https://youtrack.jetbrains.com/issue/KTIJ-22262/Compose-IDE-False-positive-Cannot-access-class-androidxcomposeuigeometrySize-error#focus=Comments-27-6447983.0-0
-                implementation("org.jetbrains.compose.ui:ui-graphics-desktop:1.1.0")
-                implementation("org.jetbrains.compose.ui:ui-geometry-desktop:1.1.0")
-                implementation("org.jetbrains.compose.foundation:foundation-desktop:1.1.0")
+                implementation("org.jetbrains.compose.ui:ui-graphics-desktop:${extra["compose.version"] as String}")
+                implementation("org.jetbrains.compose.ui:ui-geometry-desktop:${extra["compose.version"] as String}")
+                implementation("org.jetbrains.compose.foundation:foundation-desktop:${extra["compose.version"] as String}")
                 //
-                implementation("org.slf4j:slf4j-nop:1.7.36")
-                implementation("org.jetbrains.exposed:exposed-core:0.39.2")
-                implementation("org.jetbrains.exposed:exposed-jdbc:0.39.2")
-                implementation("org.jetbrains.exposed:exposed-java-time:0.39.2")
-                implementation("org.postgresql:postgresql:42.3.3")
+                implementation("org.slf4j:slf4j-nop:2.0.3")
+                implementation("org.jetbrains.exposed:exposed-core:${extra["exposed.version"] as String}")
+                implementation("org.jetbrains.exposed:exposed-jdbc:${extra["exposed.version"] as String}")
+                implementation("org.jetbrains.exposed:exposed-java-time:${extra["exposed.version"] as String}")
+                implementation("org.postgresql:postgresql:42.5.0")
                 implementation("org.apache.commons:commons-csv:1.9.0")
                 implementation("cc.ekblad:4koma:1.1.0")
             }
