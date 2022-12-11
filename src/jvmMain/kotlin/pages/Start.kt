@@ -73,7 +73,7 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
 
         Row(
             verticalAlignment = Alignment.Top,
-            modifier = Modifier.fillMaxSize().padding(top = 24.dp)
+            modifier = Modifier.fillMaxSize(.95f).padding(top = 24.dp)
         ) {
             LazyColumn(
                 modifier = Modifier.fillMaxHeight().fillMaxWidth(0.5F),
@@ -168,6 +168,10 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
                 }
             }
         }
+        Text(
+            System.getProperty("jpackage.app-version") ?: "null/debug",
+            modifier = Modifier.align(Alignment.End).padding(8.dp)
+        )
     }
 }
 

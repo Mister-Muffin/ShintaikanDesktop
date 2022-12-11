@@ -62,4 +62,3 @@ compose.desktop {
 
     }
 }
-
