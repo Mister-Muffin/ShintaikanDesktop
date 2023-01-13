@@ -1,6 +1,5 @@
 package pages
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -14,7 +13,6 @@ import androidx.compose.ui.unit.dp
 import models.Trainer
 import models.loadTrainers
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun trainerSelector(changeScreen: (id: Int, activeTrainer: Trainer) -> Unit) {
     val trainers = loadTrainers()

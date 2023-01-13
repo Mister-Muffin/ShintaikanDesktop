@@ -1,13 +1,14 @@
 package pages
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -242,7 +243,6 @@ fun teilnehmerSelector(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun customFilter(filterOptions: Array<String>, checked: MutableList<String>) {
     LazyVerticalGrid(GridCells.Fixed(2)) { // filter

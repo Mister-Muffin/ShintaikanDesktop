@@ -146,9 +146,9 @@ fun main() = application {
 
                 6 -> examsDialog(students, onDismiss = { screenID = 0 })
 
-                7 -> DatenHolenWindow(drivePath, { exitProcess(0) })
+                7 -> DatenHolenWindow(drivePath) { exitProcess(0) }
 
-                8 -> memberExportDialog(drivePath, { screenID = 0 })
+                8 -> memberExportDialog(drivePath) { screenID = 0 }
                 //
                 else -> Text(
                     "Missing page, click the screen to go back",
