@@ -220,7 +220,10 @@ fun teilnehmerSelector(
 
             Row {
                 LazyColumn(state = rightLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
-                    items(newMembers) { student ->
+                    items(newMembers.asSequence()
+                        .sortedBy { it.prename }
+                        .sortedByDescending { it.level }
+                        .toList()) { student ->
                         listBox(student) {
                             allMembers.add(student)
                             newMembers.remove(student)
