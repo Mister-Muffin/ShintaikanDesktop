@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import java.util.*
 
 plugins {
     kotlin("multiplatform")
@@ -22,16 +23,11 @@ plugins.withId("org.jetbrains.kotlin.multiplatform") {
 }
 
 kotlin {
-    jvm {
-/*        compilations.all {
-            kotlinOptions.jvmTarget = "17"
-        }*/
-        withJava()
-    }
+    jvm { withJava() }
     sourceSets {
         named("jvmMain") {
             dependencies {
-                implementation(compose.desktop.linux_arm64)
+                implementation(compose.desktop.currentOs)
                 // https://youtrack.jetbrains.com/issue/KTIJ-22262/Compose-IDE-False-positive-Cannot-access-class-androidxcomposeuigeometrySize-error#focus=Comments-27-6447983.0-0
                 implementation("org.jetbrains.compose.ui:ui-graphics-desktop:${extra["compose.version"] as String}")
                 implementation("org.jetbrains.compose.ui:ui-geometry-desktop:${extra["compose.version"] as String}")
@@ -41,7 +37,7 @@ kotlin {
                 implementation("org.jetbrains.exposed:exposed-core:${extra["exposed.version"] as String}")
                 implementation("org.jetbrains.exposed:exposed-jdbc:${extra["exposed.version"] as String}")
                 implementation("org.jetbrains.exposed:exposed-java-time:${extra["exposed.version"] as String}")
-                implementation("org.postgresql:postgresql:42.5.0")
+                implementation("org.postgresql:postgresql:42.5.1")
                 implementation("org.apache.commons:commons-csv:1.9.0")
                 implementation("cc.ekblad:4koma:1.1.0")
             }
@@ -60,5 +56,33 @@ compose.desktop {
             includeAllModules = true
         }
 
+    }
+}
+
+tasks.register<WriteDateFile>("writeDateFile") {
+    projectDir = getProjectDir()
+}
+
+tasks.register<WriteDateFileAndBuild>("writeDateFileAndBuild") {
+    dependsOn("writeDateFile")
+    dependsOn("packageReleaseUberJarForCurrentOS")
+    tasks.findByName("packageReleaseUberJarForCurrentOS")?.mustRunAfter("writeDateFile")
+}
+
+abstract class WriteDateFileAndBuild : DefaultTask()
+
+abstract class WriteDateFile : DefaultTask() {
+
+    @InputDirectory
+    var projectDir: File? = null
+
+    @TaskAction
+    fun createBuildDateFile() {
+        val dateString = Date().toString().replace(' ', '.')
+        val dateFilePath = "$projectDir/src/jvmMain/resources"
+        val dateFileName = "buildDate.txt"
+
+        File("$dateFilePath/$dateFileName").writeText(dateString)
+        println(dateString)
     }
 }
