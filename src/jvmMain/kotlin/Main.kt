@@ -37,8 +37,6 @@ import kotlin.io.path.notExists
 import kotlin.system.exitProcess
 
 const val configFileName = "config.toml"
-val windowWidth = 1152.dp
-val windowHeight = 864.dp
 internal val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
 
 @OptIn(ExperimentalComposeUiApi::class)
