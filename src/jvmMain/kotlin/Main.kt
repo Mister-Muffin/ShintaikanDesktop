@@ -103,6 +103,7 @@ fun main() = application {
             Menu("Administration", mnemonic = 'A', enabled = screenID == 0) {
                 Item("Trainer verwalten", onClick = { screenID = 4; forwardedScreenId = 5 })
                 Item("Daten holen", onClick = { screenID = 4; forwardedScreenId = 7 })
+                Item("Hilfe/Info", onClick = { screenID = 9 })
             }
             Menu("Mitglieder", mnemonic = 'P') {
                 Item("Daten abfragen", onClick = { screenID = 6 })
@@ -147,6 +148,8 @@ fun main() = application {
                 7 -> DatenHolenWindow(drivePath) { exitProcess(0) }
 
                 8 -> memberExportDialog(drivePath) { screenID = 0 }
+
+                9 -> helpDialog(drivePath) { screenID = 0 }
                 //
                 else -> Text(
                     "Missing page, click the screen to go back",
