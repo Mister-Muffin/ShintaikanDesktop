@@ -1,4 +1,5 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+import java.text.SimpleDateFormat
 import java.util.*
 
 plugins {
@@ -78,7 +79,8 @@ abstract class WriteDateFile : DefaultTask() {
 
     @TaskAction
     fun createBuildDateFile() {
-        val dateString = Date().toString().replace(' ', '.')
+        val formatter = SimpleDateFormat("EEEE, dd.MM.yyyy HH:mm:ss")
+        val dateString = formatter.format(Date()).toString()
         val dateFilePath = "$projectDir/src/jvmMain/resources"
         val dateFileName = "buildDate.txt"
 
