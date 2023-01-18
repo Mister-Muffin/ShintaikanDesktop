@@ -353,7 +353,7 @@ private fun boxColor(member: Member): Array<Color> {
             arrayOf(DEGREECOLORS.WHITE.color, DEGREECOLORS.YELLOW.color)
         }
 
-        member.level.contains("9/10 Kyu  weiss-rot") -> {
+        member.level.contains("9/10 Kyu weiss-rot") -> {
             arrayOf(DEGREECOLORS.WHITE.color, DEGREECOLORS.RED.color)
         }
 
