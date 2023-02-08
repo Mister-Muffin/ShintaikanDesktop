@@ -30,11 +30,32 @@ fun DatenHolenWindow(drivePath: String, onDismiss: () -> Unit) {
 
     LaunchedEffect(Unit) {
         //coroutineScope.launch(Dispatchers.IO) {
-        val reader = withContext(Dispatchers.IO) {
+        val reader1 = withContext(Dispatchers.IO) {
             Files.newBufferedReader(Paths.get(csvPath))
         }
-        val csvParser = CSVParser(
-            reader, CSVFormat.DEFAULT
+        val reader2 = withContext(Dispatchers.IO) {
+            Files.newBufferedReader(Paths.get(csvPath))
+        }
+        val reader3 = withContext(Dispatchers.IO) {
+            Files.newBufferedReader(Paths.get(csvPath))
+        }
+        
+        val csvParser1 = CSVParser(
+            reader1, CSVFormat.DEFAULT
+                .withDelimiter(';')
+                .withFirstRecordAsHeader()
+                .withIgnoreHeaderCase()
+                .withTrim()
+        )
+        val csvParser2 = CSVParser(
+            reader2, CSVFormat.DEFAULT
+                .withDelimiter(';')
+                .withFirstRecordAsHeader()
+                .withIgnoreHeaderCase()
+                .withTrim()
+        )
+        val csvParser3 = CSVParser(
+            reader3, CSVFormat.DEFAULT
                 .withDelimiter(';')
                 .withFirstRecordAsHeader()
                 .withIgnoreHeaderCase()
@@ -42,9 +63,9 @@ fun DatenHolenWindow(drivePath: String, onDismiss: () -> Unit) {
         )
 
         dumpCurrentDatabase()
-        exMembers({ textFieldValue = it }, csvParser)
-        renameMembers({ textFieldValue = it }, csvParser)
-        updateMembers({ textFieldValue = it }, csvParser)
+        exMembers({ textFieldValue = it }, csvParser1)
+        renameMembers({ textFieldValue = it }, csvParser2)
+        updateMembers({ textFieldValue = it }, csvParser3)
         //}.invokeOnCompletion {
         textFieldValue = textWhenDone
         //}
