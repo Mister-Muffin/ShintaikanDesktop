@@ -76,7 +76,7 @@ fun loadMembers(): List<Member> {
                     level = it[MemberTable.level],
                     total = it[MemberTable.total],
                     birthday = it[MemberTable.birthday],
-                    date_last_exam = it[MemberTable.date_last_exam],
+                    date_last_exam = getLastExamDate(it[MemberTable.id]),
                     is_trainer = it[MemberTable.is_trainer],
                     sticker_animal = it[MemberTable.sticker_animal],
                     sticker_recieved = it[MemberTable.sticker_recieved],
@@ -101,7 +101,7 @@ fun loadFullMemberTable(): List<Member> {
                 level = it[MemberTable.level],
                 total = it[MemberTable.total],
                 birthday = it[MemberTable.birthday],
-                date_last_exam = it[MemberTable.date_last_exam],
+                date_last_exam = getLastExamDate(it[MemberTable.id]),
                 is_trainer = it[MemberTable.is_trainer],
                 sticker_animal = it[MemberTable.sticker_animal],
                 sticker_recieved = it[MemberTable.sticker_recieved],
@@ -127,6 +127,21 @@ fun loadTrainers(): List<Trainer> {
                 trainer_units = it[MemberTable.trainer_units]
             )
         }
+    }
+}
+
+fun getLastExamDate(memberId: Int): LocalDate? {
+    return transaction {
+        MemberTable.join(TeilnahmeTable, JoinType.CROSS)
+            .select(where = { TeilnahmeTable.userIdExam like "%${memberId}%" and (MemberTable.id eq memberId) })
+            .orderBy(TeilnahmeTable.id, SortOrder.DESC)
+            .limit(1).map {
+                mapOf("date" to it[TeilnahmeTable.date])
+            }.let {
+                if (it.isNotEmpty()) {
+                    it.first()["date"]
+                } else null
+            }
     }
 }
 
