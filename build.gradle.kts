@@ -17,6 +17,13 @@ repositories {
     maven("https://jitpack.io")
 }
 
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
+
 dependencies {
     implementation(compose.desktop.currentOs)
     // https://youtrack.jetbrains.com/issue/KTIJ-22262/Compose-IDE-False-positive-Cannot-access-class-androidxcomposeuigeometrySize-error#focus=Comments-27-6447983.0-0
@@ -30,7 +37,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-java-time:${project.extra["exposed.version"] as String}")
     implementation("org.postgresql:postgresql:42.5.2")
     implementation("org.apache.commons:commons-csv:1.10.0")
-    implementation("cc.ekblad:4koma:1.1.0")
+    implementation("cc.ekblad:4koma:1.2.0")
 }
 
 compose.desktop {
@@ -67,7 +74,7 @@ abstract class WriteDateFile : DefaultTask() {
     fun createBuildDateFile() {
         val formatter = SimpleDateFormat("EEEE, dd.MM.yyyy HH:mm:ss")
         val dateString = formatter.format(Date()).toString()
-        val dateFilePath = "$projectDir/src/jvmMain/resources"
+        val dateFilePath = "$projectDir/src/main/resources"
         val dateFileName = "buildDate.txt"
 
         File("$dateFilePath/$dateFileName").writeText(dateString)
