@@ -42,6 +42,7 @@ dependencies {
 compose.desktop {
     application {
         mainClass = "MainKt"
+        jvmArgs += listOf("-Xmx1G")
         nativeDistributions {
             targetFormats(TargetFormat.Deb, TargetFormat.AppImage, TargetFormat.Rpm)
             packageName = "shintaikandesktop"
