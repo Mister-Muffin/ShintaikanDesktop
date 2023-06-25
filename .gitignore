@@ -45,4 +45,4 @@ bin/
 .env
 /src/pythonMain/.idea/
 *.directory
-/src/jvmMain/resources/buildDate.txt
+/src/main/resources/buildDate.txt
