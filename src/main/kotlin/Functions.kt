@@ -2,8 +2,28 @@
 
 import models.Member
 import models.Teilnahme
+import java.nio.file.Path
 import java.time.LocalDate
+import kotlin.io.path.copyTo
+import kotlin.io.path.createDirectories
+import kotlin.io.path.createDirectory
+import kotlin.io.path.notExists
 import kotlin.random.Random
+
+/**
+ * Creates the initial configuration file for this application is case it does not exist.
+ **/
+fun createConfigFile() {
+    if (Path.of(configFilePath + configFileName).notExists()) {
+        // Create root folder
+        Path.of(configFilePath).createDirectories()
+        // Create folder for upcomming database backups
+        Path.of(configFilePath + "backups/").createDirectory()
+        // Copy sample config to config location
+        Path.of("src/main/resources/config.sample.toml")
+            .copyTo(Path.of(configFilePath + configFileName), false)
+    }
+}
 
 /**
  * Zählt die Trainingseinheiten eines Mitglieds

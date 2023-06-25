@@ -30,10 +30,6 @@ import pages.successPage
 import pages.teilnehmerSelector
 import pages.trainerSelector
 import java.nio.file.Path
-import kotlin.io.path.copyTo
-import kotlin.io.path.createDirectories
-import kotlin.io.path.createDirectory
-import kotlin.io.path.notExists
 import kotlin.system.exitProcess
 
 const val configFileName = "config.toml"
@@ -42,15 +38,7 @@ internal val configFilePath = System.getProperty("user.home") + "/.local/share/s
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() = application {
     // create file/directories in case the config file does not exist
-    if (Path.of(configFilePath + configFileName).notExists()) {
-        //Create root folder
-        Path.of(configFilePath).createDirectories()
-        //Create folder for upcomming database backups
-        Path.of(configFilePath + "backups/").createDirectory()
-        // copy sample config to config location
-        Path.of("src/jvmMain/resources/config.sample.toml")
-            .copyTo(Path.of(configFilePath + configFileName), false)
-    }
+    createConfigFile()
 
     // Create a TOML mapper without any custom configuration
     val mapper = tomlMapper { }
