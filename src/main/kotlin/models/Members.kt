@@ -35,7 +35,7 @@ data class Member(
     val prename: String,
     val group: String,
     val level: String,
-    val total: Int?,
+    val total: Int,
     val birthday: LocalDate,
     val date_last_exam: LocalDate?,
     val is_trainer: Boolean,
