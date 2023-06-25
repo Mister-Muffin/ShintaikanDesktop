@@ -33,7 +33,7 @@ import java.nio.file.Path
 import kotlin.system.exitProcess
 
 const val configFileName = "config.toml"
-internal val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
+val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() = application {
