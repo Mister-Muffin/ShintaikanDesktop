@@ -189,7 +189,7 @@ private fun reasonText(isReadyString: String?) {
  * @see studentStats
  * @see memberExportDialog
  */
-internal fun isReadyForExam(member: Member, teilnahme: List<Teilnahme>): Pair<String, String?> {
+fun isReadyForExam(member: Member, teilnahme: List<Teilnahme>): Pair<String, String?> {
     val dateLastExam: LocalDate = getLastExamOrFirstTrainingDate(member, teilnahme) ?: return Pair<String, String?>(
         "❌ Der Schüler war noch nie im Training",
         "Der Schüler war noch nie im Training"

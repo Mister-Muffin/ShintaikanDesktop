@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -174,7 +175,13 @@ private fun studentStats(member: Member) { //datum letzte prüfung | wie lange h
             Text("Noch keine Prüfung")
         }
 
-        if (member.date_last_exam != null) Text(isReadyForExam(member, teilnahme).first)
+        val ready = isReadyForExam(member, teilnahme)
+        if (member.date_last_exam != null) Text(ready.first)
+        if (ready.second == null) {
+            Text("Bereit für die nächste Prüfung", color = Color.Green)
+        } else {
+            Text("Noch nicht bereit für die nächste Prüfung", color = Color.Red)
+        }
 
         if (member.trainer_units != 0) Text("Hat ${member.trainer_units} mal Training gegeben")
 
