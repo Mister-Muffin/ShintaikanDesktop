@@ -167,8 +167,8 @@ private fun studentStats(member: Member) { //datum letzte prüfung | wie lange h
                 }
             //</editor-fold>
 
-            Text(
-                "Letzte Prüfung vor: ${if (years.isNotEmpty()) "$years, " else ""}${if (months.isNotEmpty()) months else ""}${if (days.isNotEmpty() && months.isNotEmpty()) " und " else ""}${if (days.isNotEmpty()) days else ""}"
+            Text("Letzte Prüfung vor: " +
+                    "${if (years.isNotEmpty()) "$years, " else ""}${months.ifEmpty { "" }}${if (days.isNotEmpty() && months.isNotEmpty()) " und " else ""}${days.ifEmpty { "" }}"
             )
 
         } else {
