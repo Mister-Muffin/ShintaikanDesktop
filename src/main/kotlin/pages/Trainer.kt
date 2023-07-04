@@ -14,7 +14,7 @@ import models.Trainer
 import models.loadTrainers
 
 @Composable
-fun trainerSelector(changeScreen: (id: Int, activeTrainer: Trainer) -> Unit) {
+fun trainerSelector(changeScreen: (id: Int, activeTrainer: Trainer?) -> Unit) {
     val trainers = loadTrainers()
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
@@ -62,7 +62,7 @@ fun trainerSelector(changeScreen: (id: Int, activeTrainer: Trainer) -> Unit) {
             }
             Button(
                 enabled = selectedTrainer != null, modifier = Modifier.width(350.dp).height(60.dp),
-                onClick = { changeScreen(2, selectedTrainer!!) }
+                onClick = { if (selectedTrainer != null) changeScreen(2, selectedTrainer) }
             ) {
                 Text("Weiter")
             }
