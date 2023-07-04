@@ -44,5 +44,5 @@ bin/
 ###
 .env
 /src/pythonMain/.idea/
-*.directory
+.directory
 /src/main/resources/buildDate.txt
