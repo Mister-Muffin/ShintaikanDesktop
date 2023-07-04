@@ -7,10 +7,7 @@ import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -93,8 +90,11 @@ fun examsDialog(members: List<Member>, onDismiss: () -> Unit) {
 
 @Composable
 private fun studentStats(member: Member) { //datum letzte prüfung | wie lange her y m d | einheiten seit l prüf | einheiten gesamt
+    val students = remember { mutableStateListOf<Member>() }
     val teilnahme = loadTeilnahme()
-    val students = loadMembers()
+    LaunchedEffect(Unit) {
+        students.addAll(loadMembers())
+    }
     return Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
             val nameString: String = member.prename + " " + member.surname // Join pre- and surname

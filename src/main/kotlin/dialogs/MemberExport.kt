@@ -39,7 +39,12 @@ private val readyWidth = 500.dp
 
 @Composable
 fun memberExportDialog(drivePath: String, onDismiss: () -> Unit) {
-    val members = loadMembers()
+    val members = remember { mutableStateListOf<Member>() }
+
+    LaunchedEffect(Unit) {
+        members.addAll(loadMembers())
+    }
+
     val teilnahme = loadTeilnahme()
 
     var searchFieldValue by remember { mutableStateOf("") }

@@ -12,12 +12,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import composables.StudentList
+import kotlinx.coroutines.launch
 import models.Member
 import models.editIsTrainer
 import models.loadMembers
 
 @Composable
 fun manageTrainerDialog(students1: List<Member>, onDismiss: () -> Unit) {
+
+    val scope = rememberCoroutineScope()
 
     val members = remember { mutableStateListOf<Member>() }
     remember {
@@ -54,9 +57,8 @@ fun manageTrainerDialog(students1: List<Member>, onDismiss: () -> Unit) {
                 Divider(modifier = Modifier.padding(4.dp))
                 currentTrainerList(members) { newVal, student ->
                     editIsTrainer(student.id, newVal)
-                    members.clear()
-                    for (s in loadMembers()) {
-                        members.add(s)
+                    scope.launch {
+                        reloadMembers(members)
                     }
                 }
             }
@@ -98,9 +100,8 @@ fun manageTrainerDialog(students1: List<Member>, onDismiss: () -> Unit) {
                                             checked = studentFilter[0].is_trainer,
                                             onCheckedChange = {
                                                 editIsTrainer(studentFilter[0].id, it)
-                                                members.clear()
-                                                for (s in loadMembers()) {
-                                                    members.add(s)
+                                                scope.launch {
+                                                    reloadMembers(members)
                                                 }
                                                 searchFieldVal = ""
                                             })
@@ -124,6 +125,11 @@ fun manageTrainerDialog(students1: List<Member>, onDismiss: () -> Unit) {
             Text("OK")
         }
     }
+}
+
+private suspend fun reloadMembers(members: MutableList<Member>) {
+    members.clear()
+    members.addAll(loadMembers())
 }
 
 @Composable

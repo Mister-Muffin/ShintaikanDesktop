@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
+import kotlinx.coroutines.launch
 import models.*
 import java.time.LocalDate
 import java.time.Period
@@ -35,149 +36,164 @@ import java.time.format.DateTimeFormatter
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun startPage(changeScreen: (id: Int) -> Unit) {
-    val students = loadMembers()
-    val messages = loadMessages()
+    // TODO: Fix load data only when necessary
+
+    val scope = rememberCoroutineScope()
+
     val allMembers = remember { mutableStateListOf<Member>() }
-    remember {
-        for (student in students) {
-            allMembers.add(student)
-        }
-    }
     val allMessages = remember { mutableStateListOf<Message>() }
-    remember {
-        for (message in messages) {
-            allMessages.add(message)
-        }
+    val birthdays = remember { mutableStateListOf<Member>() }
+
+    LaunchedEffect(Unit) {
+        val students = loadMembers()
+        val messages = loadMessages()
+
+        allMembers.addAll(students)
+        allMessages.addAll(messages)
+
+        birthdays.addAll(loadBirthdays(students))
+
     }
 
-    val birthdays = remember { loadBirthdays(students) }
     val newMessage = remember { mutableStateOf("") }
 
     val lazyMessagesListState = rememberLazyListState()
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
 
-        Text("Willkommen", style = MaterialTheme.typography.h1)
-        Text("Heute ist der ${DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now())}")
-        Divider(
-            modifier = Modifier.padding(vertical = 16.dp)
-        )
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp).fillMaxSize()) {
 
-        Row {
-            Button(
-                modifier = Modifier.width(250.dp),
-                onClick = { changeScreen(1) }
-            ) {
-                Text(text = "Teilnehmer eintragen")
-            }
-        }
+        if (allMembers.isEmpty()) {
+            Text("Wird geladen...")
+        } else {
 
-        Row(
-            verticalAlignment = Alignment.Top,
-            modifier = Modifier.fillMaxSize(.95f).padding(top = 24.dp)
-        ) {
-            LazyColumn(
-                modifier = Modifier.fillMaxHeight().fillMaxWidth(0.5F),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                item {
-                    Text("Es haben/hatten Geburtstag:", style = MaterialTheme.typography.subtitle1)
+            Text("Willkommen", style = MaterialTheme.typography.h1)
+            Text("Heute ist der ${DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now())}")
+            Divider(
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+
+            Row {
+                Button(
+                    modifier = Modifier.width(250.dp),
+                    onClick = { changeScreen(1) }
+                ) {
+                    Text(text = "Teilnehmer eintragen")
                 }
-                items(birthdays) {
-                    Row {
-                        val birthday = it.birthday!!.plusYears(((LocalDate.now().year - it.birthday.year).toLong()))
-                        val period = Period.between(LocalDate.now(), birthday).days
-                        Text(
-                            text = "${it.surname}, ${it.prename}: ",
-                            fontWeight = FontWeight.Normal,
-                        )
-                        Text(
-                            text = if (period == 1) {
-                                "morgen"
-                            } else if (period in 1..3) {
-                                "in $period Tagen"
-                            } else if (period == -1) {
-                                "gestern"
-                            } else if (period >= -3 && period < 0) {
-                                "vor ${period * (-1)} Tagen"
-                            } else {
-                                "heute!"
-                            },
-                            fontWeight = FontWeight.Bold,
-                        )
+            }
+
+            Row(
+                verticalAlignment = Alignment.Top,
+                modifier = Modifier.fillMaxSize(.95f).padding(top = 24.dp)
+            ) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxHeight().fillMaxWidth(0.5F),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    item {
+                        Text("Es haben/hatten Geburtstag:", style = MaterialTheme.typography.subtitle1)
                     }
-                }
-            }
-            Divider(modifier = Modifier.fillMaxHeight().width(1.dp))
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(text = "Kurznachrichten", style = MaterialTheme.typography.subtitle1)
-
-                Row {
-                    OutlinedTextField(
-                        value = newMessage.value,
-                        placeholder = {
+                    items(birthdays) {
+                        Row {
+                            val birthday = it.birthday!!.plusYears(((LocalDate.now().year - it.birthday.year).toLong()))
+                            val period = Period.between(LocalDate.now(), birthday).days
                             Text(
-                                "Kurznachicht eingeben...",
-                                style = TextStyle.Default.copy(fontSize = 16.sp)
+                                text = "${it.surname}, ${it.prename}: ",
+                                fontWeight = FontWeight.Normal,
                             )
-                        },
-                        modifier = Modifier.fillMaxWidth(0.8F).onPreviewKeyEvent {
-                            // submit new message when either "ctrl" or "shift" is pressed
-                            // together with "Enter"
-                            if (((it.isCtrlPressed || it.isShiftPressed) && it.key == Key.Enter && it.type == KeyEventType.KeyUp)) {
-                                submitNewMessage(newMessage, allMessages)
-                                true
-                            } else false
-                        },
-                        trailingIcon = {
-                            IconButton(onClick = {
-                                submitNewMessage(newMessage, allMessages)
-                            }) {
-                                Icon(Icons.Default.Add, contentDescription = null)
-                            }
-                        },
-                        singleLine = false,
-                        onValueChange = { newMessage.value = it },
-                    )
-                }
-                Text(
-                    "CTRL / SHIFT + Enter oder '+' zum erstellen drücken",
-                    style = TextStyle.Default.copy(fontSize = 12.sp)
-                )
-                Row(modifier = Modifier.fillMaxWidth().padding(top = 24.dp, start = 24.dp)) {
-                    LazyColumn(
-                        horizontalAlignment = Alignment.Start,
-                        state = lazyMessagesListState
-                    ) {
-                        items(allMessages.sortedBy { it.dateCreated }) {
-                            message(it, onMessagesChanged = {
-                                // reload messages
-                                allMessages.clear()
-                                for (message in loadMessages()) {
-                                    allMessages.add(message)
-                                }
-                            })
+                            Text(
+                                text = if (period == 1) {
+                                    "morgen"
+                                } else if (period in 1..3) {
+                                    "in $period Tagen"
+                                } else if (period == -1) {
+                                    "gestern"
+                                } else if (period >= -3 && period < 0) {
+                                    "vor ${period * (-1)} Tagen"
+                                } else {
+                                    "heute!"
+                                },
+                                fontWeight = FontWeight.Bold,
+                            )
                         }
                     }
-                    VerticalScrollbar(
-                        modifier = Modifier.fillMaxHeight().requiredWidth(10.dp).offset(8.dp),
-                        adapter = rememberScrollbarAdapter(scrollState = lazyMessagesListState)
+                }
+                Divider(modifier = Modifier.fillMaxHeight().width(1.dp))
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = "Kurznachrichten", style = MaterialTheme.typography.subtitle1)
+
+                    Row {
+                        OutlinedTextField(
+                            value = newMessage.value,
+                            placeholder = {
+                                Text(
+                                    "Kurznachicht eingeben...",
+                                    style = TextStyle.Default.copy(fontSize = 16.sp)
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth(0.8F).onPreviewKeyEvent {
+                                // submit new message when either "ctrl" or "shift" is pressed
+                                // together with "Enter"
+                                if (((it.isCtrlPressed || it.isShiftPressed) && it.key == Key.Enter && it.type == KeyEventType.KeyUp)) {
+                                    submitNewMessage(newMessage, allMessages)
+                                    true
+                                } else false
+                            },
+                            trailingIcon = {
+                                IconButton(onClick = {
+                                    submitNewMessage(newMessage, allMessages)
+                                }) {
+                                    Icon(Icons.Default.Add, contentDescription = null)
+                                }
+                            },
+                            singleLine = false,
+                            onValueChange = { newMessage.value = it },
+                        )
+                    }
+                    Text(
+                        "CTRL / SHIFT + Enter oder '+' zum erstellen drücken",
+                        style = TextStyle.Default.copy(fontSize = 12.sp)
                     )
+                    Row(modifier = Modifier.fillMaxWidth().padding(top = 24.dp, start = 24.dp)) {
+                        LazyColumn(
+                            horizontalAlignment = Alignment.Start,
+                            state = lazyMessagesListState
+                        ) {
+                            items(allMessages.sortedBy { it.dateCreated }) {
+                                message(it, onMessagesChanged = {
+                                    scope.launch {
+                                        reloadMessages(allMessages)
+                                    }
+                                })
+                            }
+                        }
+                        VerticalScrollbar(
+                            modifier = Modifier.fillMaxHeight().requiredWidth(10.dp).offset(8.dp),
+                            adapter = rememberScrollbarAdapter(scrollState = lazyMessagesListState)
+                        )
+                    }
                 }
             }
+
+            Text(
+                try {
+                    val dateString: String = useResource("buildDate.txt") { it.readBytes().toString(Charsets.UTF_8) }
+                    "BuildDate: $dateString"
+                } catch (e: java.io.FileNotFoundException) {
+                    "N/A"
+                },
+                modifier = Modifier.align(Alignment.End).padding(8.dp)
+            )
         }
-        Text(
-            try {
-                val dateString: String = useResource("buildDate.txt") { it.readBytes().toString(Charsets.UTF_8) }
-                "BuildDate: $dateString"
-            } catch (e: java.io.FileNotFoundException) {
-                "N/A"
-            },
-            modifier = Modifier.align(Alignment.End).padding(8.dp)
-        )
+    }
+}
+
+private suspend fun reloadMessages(allMessages: SnapshotStateList<Message>) {
+    allMessages.clear()
+    for (message in loadMessages()) {
+        allMessages.add(message)
     }
 }
 
@@ -251,7 +267,6 @@ private fun loadBirthdays(members: List<Member>): MutableList<Member> {
     val birthdays = mutableListOf<Member>()
 
     for (student in members) {
-        if (student.birthday == null) continue
         val birthday = student.birthday.plusYears((LocalDate.now().year - student.birthday.year).toLong())
         if (birthday >= (LocalDate.now().minusDays(3)) &&
             birthday <= LocalDate.now().plusDays(3)

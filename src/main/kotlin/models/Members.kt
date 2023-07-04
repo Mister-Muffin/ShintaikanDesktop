@@ -64,8 +64,8 @@ data class Trainer(
     val trainer_units: Int
 )
 
-fun loadMembers(): List<Member> {
-    return transaction {
+suspend fun loadMembers(): List<Member> {
+    return suspendedTransactionAsync(Dispatchers.IO) {
         MemberTable.select(where = { MemberTable.is_active eq true }).sortedByDescending { it[MemberTable.level] }
             .map {
                 Member(
@@ -87,7 +87,7 @@ fun loadMembers(): List<Member> {
                     add_units_since_last_exam = it[MemberTable.add_units_since_last_exam]
                 )
             }
-    }
+    }.await()
 }
 
 fun loadFullMemberTable(): List<Member> {

@@ -1,10 +1,7 @@
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,6 +19,7 @@ import androidx.compose.ui.window.*
 import cc.ekblad.toml.decode
 import cc.ekblad.toml.tomlMapper
 import dialogs.*
+import models.Member
 import models.Trainer
 import models.loadMembers
 import org.jetbrains.exposed.sql.Database
@@ -48,10 +46,10 @@ fun main() = application {
     val config = mapper.decode<Config>(tomlFile)
     //println(config.settings)
 
-    val ip: String = config.settings.ip //System.getenv("S_DSK_IP") ?: "172.17.0.1"
-    val port: String = config.settings.port //System.getenv("S_DSK_PORT") ?: "5434"
-    val user: String = config.settings.user //System.getenv("S_DSK_USER") ?: "postgres"
-    val dbPassword: String = config.settings.password //System.getenv("S_DSK_PASSWORD") ?: "mysecretpassword"
+    val ip: String = config.settings.ip
+    val port: String = config.settings.port
+    val user: String = config.settings.user
+    val dbPassword: String = config.settings.password
     val database: String = config.settings.database
     val appPassword: String = config.settings.appPassword
     val drivePath: String = config.settings.exportPath
@@ -63,7 +61,10 @@ fun main() = application {
         password = dbPassword
     )
 
-    var students = loadMembers()
+    val students = remember { mutableStateListOf<Member>() }
+    LaunchedEffect(Unit) {
+        students.addAll(loadMembers())
+    }
 
     val imageBitmap = remember { useResource("pelli2.jpg") { loadImageBitmap(it) } }
 
@@ -117,7 +118,7 @@ fun main() = application {
                 primary = Color(0xFF212121)
             )
         ) {
-            if (screenID == 0) students = loadMembers() // Reload database when moving to home screen
+            // if (screenID == 0) students = loadMembers() // Reload database when moving to home screen
             when (screenID) {
                 0 -> startPage { screenID = it }
 
