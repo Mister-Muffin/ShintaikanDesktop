@@ -1,5 +1,3 @@
-@file:Suppress("unused")
-
 import models.Member
 import models.Teilnahme
 import java.nio.file.Path
@@ -60,7 +58,7 @@ fun getFirstDate(id: Int, teilnahme: List<Teilnahme>): LocalDate? {
  * da diese Trainingseinheiten sonst nicht berücksichtigt werden würden
  */
 fun getTotalTrainingSessions(member: Member, teilnahme: List<Teilnahme>): Int {
-    return member.total!! + countId(member, teilnahme)
+    return member.total + countId(member, teilnahme)
 }
 
 /**
