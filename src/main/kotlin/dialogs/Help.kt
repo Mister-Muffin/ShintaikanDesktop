@@ -24,7 +24,7 @@ fun helpDialog(drivePath: String, onDismiss: () -> Unit) {
     ) {
         Text("Hilfe/Info", style = MaterialTheme.typography.h6)
         Divider(modifier = Modifier.padding(vertical = 10.dp))
-        Text("Pfad für die Importdatei: ${drivePath}transferHauseDojo.CSV")
+        Text("Pfad für die Importdatei: ${drivePath}transferHauseDojo.csv")
         Text("Programmpfad: $cmdPath")
         Button(onClick = onDismiss, modifier = Modifier.width(250.dp).padding(vertical = 10.dp)) {
             Text("Zurück")

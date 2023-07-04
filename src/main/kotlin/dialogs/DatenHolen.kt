@@ -26,7 +26,7 @@ fun DatenHolenWindow(drivePath: String, onDismiss: () -> Unit) {
     var textFieldValue by remember { mutableStateOf("") }
     val coroutineScope = rememberCoroutineScope()
 
-    val csvPath = "${drivePath}transferHauseDojo.CSV"
+    val csvPath = "${drivePath}transferHauseDojo.csv"
 
     LaunchedEffect(Unit) {
         //coroutineScope.launch(Dispatchers.IO) {
@@ -39,7 +39,7 @@ fun DatenHolenWindow(drivePath: String, onDismiss: () -> Unit) {
         val reader3 = withContext(Dispatchers.IO) {
             Files.newBufferedReader(Paths.get(csvPath))
         }
-        
+
         val csvParser1 = CSVParser(
             reader1, CSVFormat.DEFAULT
                 .withDelimiter(';')
