@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun passwordPrompt(password: String, result: (pwCorrect: Boolean) -> Unit) {
+fun PasswordPrompt(password: String, result: (pwCorrect: Boolean) -> Unit) {
 
     var textViewText by remember { mutableStateOf("Bitte gib das Passwort ein") }
     var passwordFieldVal by remember { mutableStateOf("") }

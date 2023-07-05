@@ -1,9 +1,7 @@
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.input.key.Key
@@ -21,11 +19,12 @@ import cc.ekblad.toml.tomlMapper
 import dialogs.*
 import models.Trainer
 import org.jetbrains.exposed.sql.Database
-import pages.startPage
-import pages.successPage
-import pages.teilnehmerSelector
-import pages.trainerSelector
+import pages.StartPage
+import pages.SuccessPage
+import pages.MemberSelector
+import pages.TrainerSelector
 import java.nio.file.Path
+import Screen.*
 
 const val configFileName = "config.toml"
 val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
@@ -64,7 +63,7 @@ fun main() = application {
 
     val imageBitmap = remember { useResource("pelli2.jpg") { loadImageBitmap(it) } }
 
-    var forwardedScreenId = 0
+    var forwardedScreenId = HOME
 
     Window(
         onCloseRequest = ::exitApplication,
@@ -72,27 +71,27 @@ fun main() = application {
         icon = BitmapPainter(image = imageBitmap),
         state = rememberWindowState(placement = WindowPlacement.Maximized),
     ) {
-        var screenID by remember { mutableStateOf(0) }
+        var screenID by remember { mutableStateOf(HOME) }
         var activeTrainer: Trainer? by remember { mutableStateOf(null) }
 
         MenuBar {
             Menu("Datei", mnemonic = 'F') {
                 Item(
                     "Startseite",
-                    onClick = { screenID = 0 },
+                    onClick = { screenID = HOME },
                     shortcut = KeyShortcut(Key.Escape),
-                    enabled = screenID != 0
+                    enabled = screenID != HOME
                 )
                 Item("Beenden", onClick = { exitApplication() }, mnemonic = 'E')
             }
-            Menu("Administration", mnemonic = 'A', enabled = screenID == 0) {
-                Item("Trainer verwalten", onClick = { screenID = 4; forwardedScreenId = 5 })
-                Item("Daten holen", onClick = { screenID = 4; forwardedScreenId = 7 })
-                Item("Hilfe/Info", onClick = { screenID = 9 })
+            Menu("Administration", mnemonic = 'A', enabled = screenID == HOME) {
+                Item("Trainer verwalten", onClick = { screenID = PASSWORD; forwardedScreenId = MANAGE_TRAINER })
+                Item("Daten holen", onClick = { screenID = PASSWORD; forwardedScreenId = FETCH_DATA })
+                Item("Hilfe/Info", onClick = { screenID = HELP })
             }
             Menu("Mitglieder", mnemonic = 'P') {
-                Item("Daten abfragen", onClick = { screenID = 6 })
-                Item("Daten exportieren", onClick = { screenID = 8 })
+                Item("Daten abfragen", onClick = { screenID = EXAMS })
+                Item("Daten exportieren", onClick = { screenID = EXPORT_MEMBERS })
             }
         }
 
@@ -115,7 +114,7 @@ fun main() = application {
             )
         ) {
             when (screenID) {
-                0 -> startPage(
+                HOME -> StartPage(
                     viewModel.allMembers,
                     viewModel.allMessages,
                     viewModel.birthdays,
@@ -123,11 +122,11 @@ fun main() = application {
                     viewModel::submitNewMessage
                 ) { screenID = it }
 
-                1 -> trainerSelector(viewModel.trainers) { id, selectedTrainer ->
-                    screenID = id; activeTrainer = selectedTrainer
+                SELECT_TRAINER -> TrainerSelector(viewModel.trainers) { screen, selectedTrainer ->
+                    screenID = screen; activeTrainer = selectedTrainer
                 }
 
-                2 -> teilnehmerSelector(
+                SELECT_MEMBER -> MemberSelector(
                     viewModel.allMembers,
                     viewModel.teilnahme,
                     activeTrainer!!,
@@ -135,30 +134,35 @@ fun main() = application {
                     viewModel::insertTeilnahme
                 ) { screenID = it }
 
-                3 -> successPage {
+                SUCCESS -> SuccessPage {
                     viewModel.loadAll()
                     screenID = it
                 }
                 // needed because dialog windows don't work on Raspberry Pi
-                4 -> passwordPrompt(password = appPassword) { if (it) screenID = forwardedScreenId }
+                PASSWORD -> PasswordPrompt(password = appPassword) { if (it) screenID = forwardedScreenId }
 
-                5 -> manageTrainerDialog(viewModel.allMembers, viewModel::reloadMembers, onDismiss = { screenID = 0 })
+                MANAGE_TRAINER -> ManageTrainerDialog(
+                    viewModel.allMembers,
+                    viewModel::reloadMembers,
+                    onDismiss = { screenID = HOME })
 
-                6 -> examsDialog(viewModel.allMembers, viewModel.teilnahme, onDismiss = { screenID = 0 })
+                EXAMS -> ExamsDialog(viewModel.allMembers, viewModel.teilnahme, onDismiss = { screenID = HOME })
 
-                7 -> datenHolenWindow(drivePath) {
+                FETCH_DATA -> FetchDataWindow(drivePath) {
                     viewModel.loadAll()
-                    screenID = 0
+                    screenID = HOME
                 }
 
-                8 -> memberExportDialog(viewModel.allMembers, viewModel.teilnahme, drivePath) { screenID = 0 }
+                EXPORT_MEMBERS -> ExportMembersDialog(viewModel.allMembers, viewModel.teilnahme, drivePath) {
+                    screenID = HOME
+                }
 
-                9 -> helpDialog(drivePath) { screenID = 0 }
-                //
-                else -> Text(
-                    "Missing page, click the screen to go back",
-                    modifier = Modifier.clickable { screenID = 0 })
+                HELP -> HelpDialog(drivePath) { screenID = HOME }
             }
         }
     }
+}
+
+enum class Screen {
+    HOME, SELECT_TRAINER, MANAGE_TRAINER, SELECT_MEMBER, SUCCESS, PASSWORD, EXAMS, FETCH_DATA, EXPORT_MEMBERS, HELP
 }

@@ -41,7 +41,7 @@ private val monthWidth = 90.dp
 private val readyWidth = 500.dp
 
 @Composable
-fun memberExportDialog(members: List<Member>, teilnahme: List<Teilnahme>, drivePath: String, onDismiss: () -> Unit) {
+fun ExportMembersDialog(members: List<Member>, teilnahme: List<Teilnahme>, drivePath: String, onDismiss: () -> Unit) {
     var searchFieldValue by remember { mutableStateOf("") }
     var showTimedSuccessDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -93,12 +93,12 @@ fun memberExportDialog(members: List<Member>, teilnahme: List<Teilnahme>, driveP
             }) { member ->
                 val isReadyString = isReadyForExam(member, teilnahme)
                 Row {
-                    nameText(member, isReadyString.second)
-                    oldLevel(member)
-                    newLevel(member)
-                    unitsSinceLastExam(member, teilnahme)
-                    periodLastExam(member)
-                    reasonText(isReadyString.second)
+                    NameText(member, isReadyString.second)
+                    OldLevel(member)
+                    NewLevel(member)
+                    UnitsSinceLastExam(member, teilnahme)
+                    PeriodLastExam(member)
+                    ReasonText(isReadyString.second)
                 }
             }
         }
@@ -129,7 +129,7 @@ fun memberExportDialog(members: List<Member>, teilnahme: List<Teilnahme>, driveP
 
 //<editor-fold desc="'Table' fields (textComposables)">
 @Composable
-private fun nameText(member: Member, isReadyString: String?) {
+private fun NameText(member: Member, isReadyString: String?) {
     Text(
         "${member.prename} ${member.surname}",
         color = if (isReadyString == null) Color.Unspecified else Color.Red,
@@ -138,7 +138,7 @@ private fun nameText(member: Member, isReadyString: String?) {
 }
 
 @Composable
-private fun oldLevel(member: Member) {
+private fun OldLevel(member: Member) {
     var level: String = member.level
     if (member.level.contains("Dan")) {
         level = level.drop(2) // drop the first two letters
@@ -149,12 +149,12 @@ private fun oldLevel(member: Member) {
 }
 
 @Composable
-private fun newLevel(member: Member) {
+private fun NewLevel(member: Member) {
     Text(levels.next(member.level).first, modifier = Modifier.width(levelWidth))
 }
 
 @Composable
-private fun unitsSinceLastExam(member: Member, teilnahme: List<Teilnahme>) {
+private fun UnitsSinceLastExam(member: Member, teilnahme: List<Teilnahme>) {
     Text(
         if (member.date_last_exam == null) "" else "${
             countId(
@@ -169,7 +169,7 @@ private fun unitsSinceLastExam(member: Member, teilnahme: List<Teilnahme>) {
 
 
 @Composable
-private fun periodLastExam(member: Member) {
+private fun PeriodLastExam(member: Member) {
     if (member.date_last_exam == null) {
         Text("", modifier = Modifier.width(monthWidth))
     } else {
@@ -179,7 +179,7 @@ private fun periodLastExam(member: Member) {
 }
 
 @Composable
-private fun reasonText(isReadyString: String?) {
+private fun ReasonText(isReadyString: String?) {
     Text(isReadyString ?: "Kann nächste Prüfung machen!", modifier = Modifier.width(readyWidth))
 }
 //</editor-fold>
@@ -198,7 +198,7 @@ private fun reasonText(isReadyString: String?) {
  *
  * @param member member to check
  * @see studentStats
- * @see memberExportDialog
+ * @see ExportMembersDialog
  */
 fun isReadyForExam(member: Member, teilnahme: List<Teilnahme>): Pair<String, String?> {
     val dateLastExam: LocalDate = getLastExamOrFirstTrainingDate(member, teilnahme) ?: return Pair<String, String?>(

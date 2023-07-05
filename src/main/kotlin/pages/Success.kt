@@ -1,5 +1,6 @@
 package pages
 
+import Screen
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
@@ -13,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun successPage(changeScreen: (id: Int) -> Unit) {
+fun SuccessPage(changeScreen: (screen: Screen) -> Unit) {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -28,7 +29,7 @@ fun successPage(changeScreen: (id: Int) -> Unit) {
         Button(
             colors = ButtonDefaults.buttonColors(backgroundColor = Color.Gray, contentColor = Color.White),
             modifier = Modifier.width((60 * 5).dp).height(60.dp),
-            onClick = { changeScreen(0) }) {
+            onClick = { changeScreen(Screen.HOME) }) {
             Text("Weiter")
         }
     }

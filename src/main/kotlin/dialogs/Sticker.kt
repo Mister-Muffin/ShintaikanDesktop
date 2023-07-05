@@ -28,7 +28,7 @@ import stickerUnits
 import java.time.LocalDate
 
 @Composable
-fun stickerDialog(
+fun StickerDialog(
     stickerStudentsList: List<Member>,
     activeTrainer: Trainer,
     onDismiss: () -> Unit
@@ -77,13 +77,13 @@ fun stickerDialog(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            description(member, total)
+                            Description(member, total)
 
-                            radioRecieved(member, mutableMembers)
+                            RadioRecieved(member, mutableMembers)
 
                             Spacer(modifier = Modifier.width(8.dp))
 
-                            radioNotRecieved(member, mutableMembers)
+                            RadioNotRecieved(member, mutableMembers)
                         }
                     }
                 }
@@ -135,7 +135,7 @@ fun stickerDialog(
 }
 
 @Composable
-private fun radioRecieved(
+private fun RadioRecieved(
     student: Member,
     mutableMembers: SnapshotStateList<Member>
 ) {
@@ -153,7 +153,7 @@ private fun radioRecieved(
 }
 
 @Composable
-private fun radioNotRecieved(
+private fun RadioNotRecieved(
     student: Member,
     mutableMembers: SnapshotStateList<Member>
 ) {
@@ -171,7 +171,7 @@ private fun radioNotRecieved(
 }
 
 @Composable
-private fun description(student: Member, total: Int) {
+private fun Description(student: Member, total: Int) {
     val textModifier = Modifier.padding(8.dp).width(300.dp)
     if (student.sticker_recieved != stickerUnits.keys.last()) {
         if (

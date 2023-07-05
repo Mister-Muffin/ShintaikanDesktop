@@ -27,7 +27,7 @@ import java.time.Period
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun examsDialog(members: List<Member>, teilnahme: List<Teilnahme>, onDismiss: () -> Unit) {
+fun ExamsDialog(members: List<Member>, teilnahme: List<Teilnahme>, onDismiss: () -> Unit) {
 
     var searchFieldVal by remember { mutableStateOf("") }
 
@@ -68,7 +68,7 @@ fun examsDialog(members: List<Member>, teilnahme: List<Teilnahme>, onDismiss: ()
                             onClick = { nameString -> searchFieldVal = nameString })
                     }
                 } else if (studentFilter.size == 1) {
-                    item { studentStats(studentFilter[0], members, teilnahme) }
+                    item { StudentStats(studentFilter[0], members, teilnahme) }
                 } else {
                     item { Text("Keine Personen gefunden") }
                 }
@@ -78,7 +78,7 @@ fun examsDialog(members: List<Member>, teilnahme: List<Teilnahme>, onDismiss: ()
 }
 
 @Composable
-private fun studentStats(
+private fun StudentStats(
     member: Member,
     members: List<Member>,
     teilnahme: List<Teilnahme>
@@ -113,14 +113,14 @@ private fun studentStats(
         }
         Text("Grad: $level")
 
-        textTotalTrainingSessions(member, teilnahme)
+        TextTotalTrainingSessions(member, teilnahme)
 
         Divider()
 
         // Sollte die Person bereits eine Prüfung gemacht haben,
         // zeige das Datum der letzten Prüfung und bau den string für die Differenz zu diesem Datum zusammen
         if (member.date_last_exam != null) {
-            textLastExam(member)
+            TextLastExam(member)
             Text(
                 "Einheiten seit der letzten Prüfung: ${countId(member, teilnahme, member.date_last_exam)}"
             )
@@ -208,7 +208,7 @@ private fun studentStats(
  * Text composable with displays the date of the student's total trainings sessions with some additional text
  */
 @Composable
-private fun textTotalTrainingSessions(member: Member, teilnahme: List<Teilnahme>) {
+private fun TextTotalTrainingSessions(member: Member, teilnahme: List<Teilnahme>) {
     Text("Alle Trainingseinheiten: " + getTotalTrainingSessions(member, teilnahme))
 }
 
@@ -216,7 +216,7 @@ private fun textTotalTrainingSessions(member: Member, teilnahme: List<Teilnahme>
  * Text composable with displays the date of the student's last exam with some additional text
  */
 @Composable
-private fun textLastExam(member: Member) {
+private fun TextLastExam(member: Member) {
     Text(
         "Letzte Prüfung am: ${
             DateTimeFormatter.ofPattern("dd.MM.yyyy").format(member.date_last_exam)
