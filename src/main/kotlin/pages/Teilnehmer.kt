@@ -45,7 +45,10 @@ fun teilnehmerSelector(
     val searchQuery = remember { mutableStateOf("") }
     var handleAsExam by remember { mutableStateOf(false) }
 
+    val allMembers = remember { mutableStateListOf<Member>() }
     val newMembers = remember { mutableStateListOf<Member>() }
+
+    allMembers.addAll(members)
 
     val checkedColors = remember { mutableStateListOf<String>() }
 
@@ -110,7 +113,7 @@ fun teilnehmerSelector(
         Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
             Row {
                 LazyColumn(state = leftLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
-                    items(members.asSequence()
+                    items(allMembers.asSequence()
                         .filter { s ->
                             // filter color checkboxes
                             if (checkedColors.isEmpty()) true
@@ -132,7 +135,7 @@ fun teilnehmerSelector(
                     { /* linke spalte */ student ->
                         listBox(student) {
                             newMembers.add(student)
-                            members.remove(student)
+                            allMembers.remove(student)
                             searchQuery.value = ""
                         }
                         Divider(modifier = Modifier.width(250.dp))
@@ -218,7 +221,7 @@ fun teilnehmerSelector(
                         .sortedByDescending { it.level }
                         .toList()) { student ->
                         listBox(student) {
-                            members.add(student)
+                            allMembers.add(student)
                             newMembers.remove(student)
                         }
                         Divider(modifier = Modifier.width(250.dp))

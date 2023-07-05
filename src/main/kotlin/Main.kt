@@ -129,7 +129,12 @@ fun main() = application {
                     screenID = id; activeTrainer = selectedTrainer
                 }
 
-                2 -> teilnehmerSelector(viewModel.allMembers, activeTrainer!!, appPassword) { screenID = it }
+                2 -> teilnehmerSelector(
+                    viewModel.allMembers,
+                    viewModel.teilnahme,
+                    activeTrainer!!,
+                    appPassword
+                ) { screenID = it }
 
                 3 -> successPage { screenID = it }
                 // needed because dialog windows don't work on Raspberry Pi
