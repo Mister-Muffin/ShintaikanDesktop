@@ -291,7 +291,7 @@ private fun ListBox(member: Member, onBoxClicked: () -> Unit) {
             fontSize = 12.sp,
             fontFamily = FontFamily.SansSerif,
             fontWeight = FontWeight.W500,
-            color = if (DegreeColor.getDegreeList(member.level).last()?.isDark == true)
+            color = if (DegreeColor.getDegreeList(member.level).first()?.isDark == true)
                 Color.White
             else
                 Color.Black,
