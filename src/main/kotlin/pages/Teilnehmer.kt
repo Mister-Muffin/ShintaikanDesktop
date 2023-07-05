@@ -48,7 +48,7 @@ fun teilnehmerSelector(
     val allMembers = remember { mutableStateListOf<Member>() }
     val newMembers = remember { mutableStateListOf<Member>() }
 
-    allMembers.addAll(members)
+    remember { allMembers.addAll(members) }
 
     val checkedColors = remember { mutableStateListOf<String>() }
 

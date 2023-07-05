@@ -19,6 +19,11 @@ class ViewModel(val coroutineScope: CoroutineScope) {
             val trainers = loadTrainers()
             val teilnahme = loadTeilnahme()
 
+            allMembers.clear()
+            allMessages.clear()
+            birthdays.clear()
+            this@ViewModel.trainers.clear()
+            this@ViewModel.teilnahme.clear()
 
             allMembers.addAll(members)
             allMessages.addAll(messages)
