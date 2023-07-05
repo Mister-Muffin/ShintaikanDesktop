@@ -1,5 +1,6 @@
 package pages
 
+import Screen
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -41,7 +42,7 @@ fun teilnehmerSelector(
     activeTrainer: Trainer,
     password: String,
     insertTeilnahme: (insertString: String, isExam: Boolean) -> Unit,
-    changeScreen: (id: Int) -> Unit
+    changeScreen: (screen: Screen) -> Unit
 ) {
     val searchQuery = remember { mutableStateOf("") }
     var handleAsExam by remember { mutableStateOf(false) }
@@ -81,7 +82,7 @@ fun teilnehmerSelector(
         insertTeilnahme(teilnahmeString, isExam)
         increaseTrainerUnitCount(activeTrainer)
 
-        if (studentsStickers.isEmpty()) changeScreen(3)
+        if (studentsStickers.isEmpty()) changeScreen(Screen.SUCCESS)
         else showStickerDialog = true
     }
 
@@ -95,7 +96,7 @@ fun teilnehmerSelector(
         if (showStickerDialog) {
             stickerDialog(studentsStickers, activeTrainer) {
                 showStickerDialog = false
-                changeScreen(3)
+                changeScreen(Screen.SUCCESS)
             }
         }
 

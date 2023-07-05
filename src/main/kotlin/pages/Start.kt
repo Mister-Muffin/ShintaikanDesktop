@@ -1,5 +1,6 @@
 package pages
 
+import Screen
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -42,7 +43,7 @@ fun startPage(
     birthdays: List<Member>,
     reloadMessages: () -> Unit,
     submitNewMessage: (newMessage: String) -> Unit,
-    changeScreen: (id: Int) -> Unit
+    changeScreen: (id: Screen) -> Unit
 ) {
 
     var newMessage by remember { mutableStateOf("") }
@@ -64,7 +65,7 @@ fun startPage(
             Row {
                 Button(
                     modifier = Modifier.width(250.dp),
-                    onClick = { changeScreen(1) }
+                    onClick = { changeScreen(Screen.SELECT_TRAINER) }
                 ) {
                     Text(text = "Teilnehmer eintragen")
                 }

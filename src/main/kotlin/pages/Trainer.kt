@@ -1,5 +1,6 @@
 package pages
 
+import Screen
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -13,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import models.Trainer
 
 @Composable
-fun trainerSelector(trainers: List<Trainer>, changeScreen: (id: Int, activeTrainer: Trainer?) -> Unit) {
+fun trainerSelector(trainers: List<Trainer>, changeScreen: (screen: Screen, activeTrainer: Trainer?) -> Unit) {
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
         Text("Wer bist du?", style = MaterialTheme.typography.h1)
@@ -60,7 +61,7 @@ fun trainerSelector(trainers: List<Trainer>, changeScreen: (id: Int, activeTrain
             }
             Button(
                 enabled = selectedTrainer != null, modifier = Modifier.width(350.dp).height(60.dp),
-                onClick = { if (selectedTrainer != null) changeScreen(2, selectedTrainer) }
+                onClick = { if (selectedTrainer != null) changeScreen(Screen.SELECT_MEMBER, selectedTrainer) }
             ) {
                 Text("Weiter")
             }
