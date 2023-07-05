@@ -147,7 +147,7 @@ fun main() = application {
                     screenID = 0
                 }
 
-                8 -> memberExportDialog(drivePath) { screenID = 0 }
+                8 -> memberExportDialog(viewModel.allMembers, viewModel.teilnahme, drivePath) { screenID = 0 }
 
                 9 -> helpDialog(drivePath) { screenID = 0 }
                 //

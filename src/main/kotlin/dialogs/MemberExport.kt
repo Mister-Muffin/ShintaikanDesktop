@@ -22,7 +22,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import levels
-import models.*
+import models.Member
+import models.Teilnahme
+import models.loadFullMemberTable
+import models.loadTeilnahme
 import next
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
@@ -38,18 +41,12 @@ private val monthWidth = 90.dp
 private val readyWidth = 500.dp
 
 @Composable
-fun memberExportDialog(drivePath: String, onDismiss: () -> Unit) {
-    val members = remember { mutableStateListOf<Member>() }
-
-    LaunchedEffect(Unit) {
-        members.addAll(loadMembers())
-    }
-
-    val teilnahme = loadTeilnahme()
-
+fun memberExportDialog(members: List<Member>, teilnahme: List<Teilnahme>, drivePath: String, onDismiss: () -> Unit) {
     var searchFieldValue by remember { mutableStateOf("") }
     var showTimedSuccessDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
+
+    var exportRunning by remember { mutableStateOf(false) }
 
     //if (showTimedSuccessDialog) timedSuccessDialog()
 
@@ -106,6 +103,7 @@ fun memberExportDialog(drivePath: String, onDismiss: () -> Unit) {
             }
         }
         Button(modifier = Modifier.fillMaxWidth(.5f), onClick = {
+            exportRunning = true
             coroutineScope.launch { exportMembers(drivePath) }.invokeOnCompletion {
                 /* commented out because dialogs don't work on Raspberry Pi (yet?)
                 coroutineScope.launch {
@@ -114,9 +112,13 @@ fun memberExportDialog(drivePath: String, onDismiss: () -> Unit) {
                     showTimedSuccessDialog = false
                 }*/
                 showTimedSuccessDialog = true
+                exportRunning = false
             }
         }) {
             Text(if (showTimedSuccessDialog) "Erfolgreich exportiert" else "Exportieren")
+        }
+        Button(enabled = !exportRunning, modifier = Modifier.fillMaxWidth(.5f), onClick = onDismiss) {
+            Text("Zurück")
         }
     }
 }
@@ -275,10 +277,7 @@ private suspend fun exportMembers(drivePath: String) {
         Files.newBufferedWriter(Paths.get("${drivePath}pruefungsabfrage.csv"))
     }
 
-    val csvPrinter = CSVPrinter(
-        writer, CSVFormat.EXCEL
-        //.withHeader(StudentTable.columns)
-    )
+    val csvPrinter = CSVPrinter(writer, CSVFormat.EXCEL)
 
     val members = loadFullMemberTable()
     csvPrinter.printRecord("Name", "Dat. lzt. Prüf.", "Einh. s. l. Prüf.")
@@ -289,11 +288,7 @@ private suspend fun exportMembers(drivePath: String) {
         csvPrinter.printRecord(
             member.surname + " " + member.prename,
             member.date_last_exam,
-            countId(
-                member,
-                teilnahme,
-                member.date_last_exam
-            )
+            countId(member, teilnahme, member.date_last_exam)
         )
 
     }
