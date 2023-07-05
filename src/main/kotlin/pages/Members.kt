@@ -253,7 +253,7 @@ private fun <T : FilterOption> CustomFilter(filterOptions: Array<T>, checked: Mu
                     Checkbox(
                         checked = checked.contains(option),
                         colors = when (option) {
-                            is DegreeColor -> option.checkboxColors;
+                            is DegreeColor -> option.checkboxColors
                             else -> CheckboxDefaults.colors(MaterialTheme.colors.primary)
                         },
                         onCheckedChange = { handleChecked() },
@@ -273,7 +273,10 @@ private fun ListBox(member: Member, onBoxClicked: () -> Unit) {
             .height(25.dp)
             .drawWithCache {
                 val gradient = Brush.horizontalGradient(
-                    colors = DegreeColor.getColorList(member.level),
+                    colors = DegreeColor.getColorList(member.level).let { list ->
+                        if (list.size < 2) list + list
+                        else list
+                    },
                     startX = size.width / 2 - 1,
                     endX = size.width / 2 + 1,
                 )
@@ -325,7 +328,7 @@ enum class DegreeColor(
     companion object {
         fun getDegreeList(level: String) = level.trim().split(" ").last().split("-").map {
             // Could maybe use some better fallback or error
-            values().find { color -> color.databaseName == it }
+            values().find { color -> color.databaseName.lowercase() == it.lowercase() }
         }
 
         // TODO: This still isn't really nice, but a definite improvement
