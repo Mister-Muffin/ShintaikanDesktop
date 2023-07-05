@@ -102,23 +102,27 @@ fun memberExportDialog(members: List<Member>, teilnahme: List<Teilnahme>, driveP
                 }
             }
         }
-        Button(modifier = Modifier.fillMaxWidth(.5f), onClick = {
-            exportRunning = true
-            coroutineScope.launch { exportMembers(drivePath) }.invokeOnCompletion {
-                /* commented out because dialogs don't work on Raspberry Pi (yet?)
-                coroutineScope.launch {
-                    showTimedSuccessDialog = true
-                    delay(2000)
-                    showTimedSuccessDialog = false
-                }*/
-                showTimedSuccessDialog = true
-                exportRunning = false
+
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+            Button(enabled = !exportRunning, onClick = onDismiss) {
+                Text("Zurück")
             }
-        }) {
-            Text(if (showTimedSuccessDialog) "Erfolgreich exportiert" else "Exportieren")
-        }
-        Button(enabled = !exportRunning, modifier = Modifier.fillMaxWidth(.5f), onClick = onDismiss) {
-            Text("Zurück")
+
+            Button(onClick = {
+                exportRunning = true
+                coroutineScope.launch { exportMembers(drivePath) }.invokeOnCompletion {
+                    /* commented out because dialogs don't work on Raspberry Pi (yet?)
+                    coroutineScope.launch {
+                        showTimedSuccessDialog = true
+                        delay(2000)
+                        showTimedSuccessDialog = false
+                    }*/
+                    showTimedSuccessDialog = true
+                    exportRunning = false
+                }
+            }) {
+                Text(if (showTimedSuccessDialog) "Erfolgreich exportiert" else "Exportieren")
+            }
         }
     }
 }
