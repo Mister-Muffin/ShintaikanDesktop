@@ -140,7 +140,7 @@ fun main() = application {
 
                 5 -> manageTrainerDialog(viewModel.allMembers, viewModel::reloadMembers, onDismiss = { screenID = 0 })
 
-                6 -> examsDialog(viewModel.allMembers, onDismiss = { screenID = 0 })
+                6 -> examsDialog(viewModel.allMembers, viewModel.teilnahme, onDismiss = { screenID = 0 })
 
                 7 -> datenHolenWindow(drivePath) {
                     viewModel.loadAll()

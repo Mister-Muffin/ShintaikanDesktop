@@ -20,8 +20,6 @@ import countId
 import getTotalTrainingSessions
 import models.Member
 import models.Teilnahme
-import models.loadMembers
-import models.loadTeilnahme
 import next
 import stickerUnits
 import java.time.LocalDate
@@ -29,23 +27,14 @@ import java.time.Period
 import java.time.format.DateTimeFormatter
 
 @Composable
-fun examsDialog(members: List<Member>, onDismiss: () -> Unit) {
+fun examsDialog(members: List<Member>, teilnahme: List<Teilnahme>, onDismiss: () -> Unit) {
 
-    val allMembers = remember { mutableStateListOf<Member>() }
-    val searchMembers = remember { mutableStateListOf<Member>() }
-    remember {
-        for (student in members) {
-            allMembers.add(student)
-            searchMembers.add(student)
-        }
-    }
+    var searchFieldVal by remember { mutableStateOf("") }
 
-    val searchFieldVal = remember { mutableStateOf("") }
-
-    val studentFilter = allMembers.filter {
+    val studentFilter = members.filter {
         (it.prename + it.surname)
             .lowercase()
-            .contains(searchFieldVal.value.lowercase().replace(" ", ""))
+            .contains(searchFieldVal.lowercase().replace(" ", ""))
     }
 
     Column(
@@ -55,8 +44,8 @@ fun examsDialog(members: List<Member>, onDismiss: () -> Unit) {
         Text("Mitgliedsdaten abfragen", style = MaterialTheme.typography.h6)
         Divider(modifier = Modifier.padding(vertical = 16.dp))
         OutlinedTextField(
-            value = searchFieldVal.value,
-            onValueChange = { searchFieldVal.value = it },
+            value = searchFieldVal,
+            onValueChange = { searchFieldVal = it },
             placeholder = {
                 Text(
                     "Suchen... (mind. 3 Zeichen)",
@@ -66,20 +55,20 @@ fun examsDialog(members: List<Member>, onDismiss: () -> Unit) {
             modifier = Modifier.padding(bottom = 10.dp).width(300.dp)
         )
         LazyColumn {
-            if (searchFieldVal.value.length > 2) {
+            if (searchFieldVal.length > 2) {
                 if (studentFilter.size >= 2) {
-                    items(allMembers.filter {
+                    items(members.filter {
                         (it.prename + it.surname)
                             .lowercase()
-                            .contains(searchFieldVal.value.lowercase().replace(" ", ""))
+                            .contains(searchFieldVal.lowercase().replace(" ", ""))
                     }) {
                         StudentList().studentList(
                             it.id,
                             members,
-                            onClick = { nameString -> searchFieldVal.value = nameString })
+                            onClick = { nameString -> searchFieldVal = nameString })
                     }
                 } else if (studentFilter.size == 1) {
-                    item { studentStats(studentFilter[0]) }
+                    item { studentStats(studentFilter[0], members, teilnahme) }
                 } else {
                     item { Text("Keine Personen gefunden") }
                 }
@@ -89,12 +78,11 @@ fun examsDialog(members: List<Member>, onDismiss: () -> Unit) {
 }
 
 @Composable
-private fun studentStats(member: Member) { //datum letzte prüfung | wie lange her y m d | einheiten seit l prüf | einheiten gesamt
-    val students = remember { mutableStateListOf<Member>() }
-    val teilnahme = loadTeilnahme()
-    LaunchedEffect(Unit) {
-        students.addAll(loadMembers())
-    }
+private fun studentStats(
+    member: Member,
+    members: List<Member>,
+    teilnahme: List<Teilnahme>
+) { //datum letzte prüfung | wie lange her y m d | einheiten seit l prüf | einheiten gesamt
     return Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
             val nameString: String = member.prename + " " + member.surname // Join pre- and surname
@@ -197,7 +185,7 @@ private fun studentStats(member: Member) { //datum letzte prüfung | wie lange h
                 val stickerUnit: Int = singleStats[0].toInt()
                 val stickerName = stickerUnits[stickerUnit]
                 val stickerBy: Int = singleStats[1].toInt()
-                val stickerByTrainer = students.filter { f -> stickerBy == f.id }[0]
+                val stickerByTrainer = members.filter { f -> stickerBy == f.id }[0]
                 val stickerByTrainerName = "${stickerByTrainer.prename} ${stickerByTrainer.surname}"
                 val stickerDate = singleStats[2]
                 val stickerDateFormatted = LocalDate.parse(stickerDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
