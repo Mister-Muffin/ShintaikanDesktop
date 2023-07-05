@@ -15,7 +15,6 @@ import models.Trainer
 @Composable
 fun trainerSelector(trainers: List<Trainer>, changeScreen: (id: Int, activeTrainer: Trainer?) -> Unit) {
 
-
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
         Text("Wer bist du?", style = MaterialTheme.typography.h1)
         Divider(modifier = Modifier.padding(vertical = 16.dp))
