@@ -90,7 +90,7 @@ fun DatenHolenWindow(drivePath: String, onDismiss: () -> Unit) {
     }
 }
 
-suspend fun dumpCurrentDatabase() {
+private suspend fun dumpCurrentDatabase() {
     val writer = newBufferedWriter(Paths.get("${configFilePath}backups/backup-${LocalTime.now()}.csv"))
 
     val csvPrinter = CSVPrinter(
