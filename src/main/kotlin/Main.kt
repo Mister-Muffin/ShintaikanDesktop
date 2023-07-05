@@ -134,7 +134,10 @@ fun main() = application {
                     appPassword
                 ) { screenID = it }
 
-                3 -> successPage { screenID = it }
+                3 -> successPage {
+                    viewModel.loadAll()
+                    screenID = it
+                }
                 // needed because dialog windows don't work on Raspberry Pi
                 4 -> passwordPrompt(password = appPassword) { if (it) screenID = forwardedScreenId }
 
