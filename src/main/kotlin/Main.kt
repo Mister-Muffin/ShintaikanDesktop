@@ -131,7 +131,8 @@ fun main() = application {
                     viewModel.allMembers,
                     viewModel.teilnahme,
                     activeTrainer!!,
-                    appPassword
+                    appPassword,
+                    viewModel::insertTeilnahme
                 ) { screenID = it }
 
                 3 -> successPage {

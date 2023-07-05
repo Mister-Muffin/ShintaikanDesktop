@@ -4,6 +4,7 @@ import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.isNotNull
 import org.jetbrains.exposed.sql.javatime.date
+import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDate
 
@@ -49,8 +50,8 @@ fun loadExams(): List<Teilnahme> {
     }
 }
 
-fun insertTeilnahme(ids: String, isExam: Boolean) {
-    val today = transaction {
+suspend fun insertTeilnahme(ids: String, isExam: Boolean) {
+    val today = suspendedTransactionAsync {
         TeilnahmeTable.select(where = TeilnahmeTable.date eq LocalDate.now()).map {
             Teilnahme(
                 id = it[TeilnahmeTable.id],
@@ -59,16 +60,16 @@ fun insertTeilnahme(ids: String, isExam: Boolean) {
                 date = it[TeilnahmeTable.date]
             )
         }
-    }
+    }.await()
     if (today.size == 0) {
-        transaction {
+        suspendedTransactionAsync {
             TeilnahmeTable.insert {
                 if (isExam) it[userIdExam] = ids else it[userId] = ids
                 it[date] = LocalDate.now()
             }
-        }
+        }.await()
     } else {
-        transaction {
+        suspendedTransactionAsync {
             if (isExam) {
                 TeilnahmeTable.update(where = { TeilnahmeTable.date eq LocalDate.now() }) {
                     it[userIdExam] =
@@ -81,7 +82,7 @@ fun insertTeilnahme(ids: String, isExam: Boolean) {
                         .filter { !it.isWhitespace() }
                 }
             }
-        }
+        }.await()
     }
 }
 

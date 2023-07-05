@@ -40,6 +40,7 @@ fun teilnehmerSelector(
     teilnahme: List<Teilnahme>,
     activeTrainer: Trainer,
     password: String,
+    insertTeilnahme: (insertString: String, isExam: Boolean) -> Unit,
     changeScreen: (id: Int) -> Unit
 ) {
     val searchQuery = remember { mutableStateOf("") }

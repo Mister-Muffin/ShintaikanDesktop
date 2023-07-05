@@ -62,6 +62,12 @@ class ViewModel(val coroutineScope: CoroutineScope) {
         )
     }
 
+    fun insertTeilnahme(insertString: String, isExam: Boolean) {
+        coroutineScope.launch {
+            models.insertTeilnahme(insertString, isExam)
+        }
+    }
+
     private fun loadBirthdays(members: List<Member>): MutableList<Member> {
         val birthdays = mutableListOf<Member>()
 
