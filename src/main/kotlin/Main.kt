@@ -1,5 +1,9 @@
+import Screen.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Shapes
+import androidx.compose.material.Typography
+import androidx.compose.material.lightColors
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
@@ -19,12 +23,11 @@ import cc.ekblad.toml.tomlMapper
 import dialogs.*
 import models.Trainer
 import org.jetbrains.exposed.sql.Database
+import pages.MemberSelector
 import pages.StartPage
 import pages.SuccessPage
-import pages.MemberSelector
 import pages.TrainerSelector
 import java.nio.file.Path
-import Screen.*
 
 const val configFileName = "config.toml"
 val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
@@ -141,10 +144,10 @@ fun main() = application {
                 // needed because dialog windows don't work on Raspberry Pi
                 PASSWORD -> PasswordPrompt(password = appPassword) { if (it) screenID = forwardedScreenId }
 
-                MANAGE_TRAINER -> ManageTrainerDialog(
-                    viewModel.allMembers,
-                    viewModel::reloadMembers,
-                    onDismiss = { screenID = HOME })
+                MANAGE_TRAINER -> ManageTrainerDialog(viewModel.allMembers, viewModel::reloadMembers, onDismiss = {
+                    viewModel.loadAll()
+                    screenID = HOME
+                })
 
                 EXAMS -> ExamsDialog(viewModel.allMembers, viewModel.teilnahme, onDismiss = { screenID = HOME })
 

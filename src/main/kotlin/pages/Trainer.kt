@@ -25,7 +25,6 @@ fun TrainerSelector(trainers: List<Trainer>, changeScreen: (screen: Screen, acti
             modifier = Modifier.fillMaxSize(),
         ) {
             var selectedTrainer: Trainer? by remember { mutableStateOf(null) }
-            var selectedCotrainer: Trainer? by remember { mutableStateOf(null) }
 
             LazyVerticalGrid(GridCells.Fixed(4)) {
                 items(trainers.sortedBy { it.prename }) { trainer ->
@@ -46,7 +45,7 @@ fun TrainerSelector(trainers: List<Trainer>, changeScreen: (screen: Screen, acti
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.clickable {
-                            selectedTrainer = trainer; if (selectedCotrainer == trainer) selectedCotrainer = null
+                            selectedTrainer = trainer
                         }.padding(24.dp)
                     ) {
                         RadioButton(
@@ -59,6 +58,7 @@ fun TrainerSelector(trainers: List<Trainer>, changeScreen: (screen: Screen, acti
                     }
                 }
             }
+
             Button(
                 enabled = selectedTrainer != null, modifier = Modifier.width(350.dp).height(60.dp),
                 onClick = { if (selectedTrainer != null) changeScreen(Screen.SELECT_MEMBER, selectedTrainer) }
