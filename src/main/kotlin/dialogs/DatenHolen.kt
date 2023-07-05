@@ -66,9 +66,8 @@ fun DatenHolenWindow(drivePath: String, onDismiss: () -> Unit) {
         exMembers({ textFieldValue = it }, csvParser1)
         renameMembers({ textFieldValue = it }, csvParser2)
         updateMembers({ textFieldValue = it }, csvParser3)
-        //}.invokeOnCompletion {
+
         textFieldValue = textWhenDone
-        //}
     }
 
     Column(
