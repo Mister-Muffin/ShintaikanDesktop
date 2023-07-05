@@ -22,9 +22,8 @@ import java.time.LocalTime
 private const val textWhenDone = "Complete!\nExit Program."
 
 @Composable
-fun DatenHolenWindow(drivePath: String, onDismiss: () -> Unit) {
+fun datenHolenWindow(drivePath: String, onDismiss: () -> Unit) {
     var textFieldValue by remember { mutableStateOf("") }
-    val coroutineScope = rememberCoroutineScope()
 
     val csvPath = "${drivePath}transferHauseDojo.csv"
 
