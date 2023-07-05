@@ -22,9 +22,8 @@ import java.time.LocalTime
 private const val textWhenDone = "Complete!\nExit Program."
 
 @Composable
-fun DatenHolenWindow(drivePath: String, onDismiss: () -> Unit) {
+fun datenHolenWindow(drivePath: String, onDismiss: () -> Unit) {
     var textFieldValue by remember { mutableStateOf("") }
-    val coroutineScope = rememberCoroutineScope()
 
     val csvPath = "${drivePath}transferHauseDojo.csv"
 
@@ -66,9 +65,8 @@ fun DatenHolenWindow(drivePath: String, onDismiss: () -> Unit) {
         exMembers({ textFieldValue = it }, csvParser1)
         renameMembers({ textFieldValue = it }, csvParser2)
         updateMembers({ textFieldValue = it }, csvParser3)
-        //}.invokeOnCompletion {
+
         textFieldValue = textWhenDone
-        //}
     }
 
     Column(
@@ -84,13 +82,13 @@ fun DatenHolenWindow(drivePath: String, onDismiss: () -> Unit) {
         Text(textFieldValue)
         Spacer(modifier = Modifier.fillMaxHeight(.5f))
         Button(enabled = textFieldValue == textWhenDone, onClick = onDismiss) {
-            Text("Fenster schließen")
+            Text("Zurück")
         }
 
     }
 }
 
-fun dumpCurrentDatabase() {
+private suspend fun dumpCurrentDatabase() {
     val writer = newBufferedWriter(Paths.get("${configFilePath}backups/backup-${LocalTime.now()}.csv"))
 
     val csvPrinter = CSVPrinter(

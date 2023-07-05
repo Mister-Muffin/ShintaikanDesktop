@@ -37,23 +37,18 @@ private val farben = arrayOf("Weiss", "Gelb", "Orange", "Grün", "Blau", "Violet
 @Composable
 fun teilnehmerSelector(
     members: List<Member>,
+    teilnahme: List<Teilnahme>,
     activeTrainer: Trainer,
     password: String,
     changeScreen: (id: Int) -> Unit
 ) {
-
     val searchQuery = remember { mutableStateOf("") }
     var handleAsExam by remember { mutableStateOf(false) }
 
-    val newMembers = remember { mutableStateListOf<Member>() }
     val allMembers = remember { mutableStateListOf<Member>() }
-    remember {
-        for (student in members) {
-            allMembers.add(student)
-        }
-    }
+    val newMembers = remember { mutableStateListOf<Member>() }
 
-    val teilnahme = loadTeilnahme()
+    remember { allMembers.addAll(members) }
 
     val checkedColors = remember { mutableStateListOf<String>() }
 

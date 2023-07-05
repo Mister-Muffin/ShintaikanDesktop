@@ -14,19 +14,10 @@ import androidx.compose.ui.unit.dp
 import composables.StudentList
 import models.Member
 import models.editIsTrainer
-import models.loadMembers
 
 @Composable
-fun manageTrainerDialog(students1: List<Member>, onDismiss: () -> Unit) {
+fun manageTrainerDialog(members: List<Member>, reloadMembers: () -> Unit, onDismiss: () -> Unit) {
 
-    val members = remember { mutableStateListOf<Member>() }
-    remember {
-        for (student in students1) {
-            members.add(student)
-        }
-    }
-
-    var requirePassword by remember { mutableStateOf(true) }
     var searchFieldVal by remember { mutableStateOf("") }
 
     val lazyState = rememberLazyListState()
@@ -54,10 +45,7 @@ fun manageTrainerDialog(students1: List<Member>, onDismiss: () -> Unit) {
                 Divider(modifier = Modifier.padding(4.dp))
                 currentTrainerList(members) { newVal, student ->
                     editIsTrainer(student.id, newVal)
-                    members.clear()
-                    for (s in loadMembers()) {
-                        members.add(s)
-                    }
+                    reloadMembers()
                 }
             }
             Column(
@@ -98,10 +86,7 @@ fun manageTrainerDialog(students1: List<Member>, onDismiss: () -> Unit) {
                                             checked = studentFilter[0].is_trainer,
                                             onCheckedChange = {
                                                 editIsTrainer(studentFilter[0].id, it)
-                                                members.clear()
-                                                for (s in loadMembers()) {
-                                                    members.add(s)
-                                                }
+                                                reloadMembers()
                                                 searchFieldVal = ""
                                             })
                                     }
@@ -128,7 +113,7 @@ fun manageTrainerDialog(students1: List<Member>, onDismiss: () -> Unit) {
 
 @Composable
 private fun currentTrainerList(
-    members: MutableList<Member>,
+    members: List<Member>,
     onCheckedChange: (newVal: Boolean, member: Member) -> Unit
 ) {
     val lazyState = rememberLazyListState()

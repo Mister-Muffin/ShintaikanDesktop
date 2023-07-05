@@ -1,8 +1,10 @@
 package models
 
+import kotlinx.coroutines.Dispatchers
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.javatime.date
+import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.time.LocalDate
 
@@ -20,9 +22,9 @@ data class Message(
     val dateCreated: LocalDate
 )
 
-fun loadMessages(): List<Message> {
+suspend fun loadMessages(): List<Message> {
 
-    return transaction {
+    return suspendedTransactionAsync(Dispatchers.IO) {
         MessageTable.selectAll().sortedByDescending { it[MessageTable.dateCreated] }.map {
             Message(
                 id = it[MessageTable.id],
@@ -31,7 +33,7 @@ fun loadMessages(): List<Message> {
                 dateCreated = it[MessageTable.dateCreated]
             )
         }
-    }
+    }.await()
 }
 
 fun addMessage(message: Message): Int {

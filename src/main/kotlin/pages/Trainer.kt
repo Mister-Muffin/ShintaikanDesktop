@@ -11,11 +11,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import models.Trainer
-import models.loadTrainers
 
 @Composable
-fun trainerSelector(changeScreen: (id: Int, activeTrainer: Trainer?) -> Unit) {
-    val trainers = loadTrainers()
+fun trainerSelector(trainers: List<Trainer>, changeScreen: (id: Int, activeTrainer: Trainer?) -> Unit) {
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
         Text("Wer bist du?", style = MaterialTheme.typography.h1)

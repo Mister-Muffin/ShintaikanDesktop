@@ -1,10 +1,7 @@
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -23,14 +20,12 @@ import cc.ekblad.toml.decode
 import cc.ekblad.toml.tomlMapper
 import dialogs.*
 import models.Trainer
-import models.loadMembers
 import org.jetbrains.exposed.sql.Database
 import pages.startPage
 import pages.successPage
 import pages.teilnehmerSelector
 import pages.trainerSelector
 import java.nio.file.Path
-import kotlin.system.exitProcess
 
 const val configFileName = "config.toml"
 val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
@@ -43,15 +38,15 @@ fun main() = application {
     // Create a TOML mapper without any custom configuration
     val mapper = tomlMapper { }
 
-    // Read our config from file
+    // Read config from file
     val tomlFile = Path.of(configFilePath + configFileName)
     val config = mapper.decode<Config>(tomlFile)
     //println(config.settings)
 
-    val ip: String = config.settings.ip //System.getenv("S_DSK_IP") ?: "172.17.0.1"
-    val port: String = config.settings.port //System.getenv("S_DSK_PORT") ?: "5434"
-    val user: String = config.settings.user //System.getenv("S_DSK_USER") ?: "postgres"
-    val dbPassword: String = config.settings.password //System.getenv("S_DSK_PASSWORD") ?: "mysecretpassword"
+    val ip: String = config.settings.ip
+    val port: String = config.settings.port
+    val user: String = config.settings.user
+    val dbPassword: String = config.settings.password
     val database: String = config.settings.database
     val appPassword: String = config.settings.appPassword
     val drivePath: String = config.settings.exportPath
@@ -63,7 +58,9 @@ fun main() = application {
         password = dbPassword
     )
 
-    var students = loadMembers()
+    val scope = rememberCoroutineScope()
+    val viewModel = remember { ViewModel(scope) }
+    viewModel.loadAll()
 
     val imageBitmap = remember { useResource("pelli2.jpg") { loadImageBitmap(it) } }
 
@@ -117,25 +114,40 @@ fun main() = application {
                 primary = Color(0xFF212121)
             )
         ) {
-            if (screenID == 0) students = loadMembers() // Reload database when moving to home screen
             when (screenID) {
-                0 -> startPage { screenID = it }
+                0 -> startPage(
+                    viewModel.allMembers,
+                    viewModel.allMessages,
+                    viewModel.birthdays,
+                    viewModel::reloadMessages,
+                    viewModel::submitNewMessage
+                ) { screenID = it }
 
-                1 -> trainerSelector { id, selectedTrainer -> screenID = id; activeTrainer = selectedTrainer }
+                1 -> trainerSelector(viewModel.trainers) { id, selectedTrainer ->
+                    screenID = id; activeTrainer = selectedTrainer
+                }
 
-                2 -> teilnehmerSelector(students, activeTrainer!!, appPassword) { screenID = it }
+                2 -> teilnehmerSelector(
+                    viewModel.allMembers,
+                    viewModel.teilnahme,
+                    activeTrainer!!,
+                    appPassword
+                ) { screenID = it }
 
                 3 -> successPage { screenID = it }
                 // needed because dialog windows don't work on Raspberry Pi
                 4 -> passwordPrompt(password = appPassword) { if (it) screenID = forwardedScreenId }
 
-                5 -> manageTrainerDialog(students, onDismiss = { screenID = 0 })
+                5 -> manageTrainerDialog(viewModel.allMembers, viewModel::reloadMembers, onDismiss = { screenID = 0 })
 
-                6 -> examsDialog(students, onDismiss = { screenID = 0 })
+                6 -> examsDialog(viewModel.allMembers, viewModel.teilnahme, onDismiss = { screenID = 0 })
 
-                7 -> DatenHolenWindow(drivePath) { exitProcess(0) }
+                7 -> datenHolenWindow(drivePath) {
+                    viewModel.loadAll()
+                    screenID = 0
+                }
 
-                8 -> memberExportDialog(drivePath) { screenID = 0 }
+                8 -> memberExportDialog(viewModel.allMembers, viewModel.teilnahme, drivePath) { screenID = 0 }
 
                 9 -> helpDialog(drivePath) { screenID = 0 }
                 //

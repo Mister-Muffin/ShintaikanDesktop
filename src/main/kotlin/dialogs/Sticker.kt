@@ -33,8 +33,6 @@ fun stickerDialog(
     activeTrainer: Trainer,
     onDismiss: () -> Unit
 ) {
-
-
     val mutableMembers = remember { stickerStudentsList.toMutableStateList() }
     fun SnapshotStateList<Member>.filterShowSticker() = filter { it.sticker_show_again }
 

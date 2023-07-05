@@ -21,8 +21,15 @@ import androidx.compose.ui.unit.dp
 fun passwordPrompt(password: String, result: (pwCorrect: Boolean) -> Unit) {
 
     var textViewText by remember { mutableStateOf("Bitte gib das Passwort ein") }
-    var passwordFieldVal by remember { mutableStateOf("") } //TODO: Set empty string for production
+    var passwordFieldVal by remember { mutableStateOf("") }
     var errorTextField by remember { mutableStateOf(false) }
+
+    fun checkPasswordAndReturn() {
+        val passwordCorrect = passwordFieldVal == password // <- Password
+        errorTextField = !passwordCorrect
+        textViewText = if (passwordCorrect) textViewText else "Passwort falsch!"
+        result(passwordCorrect)
+    }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
         Text(textViewText, modifier = Modifier.padding(bottom = 16.dp))
@@ -38,25 +45,13 @@ fun passwordPrompt(password: String, result: (pwCorrect: Boolean) -> Unit) {
             modifier = Modifier.padding(bottom = 16.dp).onKeyEvent { keyEvent ->
                 if (keyEvent.key != Key.Enter) return@onKeyEvent false
                 if (keyEvent.type == KeyEventType.KeyUp) {
-                    //TODO: Function this
-                    val passwordCorrect = passwordFieldVal == password // <- Password
-                    errorTextField = !passwordCorrect
-                    textViewText = if (passwordCorrect) textViewText else "Passwort falsch!"
-
-                    result(passwordCorrect)
-                    //
+                    checkPasswordAndReturn()
                 }
                 true
             },
             onValueChange = { passwordFieldVal = it })
         Button(onClick = {
-            //TODO: Function this
-            val passwordCorrect = passwordFieldVal == password // <- Password
-            errorTextField = !passwordCorrect
-            textViewText = if (passwordCorrect) textViewText else "Passwort falsch!"
-
-            result(passwordCorrect)
-            //
+            checkPasswordAndReturn()
         }) { Text("OK") }
     }
 
