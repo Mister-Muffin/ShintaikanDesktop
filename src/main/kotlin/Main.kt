@@ -115,7 +115,6 @@ fun main() = application {
                 primary = Color(0xFF212121)
             )
         ) {
-            // if (screenID == 0) students = loadMembers() // Reload database when moving to home screen
             when (screenID) {
                 0 -> startPage(
                     viewModel.allMembers,
