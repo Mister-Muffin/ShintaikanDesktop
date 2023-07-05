@@ -38,7 +38,7 @@ fun main() = application {
     // Create a TOML mapper without any custom configuration
     val mapper = tomlMapper { }
 
-    // Read our config from file
+    // Read config from file
     val tomlFile = Path.of(configFilePath + configFileName)
     val config = mapper.decode<Config>(tomlFile)
     //println(config.settings)
@@ -138,7 +138,7 @@ fun main() = application {
                 // needed because dialog windows don't work on Raspberry Pi
                 4 -> passwordPrompt(password = appPassword) { if (it) screenID = forwardedScreenId }
 
-                5 -> manageTrainerDialog(viewModel.allMembers, onDismiss = { screenID = 0 })
+                5 -> manageTrainerDialog(viewModel.allMembers, viewModel::reloadMembers, onDismiss = { screenID = 0 })
 
                 6 -> examsDialog(viewModel.allMembers, onDismiss = { screenID = 0 })
 

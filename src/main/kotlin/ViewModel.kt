@@ -28,9 +28,18 @@ class ViewModel(val coroutineScope: CoroutineScope) {
         }
     }
 
+    fun reloadMembers() {
+        coroutineScope.launch {
+            val members = loadMembers()
+            allMembers.clear()
+            allMembers.addAll(members)
+        }
+    }
+
     fun reloadMessages() {
         coroutineScope.launch {
             val messages = loadMessages()
+            allMessages.clear()
             allMessages.addAll(messages)
         }
     }
