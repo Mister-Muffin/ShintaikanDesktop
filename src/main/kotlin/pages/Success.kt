@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun successPage(changeScreen: (screen: Screen) -> Unit) {
+fun SuccessPage(changeScreen: (screen: Screen) -> Unit) {
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,

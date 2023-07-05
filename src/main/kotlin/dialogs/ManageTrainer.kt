@@ -16,7 +16,7 @@ import models.Member
 import models.editIsTrainer
 
 @Composable
-fun manageTrainerDialog(members: List<Member>, reloadMembers: () -> Unit, onDismiss: () -> Unit) {
+fun ManageTrainerDialog(members: List<Member>, reloadMembers: () -> Unit, onDismiss: () -> Unit) {
 
     var searchFieldVal by remember { mutableStateOf("") }
 
@@ -43,7 +43,7 @@ fun manageTrainerDialog(members: List<Member>, reloadMembers: () -> Unit, onDism
             ) {
                 Text("Aktuelle Trainer:", style = MaterialTheme.typography.h6)
                 Divider(modifier = Modifier.padding(4.dp))
-                currentTrainerList(members) { newVal, student ->
+                CurrentTrainerList(members) { newVal, student ->
                     editIsTrainer(student.id, newVal)
                     reloadMembers()
                 }
@@ -112,7 +112,7 @@ fun manageTrainerDialog(members: List<Member>, reloadMembers: () -> Unit, onDism
 }
 
 @Composable
-private fun currentTrainerList(
+private fun CurrentTrainerList(
     members: List<Member>,
     onCheckedChange: (newVal: Boolean, member: Member) -> Unit
 ) {

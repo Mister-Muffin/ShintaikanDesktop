@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import java.io.File
 
 @Composable
-fun helpDialog(drivePath: String, onDismiss: () -> Unit) {
+fun HelpDialog(drivePath: String, onDismiss: () -> Unit) {
     val cmdPath = File(".").canonicalPath
 
     Column(

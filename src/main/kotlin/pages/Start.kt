@@ -37,7 +37,7 @@ import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun startPage(
+fun StartPage(
     members: List<Member>,
     messages: List<Message>,
     birthdays: List<Member>,
@@ -154,7 +154,7 @@ fun startPage(
                             state = lazyMessagesListState
                         ) {
                             items(messages.sortedBy { it.dateCreated }) {
-                                message(it, onMessagesChanged = {
+                                Message(it, onMessagesChanged = {
                                     reloadMessages()
                                 })
                             }
@@ -181,11 +181,11 @@ fun startPage(
 }
 
 @Composable
-private fun message(message: Message, onMessagesChanged: () -> Unit) {
+private fun Message(message: Message, onMessagesChanged: () -> Unit) {
 
     var showEditMessageDialog by remember { mutableStateOf(false) }
 
-    if (showEditMessageDialog) editMessageDialog(message) { showEditMessageDialog = false; onMessagesChanged() }
+    if (showEditMessageDialog) EditMessageDialog(message) { showEditMessageDialog = false; onMessagesChanged() }
     LazyRow(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth(.9f)) {
         item {
             Text(text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(message.dateCreated).toString() + ": ")
@@ -204,7 +204,7 @@ private fun message(message: Message, onMessagesChanged: () -> Unit) {
 }
 
 @Composable
-private fun editMessageDialog(message: Message, onDismiss: () -> Unit) {
+private fun EditMessageDialog(message: Message, onDismiss: () -> Unit) {
 
     var textFieldValue by remember { mutableStateOf(message.message) }
 

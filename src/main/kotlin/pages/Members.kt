@@ -24,8 +24,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dialogs.passwordPrompt
-import dialogs.stickerDialog
+import dialogs.PasswordPrompt
+import dialogs.StickerDialog
 import getTotalTrainingSessions
 import gretting
 import models.*
@@ -36,7 +36,7 @@ import java.util.*
 private val farben = arrayOf("Weiss", "Gelb", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
 
 @Composable
-fun memberSelector(
+fun MemberSelector(
     members: List<Member>,
     teilnahme: List<Teilnahme>,
     activeTrainer: Trainer,
@@ -94,14 +94,14 @@ fun memberSelector(
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
 
         if (showStickerDialog) {
-            stickerDialog(studentsStickers, activeTrainer) {
+            StickerDialog(studentsStickers, activeTrainer) {
                 showStickerDialog = false
                 changeScreen(Screen.SUCCESS)
             }
         }
 
         if (showCheckboxPasswordDialog) {
-            passwordPrompt(
+            PasswordPrompt(
                 password = password,
                 result = { pwCorrect ->
                     handleAsExam = pwCorrect
@@ -135,7 +135,7 @@ fun memberSelector(
                         }.sortedBy { it.prename }.sortedByDescending { it.level }.toList()
                     )
                     { /* linke spalte */ student ->
-                        listBox(student) {
+                        ListBox(student) {
                             newMembers.add(student)
                             allMembers.remove(student)
                             searchQuery.value = ""
@@ -163,9 +163,9 @@ fun memberSelector(
                     })
                 }
                 Column {
-                    customFilter(farben, checkedColors)
+                    CustomFilter(farben, checkedColors)
                     Divider(modifier = Modifier.padding(vertical = 30.dp))
-                    customFilter(groups, checkedGroups)
+                    CustomFilter(groups, checkedGroups)
                 }
                 Column {
                     Box(
@@ -222,7 +222,7 @@ fun memberSelector(
                         .sortedBy { it.prename }
                         .sortedByDescending { it.level }
                         .toList()) { student ->
-                        listBox(student) {
+                        ListBox(student) {
                             allMembers.add(student)
                             newMembers.remove(student)
                         }
@@ -241,7 +241,7 @@ fun memberSelector(
 }
 
 @Composable
-private fun customFilter(filterOptions: Array<String>, checked: MutableList<String>) {
+private fun CustomFilter(filterOptions: Array<String>, checked: MutableList<String>) {
     LazyVerticalGrid(GridCells.Fixed(2)) { // filter
         items(filterOptions) { option ->
 
@@ -256,7 +256,7 @@ private fun customFilter(filterOptions: Array<String>, checked: MutableList<Stri
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
                         checked = checked.contains(option),
-                        colors = getCheckBoxColor(option),
+                        colors = GetCheckBoxColor(option),
                         onCheckedChange = { handleChecked() },
                     )
                     Text(text = if (option == "Benjamini") "Karamini" else option)
@@ -267,7 +267,7 @@ private fun customFilter(filterOptions: Array<String>, checked: MutableList<Stri
 }
 
 @Composable
-private fun getCheckBoxColor(option: String): CheckboxColors {
+private fun GetCheckBoxColor(option: String): CheckboxColors {
     when (option) {
         farben[0] -> {
             return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.WHITE.color, checkmarkColor = Color.Black)
@@ -302,7 +302,7 @@ private fun getCheckBoxColor(option: String): CheckboxColors {
 }
 
 @Composable
-private fun listBox(member: Member, onBoxClicked: () -> Unit) {
+private fun ListBox(member: Member, onBoxClicked: () -> Unit) {
     Box(
         modifier = Modifier
             .width(250.dp)

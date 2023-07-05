@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.dp
 import models.Trainer
 
 @Composable
-fun trainerSelector(trainers: List<Trainer>, changeScreen: (screen: Screen, activeTrainer: Trainer?) -> Unit) {
+fun TrainerSelector(trainers: List<Trainer>, changeScreen: (screen: Screen, activeTrainer: Trainer?) -> Unit) {
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
         Text("Wer bist du?", style = MaterialTheme.typography.h1)

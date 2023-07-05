@@ -19,10 +19,10 @@ import cc.ekblad.toml.tomlMapper
 import dialogs.*
 import models.Trainer
 import org.jetbrains.exposed.sql.Database
-import pages.startPage
-import pages.successPage
-import pages.memberSelector
-import pages.trainerSelector
+import pages.StartPage
+import pages.SuccessPage
+import pages.MemberSelector
+import pages.TrainerSelector
 import java.nio.file.Path
 import Screen.*
 
@@ -114,7 +114,7 @@ fun main() = application {
             )
         ) {
             when (screenID) {
-                HOME -> startPage(
+                HOME -> StartPage(
                     viewModel.allMembers,
                     viewModel.allMessages,
                     viewModel.birthdays,
@@ -122,11 +122,11 @@ fun main() = application {
                     viewModel::submitNewMessage
                 ) { screenID = it }
 
-                SELECT_TRAINER -> trainerSelector(viewModel.trainers) { screen, selectedTrainer ->
+                SELECT_TRAINER -> TrainerSelector(viewModel.trainers) { screen, selectedTrainer ->
                     screenID = screen; activeTrainer = selectedTrainer
                 }
 
-                SELECT_MEMBER -> memberSelector(
+                SELECT_MEMBER -> MemberSelector(
                     viewModel.allMembers,
                     viewModel.teilnahme,
                     activeTrainer!!,
@@ -134,30 +134,30 @@ fun main() = application {
                     viewModel::insertTeilnahme
                 ) { screenID = it }
 
-                SUCCESS -> successPage {
+                SUCCESS -> SuccessPage {
                     viewModel.loadAll()
                     screenID = it
                 }
                 // needed because dialog windows don't work on Raspberry Pi
-                PASSWORD -> passwordPrompt(password = appPassword) { if (it) screenID = forwardedScreenId }
+                PASSWORD -> PasswordPrompt(password = appPassword) { if (it) screenID = forwardedScreenId }
 
-                MANAGE_TRAINER -> manageTrainerDialog(
+                MANAGE_TRAINER -> ManageTrainerDialog(
                     viewModel.allMembers,
                     viewModel::reloadMembers,
                     onDismiss = { screenID = HOME })
 
-                EXAMS -> examsDialog(viewModel.allMembers, viewModel.teilnahme, onDismiss = { screenID = HOME })
+                EXAMS -> ExamsDialog(viewModel.allMembers, viewModel.teilnahme, onDismiss = { screenID = HOME })
 
-                FETCH_DATA -> fetchDataWindow(drivePath) {
+                FETCH_DATA -> FetchDataWindow(drivePath) {
                     viewModel.loadAll()
                     screenID = HOME
                 }
 
-                EXPORT_MEMBERS -> exportMembersDialog(viewModel.allMembers, viewModel.teilnahme, drivePath) {
+                EXPORT_MEMBERS -> ExportMembersDialog(viewModel.allMembers, viewModel.teilnahme, drivePath) {
                     screenID = HOME
                 }
 
-                HELP -> helpDialog(drivePath) { screenID = HOME }
+                HELP -> HelpDialog(drivePath) { screenID = HOME }
             }
         }
     }
