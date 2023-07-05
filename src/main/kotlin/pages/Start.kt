@@ -14,7 +14,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -27,45 +26,35 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
-import kotlinx.coroutines.launch
-import models.*
+import models.Member
+import models.Message
+import models.deleteMessage
+import models.editMessage
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun startPage(changeScreen: (id: Int) -> Unit) {
-    // TODO: Fix load data only when necessary
+fun startPage(
+    members: List<Member>,
+    messages: List<Message>,
+    birthdays: List<Member>,
+    reloadMessages: () -> Unit,
+    submitNewMessage: (newMessage: String) -> Unit,
+    changeScreen: (id: Int) -> Unit
+) {
 
-    val scope = rememberCoroutineScope()
-
-    val allMembers = remember { mutableStateListOf<Member>() }
-    val allMessages = remember { mutableStateListOf<Message>() }
-    val birthdays = remember { mutableStateListOf<Member>() }
-
-    LaunchedEffect(Unit) {
-        val students = loadMembers()
-        val messages = loadMessages()
-
-        allMembers.addAll(students)
-        allMessages.addAll(messages)
-
-        birthdays.addAll(loadBirthdays(students))
-
-    }
-
-    val newMessage = remember { mutableStateOf("") }
+    var newMessage by remember { mutableStateOf("") }
 
     val lazyMessagesListState = rememberLazyListState()
 
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp).fillMaxSize()) {
 
-        if (allMembers.isEmpty()) {
+        if (members.isEmpty()) {
             Text("Wird geladen...")
         } else {
-
             Text("Willkommen", style = MaterialTheme.typography.h1)
             Text("Heute ist der ${DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now())}")
             Divider(
@@ -94,7 +83,7 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
                     }
                     items(birthdays) {
                         Row {
-                            val birthday = it.birthday!!.plusYears(((LocalDate.now().year - it.birthday.year).toLong()))
+                            val birthday = it.birthday.plusYears(((LocalDate.now().year - it.birthday.year).toLong()))
                             val period = Period.between(LocalDate.now(), birthday).days
                             Text(
                                 text = "${it.surname}, ${it.prename}: ",
@@ -126,7 +115,7 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
 
                     Row {
                         OutlinedTextField(
-                            value = newMessage.value,
+                            value = newMessage,
                             placeholder = {
                                 Text(
                                     "Kurznachicht eingeben...",
@@ -137,19 +126,21 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
                                 // submit new message when either "ctrl" or "shift" is pressed
                                 // together with "Enter"
                                 if (((it.isCtrlPressed || it.isShiftPressed) && it.key == Key.Enter && it.type == KeyEventType.KeyUp)) {
-                                    submitNewMessage(newMessage, allMessages)
+                                    submitNewMessage(newMessage)
+                                    newMessage = ""
                                     true
                                 } else false
                             },
                             trailingIcon = {
                                 IconButton(onClick = {
-                                    submitNewMessage(newMessage, allMessages)
+                                    submitNewMessage(newMessage)
+                                    newMessage = ""
                                 }) {
                                     Icon(Icons.Default.Add, contentDescription = null)
                                 }
                             },
                             singleLine = false,
-                            onValueChange = { newMessage.value = it },
+                            onValueChange = { newMessage = it },
                         )
                     }
                     Text(
@@ -161,11 +152,9 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
                             horizontalAlignment = Alignment.Start,
                             state = lazyMessagesListState
                         ) {
-                            items(allMessages.sortedBy { it.dateCreated }) {
+                            items(messages.sortedBy { it.dateCreated }) {
                                 message(it, onMessagesChanged = {
-                                    scope.launch {
-                                        reloadMessages(allMessages)
-                                    }
+                                    reloadMessages()
                                 })
                             }
                         }
@@ -188,30 +177,6 @@ fun startPage(changeScreen: (id: Int) -> Unit) {
             )
         }
     }
-}
-
-private suspend fun reloadMessages(allMessages: SnapshotStateList<Message>) {
-    allMessages.clear()
-    for (message in loadMessages()) {
-        allMessages.add(message)
-    }
-}
-
-private fun submitNewMessage(
-    newMessage: MutableState<String>,
-    allMessages: SnapshotStateList<Message>
-) {
-    val newMessageObj = Message(-1, newMessage.value, "", LocalDate.now())
-    val id = addMessage(newMessageObj)
-    allMessages.add(
-        Message(
-            id = id,
-            message = newMessage.value,
-            short = "",
-            newMessageObj.dateCreated
-        )
-    )
-    newMessage.value = ""
 }
 
 @Composable
@@ -260,19 +225,4 @@ private fun editMessageDialog(message: Message, onDismiss: () -> Unit) {
             }
         }
     }
-}
-
-
-private fun loadBirthdays(members: List<Member>): MutableList<Member> {
-    val birthdays = mutableListOf<Member>()
-
-    for (student in members) {
-        val birthday = student.birthday.plusYears((LocalDate.now().year - student.birthday.year).toLong())
-        if (birthday >= (LocalDate.now().minusDays(3)) &&
-            birthday <= LocalDate.now().plusDays(3)
-        ) {
-            birthdays.add(student)
-        }
-    }
-    return birthdays
 }

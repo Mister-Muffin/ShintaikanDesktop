@@ -19,9 +19,7 @@ import androidx.compose.ui.window.*
 import cc.ekblad.toml.decode
 import cc.ekblad.toml.tomlMapper
 import dialogs.*
-import models.Member
 import models.Trainer
-import models.loadMembers
 import org.jetbrains.exposed.sql.Database
 import pages.startPage
 import pages.successPage
@@ -61,10 +59,9 @@ fun main() = application {
         password = dbPassword
     )
 
-    val students = remember { mutableStateListOf<Member>() }
-    LaunchedEffect(Unit) {
-        students.addAll(loadMembers())
-    }
+    val scope = rememberCoroutineScope()
+    val viewModel = remember { ViewModel(scope) }
+    viewModel.loadAll()
 
     val imageBitmap = remember { useResource("pelli2.jpg") { loadImageBitmap(it) } }
 
@@ -120,19 +117,27 @@ fun main() = application {
         ) {
             // if (screenID == 0) students = loadMembers() // Reload database when moving to home screen
             when (screenID) {
-                0 -> startPage { screenID = it }
+                0 -> startPage(
+                    viewModel.allMembers,
+                    viewModel.allMessages,
+                    viewModel.birthdays,
+                    viewModel::reloadMessages,
+                    viewModel::submitNewMessage
+                ) { screenID = it }
 
-                1 -> trainerSelector { id, selectedTrainer -> screenID = id; activeTrainer = selectedTrainer }
+                1 -> trainerSelector(viewModel.trainers) { id, selectedTrainer ->
+                    screenID = id; activeTrainer = selectedTrainer
+                }
 
-                2 -> teilnehmerSelector(students, activeTrainer!!, appPassword) { screenID = it }
+                2 -> teilnehmerSelector(viewModel.allMembers, activeTrainer!!, appPassword) { screenID = it }
 
                 3 -> successPage { screenID = it }
                 // needed because dialog windows don't work on Raspberry Pi
                 4 -> passwordPrompt(password = appPassword) { if (it) screenID = forwardedScreenId }
 
-                5 -> manageTrainerDialog(students, onDismiss = { screenID = 0 })
+                5 -> manageTrainerDialog(viewModel.allMembers, onDismiss = { screenID = 0 })
 
-                6 -> examsDialog(students, onDismiss = { screenID = 0 })
+                6 -> examsDialog(viewModel.allMembers, onDismiss = { screenID = 0 })
 
                 7 -> DatenHolenWindow(drivePath) { exitProcess(0) }
 

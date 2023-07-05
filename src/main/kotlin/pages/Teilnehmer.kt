@@ -37,23 +37,15 @@ private val farben = arrayOf("Weiss", "Gelb", "Orange", "Grün", "Blau", "Violet
 @Composable
 fun teilnehmerSelector(
     members: List<Member>,
+    teilnahme: List<Teilnahme>,
     activeTrainer: Trainer,
     password: String,
     changeScreen: (id: Int) -> Unit
 ) {
-
     val searchQuery = remember { mutableStateOf("") }
     var handleAsExam by remember { mutableStateOf(false) }
 
     val newMembers = remember { mutableStateListOf<Member>() }
-    val allMembers = remember { mutableStateListOf<Member>() }
-    remember {
-        for (student in members) {
-            allMembers.add(student)
-        }
-    }
-
-    val teilnahme = loadTeilnahme()
 
     val checkedColors = remember { mutableStateListOf<String>() }
 
@@ -118,7 +110,7 @@ fun teilnehmerSelector(
         Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
             Row {
                 LazyColumn(state = leftLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
-                    items(allMembers.asSequence()
+                    items(members.asSequence()
                         .filter { s ->
                             // filter color checkboxes
                             if (checkedColors.isEmpty()) true
@@ -140,7 +132,7 @@ fun teilnehmerSelector(
                     { /* linke spalte */ student ->
                         listBox(student) {
                             newMembers.add(student)
-                            allMembers.remove(student)
+                            members.remove(student)
                             searchQuery.value = ""
                         }
                         Divider(modifier = Modifier.width(250.dp))
@@ -226,7 +218,7 @@ fun teilnehmerSelector(
                         .sortedByDescending { it.level }
                         .toList()) { student ->
                         listBox(student) {
-                            allMembers.add(student)
+                            members.add(student)
                             newMembers.remove(student)
                         }
                         Divider(modifier = Modifier.width(250.dp))
