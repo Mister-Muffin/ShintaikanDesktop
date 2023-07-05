@@ -36,7 +36,7 @@ import java.util.*
 private val farben = arrayOf("Weiss", "Gelb", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
 
 @Composable
-fun teilnehmerSelector(
+fun memberSelector(
     members: List<Member>,
     teilnahme: List<Teilnahme>,
     activeTrainer: Trainer,

@@ -1,9 +1,7 @@
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.input.key.Key
@@ -23,7 +21,7 @@ import models.Trainer
 import org.jetbrains.exposed.sql.Database
 import pages.startPage
 import pages.successPage
-import pages.teilnehmerSelector
+import pages.memberSelector
 import pages.trainerSelector
 import java.nio.file.Path
 import Screen.*
@@ -93,7 +91,7 @@ fun main() = application {
             }
             Menu("Mitglieder", mnemonic = 'P') {
                 Item("Daten abfragen", onClick = { screenID = EXAMS })
-                Item("Daten exportieren", onClick = { screenID = EXPORT_MEMBER })
+                Item("Daten exportieren", onClick = { screenID = EXPORT_MEMBERS })
             }
         }
 
@@ -128,7 +126,7 @@ fun main() = application {
                     screenID = screen; activeTrainer = selectedTrainer
                 }
 
-                SELECT_MEMBER -> teilnehmerSelector(
+                SELECT_MEMBER -> memberSelector(
                     viewModel.allMembers,
                     viewModel.teilnahme,
                     activeTrainer!!,
@@ -143,16 +141,21 @@ fun main() = application {
                 // needed because dialog windows don't work on Raspberry Pi
                 PASSWORD -> passwordPrompt(password = appPassword) { if (it) screenID = forwardedScreenId }
 
-                MANAGE_TRAINER -> manageTrainerDialog(viewModel.allMembers, viewModel::reloadMembers, onDismiss = { screenID = HOME })
+                MANAGE_TRAINER -> manageTrainerDialog(
+                    viewModel.allMembers,
+                    viewModel::reloadMembers,
+                    onDismiss = { screenID = HOME })
 
                 EXAMS -> examsDialog(viewModel.allMembers, viewModel.teilnahme, onDismiss = { screenID = HOME })
 
-                FETCH_DATA -> datenHolenWindow(drivePath) {
+                FETCH_DATA -> fetchDataWindow(drivePath) {
                     viewModel.loadAll()
                     screenID = HOME
                 }
 
-                EXPORT_MEMBER -> memberExportDialog(viewModel.allMembers, viewModel.teilnahme, drivePath) { screenID = HOME }
+                EXPORT_MEMBERS -> exportMembersDialog(viewModel.allMembers, viewModel.teilnahme, drivePath) {
+                    screenID = HOME
+                }
 
                 HELP -> helpDialog(drivePath) { screenID = HOME }
             }
@@ -161,5 +164,5 @@ fun main() = application {
 }
 
 enum class Screen {
-    HOME, SELECT_TRAINER, MANAGE_TRAINER, SELECT_MEMBER, SUCCESS, PASSWORD, EXAMS, FETCH_DATA, EXPORT_MEMBER, HELP
+    HOME, SELECT_TRAINER, MANAGE_TRAINER, SELECT_MEMBER, SUCCESS, PASSWORD, EXAMS, FETCH_DATA, EXPORT_MEMBERS, HELP
 }

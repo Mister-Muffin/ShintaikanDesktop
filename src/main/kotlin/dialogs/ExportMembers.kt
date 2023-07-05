@@ -41,7 +41,7 @@ private val monthWidth = 90.dp
 private val readyWidth = 500.dp
 
 @Composable
-fun memberExportDialog(members: List<Member>, teilnahme: List<Teilnahme>, drivePath: String, onDismiss: () -> Unit) {
+fun exportMembersDialog(members: List<Member>, teilnahme: List<Teilnahme>, drivePath: String, onDismiss: () -> Unit) {
     var searchFieldValue by remember { mutableStateOf("") }
     var showTimedSuccessDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -198,7 +198,7 @@ private fun reasonText(isReadyString: String?) {
  *
  * @param member member to check
  * @see studentStats
- * @see memberExportDialog
+ * @see exportMembersDialog
  */
 fun isReadyForExam(member: Member, teilnahme: List<Teilnahme>): Pair<String, String?> {
     val dateLastExam: LocalDate = getLastExamOrFirstTrainingDate(member, teilnahme) ?: return Pair<String, String?>(
