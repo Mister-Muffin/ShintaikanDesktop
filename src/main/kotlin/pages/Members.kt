@@ -33,8 +33,6 @@ import next
 import stickerUnits
 import java.util.*
 
-private val farben = arrayOf("Weiss", "Gelb", "Orange", "Grün", "Blau", "Violett", "Braun", "Schwarz")
-
 @Composable
 fun MemberSelector(
     members: List<Member>,
@@ -52,14 +50,12 @@ fun MemberSelector(
 
     remember { allMembers.addAll(members) }
 
-    val checkedColors = remember { mutableStateListOf<String>() }
+    val checkedColors = remember { mutableStateListOf<DegreeColor>() }
+    val checkedGroups = remember { mutableStateListOf<Group>() }
 
-    val groups = arrayOf("Benjamini", "Kinder Karate", "Jugend Karate", "Karate")
-    val checkedGroups = remember { mutableStateListOf<String>() }
-
-    fun findMatch(s: String, strings: List<String>, exactMach: Boolean): Boolean {
-        return if (exactMach) strings.any { a -> s.lowercase() == a.lowercase() }
-        else strings.any { a -> s.lowercase().contains(a.lowercase()) }
+    fun <T : FilterOption> findMatch(s: String, options: List<T>, exactMach: Boolean): Boolean {
+        return if (exactMach) options.any { a -> s.lowercase() == a.databaseName.lowercase() }
+        else options.any { a -> s.lowercase().contains(a.databaseName.lowercase()) }
     }
 
     var showStickerDialog by remember { mutableStateOf(false) }
@@ -163,9 +159,9 @@ fun MemberSelector(
                     })
                 }
                 Column {
-                    CustomFilter(farben, checkedColors)
+                    CustomFilter(DegreeColor.values(), checkedColors)
                     Divider(modifier = Modifier.padding(vertical = 30.dp))
-                    CustomFilter(groups, checkedGroups)
+                    CustomFilter(Group.values(), checkedGroups)
                 }
                 Column {
                     Box(
@@ -241,7 +237,7 @@ fun MemberSelector(
 }
 
 @Composable
-private fun CustomFilter(filterOptions: Array<String>, checked: MutableList<String>) {
+private fun <T : FilterOption> CustomFilter(filterOptions: Array<T>, checked: MutableList<T>) {
     LazyVerticalGrid(GridCells.Fixed(2)) { // filter
         items(filterOptions) { option ->
 
@@ -256,48 +252,16 @@ private fun CustomFilter(filterOptions: Array<String>, checked: MutableList<Stri
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Checkbox(
                         checked = checked.contains(option),
-                        colors = GetCheckBoxColor(option),
+                        colors = when (option) {
+                            is DegreeColor -> option.checkboxColors;
+                            else -> CheckboxDefaults.colors(MaterialTheme.colors.primary)
+                        },
                         onCheckedChange = { handleChecked() },
                     )
-                    Text(text = if (option == "Benjamini") "Karamini" else option)
+                    Text(text = option.optionName)
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun GetCheckBoxColor(option: String): CheckboxColors {
-    when (option) {
-        farben[0] -> {
-            return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.WHITE.color, checkmarkColor = Color.Black)
-        }
-
-        farben[1] -> {
-            return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.YELLOW.color, checkmarkColor = Color.Black)
-        }
-
-        farben[2] -> {
-            return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.ORANGE.color)
-        }
-
-        farben[3] -> {
-            return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.GREEN.color)
-        }
-
-        farben[4] -> {
-            return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.BLUE.color)
-        }
-
-        farben[5] -> {
-            return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.PURPLE.color)
-        }
-
-        farben[6] -> {
-            return CheckboxDefaults.colors(checkedColor = DEGREECOLORS.BROWN.color)
-        }
-
-        else -> return CheckboxDefaults.colors(MaterialTheme.colors.primary)
     }
 }
 
@@ -309,10 +273,7 @@ private fun ListBox(member: Member, onBoxClicked: () -> Unit) {
             .height(25.dp)
             .drawWithCache {
                 val gradient = Brush.horizontalGradient(
-                    colors = listOf(
-                        boxColor(member)[0],
-                        boxColor(member)[1]
-                    ),
+                    colors = DegreeColor.getColorList(member.level),
                     startX = size.width / 2 - 1,
                     endX = size.width / 2 + 1,
                 )
@@ -327,88 +288,64 @@ private fun ListBox(member: Member, onBoxClicked: () -> Unit) {
             fontSize = 12.sp,
             fontFamily = FontFamily.SansSerif,
             fontWeight = FontWeight.W500,
-            color = if (
-                member.level.contains("5. Kyu blau") ||
-                member.level.contains("4. Kyu violett") ||
-                member.level.contains(". Kyu braun") ||
-                member.level.contains(". Dan schwarz")
-            ) Color.White
-            else Color.Black,
+            color = if (DegreeColor.getDegreeList(member.level).last()?.isDark == true)
+                Color.White
+            else
+                Color.Black,
             modifier = Modifier.padding(start = 8.dp),
             text = "${member.prename} ${member.surname}"
         )
     }
 }
 
-private fun boxColor(member: Member): Array<Color> {
-    val boxColor: Array<Color> = when {
-        member.level.contains("z Kyu weiss") -> {
-            arrayOf(DEGREECOLORS.WHITE.color, DEGREECOLORS.WHITE.color)
+enum class DegreeColor(
+    private val color: Color,
+    override val optionName: String,
+    val isDark: Boolean,
+    private val checkmarkColor: Color? = null
+) : FilterOption {
+    WHITE(color = Color.White, optionName = "Weiß", false, checkmarkColor = Color.Black) {
+        override val databaseName = "Weiss"
+    },
+    YELLOW(color = Color(0xffffff35), optionName = "Gelb", isDark = false, checkmarkColor = Color.Black),
+    RED(color = Color(0xffff0004), optionName = "Rot", isDark = false),
+    ORANGE(color = Color(0xffffaa00), optionName = "Orange", isDark = false),
+    GREEN(color = Color(0xff00aa00), optionName = "Grün", isDark = false),
+    BLUE(color = Color(0xff0055ff), optionName = "Blau", isDark = true),
+    PURPLE(color = Color(0xff5500ff), optionName = "Violett", isDark = true),
+    BROWN(color = Color(0xffaa5500), optionName = "Braun", isDark = true),
+    BLACK(color = Color.Black, optionName = "Schwarz", isDark = true);
+
+    val checkboxColors
+        @Composable get() = if (checkmarkColor == null) CheckboxDefaults.colors(checkedColor = color) else CheckboxDefaults.colors(
+            checkedColor = color,
+            checkmarkColor = checkmarkColor
+        )
+
+    companion object {
+        fun getDegreeList(level: String) = level.trim().split(" ").last().split("-").map {
+            // Could maybe use some better fallback or error
+            values().find { color -> color.databaseName == it }
         }
 
-        member.level.contains("9. Kyu weiss-gelb") -> {
-            arrayOf(DEGREECOLORS.WHITE.color, DEGREECOLORS.YELLOW.color)
-        }
-
-        member.level.contains("9/10 Kyu weiss-rot") -> {
-            arrayOf(DEGREECOLORS.WHITE.color, DEGREECOLORS.RED.color)
-        }
-
-        member.level.contains("8. Kyu gelb") -> {
-            arrayOf(DEGREECOLORS.YELLOW.color, DEGREECOLORS.YELLOW.color)
-        }
-
-        member.level.contains("7. Kyu orange") -> {
-            arrayOf(DEGREECOLORS.ORANGE.color, DEGREECOLORS.ORANGE.color)
-        }
-
-        member.level.contains("7/8 Kyu gelb-orange") -> {
-            arrayOf(DEGREECOLORS.YELLOW.color, DEGREECOLORS.ORANGE.color)
-        }
-
-        member.level.contains("6. Kyu grün") -> {
-            arrayOf(DEGREECOLORS.GREEN.color, DEGREECOLORS.GREEN.color)
-        }
-
-        member.level.contains("6/7 Kyu orange-grün") -> {
-            arrayOf(DEGREECOLORS.ORANGE.color, DEGREECOLORS.GREEN.color)
-        }
-
-        member.level.contains("5. Kyu blau") -> {
-            arrayOf(DEGREECOLORS.BLUE.color, DEGREECOLORS.BLUE.color)
-        }
-
-        member.level.contains("5/6 Kyu grün-blau") -> {
-            arrayOf(DEGREECOLORS.GREEN.color, DEGREECOLORS.BLUE.color)
-        }
-
-        member.level.contains("4. Kyu violett") -> {
-            arrayOf(DEGREECOLORS.PURPLE.color, DEGREECOLORS.PURPLE.color)
-        }
-
-        member.level.contains(". Kyu braun") -> {
-            arrayOf(DEGREECOLORS.BROWN.color, DEGREECOLORS.BROWN.color)
-        }
-
-        member.level.contains(". Dan schwarz") -> {
-            arrayOf(DEGREECOLORS.BLACK.color, DEGREECOLORS.BLACK.color)
-        }
-
-        else -> {
-            arrayOf(Color.White, Color.White)
+        // TODO: This still isn't really nice, but a definite improvement
+        fun getColorList(level: String) = getDegreeList(level).map {
+            // Could maybe use some better fallback or error
+            it?.color ?: Color.Transparent
         }
     }
-    return boxColor
 }
 
-enum class DEGREECOLORS(val color: Color) {
-    WHITE(Color.White),
-    YELLOW(Color(0xffffff35)),
-    RED(Color(0xffff0004)),
-    ORANGE(Color(0xffffaa00)),
-    GREEN(Color(0xff00aa00)),
-    BLUE(Color(0xff0055ff)),
-    PURPLE(Color(0xff5500ff)),
-    BROWN(Color(0xffaa5500)),
-    BLACK(Color.Black)
+interface FilterOption {
+    val optionName: String
+    val databaseName: String
+        get() = optionName
+}
+
+private enum class Group(override val optionName: String, override val databaseName: String = optionName) :
+    FilterOption {
+    BENJAMINI("Karamini", databaseName = "Benjamini"),
+    KIDS("Kinder Karate"),
+    YOUTH("Jugend Karate"),
+    NORMAL("Karate")
 }
