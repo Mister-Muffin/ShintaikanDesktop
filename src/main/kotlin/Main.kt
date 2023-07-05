@@ -26,7 +26,6 @@ import pages.successPage
 import pages.teilnehmerSelector
 import pages.trainerSelector
 import java.nio.file.Path
-import kotlin.system.exitProcess
 
 const val configFileName = "config.toml"
 val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
@@ -143,7 +142,10 @@ fun main() = application {
 
                 6 -> examsDialog(viewModel.allMembers, onDismiss = { screenID = 0 })
 
-                7 -> DatenHolenWindow(drivePath) { exitProcess(0) }
+                7 -> DatenHolenWindow(drivePath) {
+                    viewModel.loadAll()
+                    screenID = 0
+                }
 
                 8 -> memberExportDialog(drivePath) { screenID = 0 }
 

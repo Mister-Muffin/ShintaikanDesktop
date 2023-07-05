@@ -84,7 +84,7 @@ fun DatenHolenWindow(drivePath: String, onDismiss: () -> Unit) {
         Text(textFieldValue)
         Spacer(modifier = Modifier.fillMaxHeight(.5f))
         Button(enabled = textFieldValue == textWhenDone, onClick = onDismiss) {
-            Text("Fenster schließen")
+            Text("Zurück")
         }
 
     }
