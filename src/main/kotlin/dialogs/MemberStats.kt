@@ -103,13 +103,7 @@ private fun StudentStats(
         // Show member's group and replace "Benjamini" with "Karamini" if so
         Text("Gruppe: ${if (member.group == "Benjamini") "Karamini" else member.group}")
 
-        var level: String = member.level
-        if (member.level.contains("Dan")) {
-            level = level.drop(2) // drop the first two letters
-        } else if (member.level == "z Kyu weiss") {
-            level = level.drop(2)
-        }
-        Text("Grad: $level")
+        Text("Grad: ${member.formattedLevel()}")
 
         TextTotalTrainingSessions(member, teilnahme)
 

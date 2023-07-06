@@ -51,7 +51,21 @@ data class Member(
     val stickerRecieved: Boolean = false, // for sticker dialog, if radio button is checked or not
     val sticker_show_again: Boolean = true, // for sticker dialog, if student is still missing stickers and the dialog should open again with this student
 ) {
-    val age = Period.between(birthday, LocalDate.now()).years
+    val age: Int = Period.between(birthday, LocalDate.now()).years
+
+    /**
+     * Example: z Kyu weiss -> Kyu weiss
+     * @return The member's level formatted to be displayed in the UI
+     */
+    fun formattedLevel(): String {
+        var level = this.level
+        if (level.contains("Dan")) {
+            level = level.drop(2) // drop the first two letters
+        } else if (level == "z Kyu weiss") {
+            level = level.drop(2)
+        }
+        return level
+    }
 
 }
 
