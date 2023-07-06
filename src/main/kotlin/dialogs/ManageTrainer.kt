@@ -10,6 +10,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import composables.StudentList
 import models.Member
@@ -17,6 +18,8 @@ import models.editIsTrainer
 
 @Composable
 fun ManageTrainerDialog(members: List<Member>, reloadMembers: () -> Unit, onDismiss: () -> Unit) {
+
+    val studentListTextWidth: Dp = 300.dp
 
     var searchFieldVal by remember { mutableStateOf("") }
 
@@ -38,7 +41,7 @@ fun ManageTrainerDialog(members: List<Member>, reloadMembers: () -> Unit, onDism
         ) {
             Column(
                 modifier = Modifier.padding(8.dp)
-                    .width(StudentList.textWidth + 30.dp), // use textWidth here to make them both the same width
+                    .width(studentListTextWidth + 30.dp), // use textWidth here to make them both the same width
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text("Aktuelle Trainer:", style = MaterialTheme.typography.h6)
@@ -49,7 +52,7 @@ fun ManageTrainerDialog(members: List<Member>, reloadMembers: () -> Unit, onDism
                 }
             }
             Column(
-                modifier = Modifier.padding(8.dp).width(StudentList.textWidth + 30.dp), // +30 for scrollbar
+                modifier = Modifier.padding(8.dp).width(studentListTextWidth + 30.dp), // +30 for scrollbar
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text("Trainer hinzufügen:", style = MaterialTheme.typography.h6)
@@ -70,10 +73,12 @@ fun ManageTrainerDialog(members: List<Member>, reloadMembers: () -> Unit, onDism
                                         .lowercase()
                                         .contains(searchFieldVal.lowercase().replace(" ", ""))
                                 }) {
-                                    StudentList().studentList(
+                                    StudentList(
                                         it.id,
                                         members,
+                                        studentListTextWidth,
                                         onClick = { nameString -> searchFieldVal = nameString })
+
                                 }
                             } else if (studentFilter.size == 1) {
                                 item {
@@ -105,7 +110,7 @@ fun ManageTrainerDialog(members: List<Member>, reloadMembers: () -> Unit, onDism
                 }
             }
         }
-        Button(onClick = onDismiss, modifier = Modifier.padding(8.dp).width(StudentList.textWidth)) {
+        Button(onClick = onDismiss, modifier = Modifier.padding(8.dp).width(studentListTextWidth)) {
             Text("OK")
         }
     }

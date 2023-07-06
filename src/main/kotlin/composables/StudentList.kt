@@ -13,25 +13,24 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import models.Member
 
-class StudentList {
-    companion object {
-        val textWidth: Dp = 300.dp
-    }
-
-    @Composable
-    fun studentList(id: Int, members: List<Member>, onClick: (nameString: String) -> Unit) {
-        val student = members.find { it.id == id }
-        return if (student != null) {
-            Row(horizontalArrangement = Arrangement.Center) {
-                val nameString: String = student.prename + " " + student.surname
-                Text(
-                    text = nameString,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.clickable { onClick(nameString) }.padding(10.dp).width(textWidth)
-                )
-            }
-        } else {
-            Row { textWidth }
+@Composable
+fun StudentList(
+    id: Int,
+    members: List<Member>,
+    textWidth: Dp = 300.dp,
+    onClick: (nameString: String) -> Unit
+) {
+    val member = members.find { it.id == id }
+    return if (member != null) {
+        Row(horizontalArrangement = Arrangement.Center) {
+            val nameString: String = member.prename + " " + member.surname
+            Text(
+                text = nameString,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.clickable { onClick(nameString) }.padding(10.dp).width(textWidth)
+            )
         }
+    } else {
+        Row { }
     }
 }

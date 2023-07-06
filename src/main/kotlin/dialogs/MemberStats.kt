@@ -65,7 +65,7 @@ fun ExamsDialog(members: List<Member>, teilnahme: List<Teilnahme>, onDismiss: ()
                             .lowercase()
                             .contains(searchFieldVal.lowercase().replace(" ", ""))
                     }) {
-                        StudentList().studentList(
+                        StudentList(
                             it.id,
                             members,
                             onClick = { nameString -> searchFieldVal = nameString })
