@@ -1,3 +1,5 @@
+@file:Suppress("RemoveRedundantQualifierName")
+
 package models
 
 import kotlinx.coroutines.Dispatchers
@@ -157,7 +159,6 @@ fun increaseTrainerUnitCount(trainer: Trainer) {
     }
 }
 
-@Suppress("RemoveRedundantQualifierName")
 fun editMemberSticker(member: Member) {
     val currentStickerRecievedBy = transaction {
         MemberTable.slice(MemberTable.id, MemberTable.sticker_recieved_by).select(where = MemberTable.id eq member.id)
@@ -215,33 +216,36 @@ suspend fun renameMember(oldName: Pair<String, String>, newName: Pair<String, St
  * @param birthday is the Birthday to update as a string in format dd/MM/yyyy
  */
 suspend fun updateMember(name: Pair<String, String>, group: String, level: String, birthday: String): Any {
-    val memberExists = suspendedTransactionAsync(Dispatchers.IO) {
+    val memberExists: Boolean = suspendedTransactionAsync(Dispatchers.IO) {
         MemberTable.select(where = { MemberTable.prename eq name.first and (MemberTable.surname eq name.second) })
             .toList()
     }.await().isNotEmpty()
-    if (memberExists) {
-        return suspendedTransactionAsync(Dispatchers.IO) {
+
+    return suspendedTransactionAsync(Dispatchers.IO) {
+        if (memberExists) {
             MemberTable.update(where = { MemberTable.prename eq name.first and (MemberTable.surname eq name.second) }) {
                 it[MemberTable.group] = group
                 it[MemberTable.level] = level.removeMultipleWhitespaces()
                 it[MemberTable.is_active] = true
                 if (birthday.split("/")[0].length == 1) {
                     if (birthday.split("/")[1].length == 1) {
-                        it[MemberTable.birthday] = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("M/d/yyyy"))
+                        it[MemberTable.birthday] =
+                            LocalDate.parse(birthday, DateTimeFormatter.ofPattern("M/d/yyyy"))
                     } else {
-                        it[MemberTable.birthday] = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("M/dd/yyyy"))
+                        it[MemberTable.birthday] =
+                            LocalDate.parse(birthday, DateTimeFormatter.ofPattern("M/dd/yyyy"))
                     }
                 } else {
                     if (birthday.split("/")[1].length == 1) {
-                        it[MemberTable.birthday] = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("MM/d/yyyy"))
+                        it[MemberTable.birthday] =
+                            LocalDate.parse(birthday, DateTimeFormatter.ofPattern("MM/d/yyyy"))
                     } else {
-                        it[MemberTable.birthday] = LocalDate.parse(birthday, DateTimeFormatter.ofPattern("MM/dd/yyyy"))
+                        it[MemberTable.birthday] =
+                            LocalDate.parse(birthday, DateTimeFormatter.ofPattern("MM/dd/yyyy"))
                     }
                 }
             }
-        }.await()
-    } else {
-        return suspendedTransactionAsync(Dispatchers.IO) {
+        } else {
             MemberTable.insert {
                 it[MemberTable.prename] = name.first
                 it[MemberTable.surname] = name.second
@@ -261,6 +265,7 @@ suspend fun updateMember(name: Pair<String, String>, group: String, level: Strin
                     }
                 }
             }
-        }.await()
-    }
+        }
+    }.await()
+
 }
