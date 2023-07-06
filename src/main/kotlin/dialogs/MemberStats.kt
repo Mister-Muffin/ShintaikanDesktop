@@ -116,7 +116,7 @@ private fun StudentStats(
         if (member.date_last_exam != null) {
             TextLastExam(member)
             Text(
-                "Einheiten seit der letzten Prüfung: ${countId(member, teilnahme, member.date_last_exam)}"
+                "Einheiten seit der letzten Prüfung: ${countId(member.id, teilnahme, member.date_last_exam)}"
             )
 
             // Zeitraum zwischen der letzten Prüfung und dem heutigen Datum
