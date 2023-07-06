@@ -235,7 +235,7 @@ fun isReadyForExam(member: Member, teilnahme: List<Teilnahme>): Pair<String, Str
             "\n❌ $s (mind. ${level.months} Monate) noch $remainingMonths ${if (remainingMonths == 1.toLong()) "Monat" else "Monate"}"
         returnString += text
         returnString2 = s
-    } else returnString += "\n✔️ Genug Zeit seit der letzten Prüfung"
+    } else returnString += "\n✔️ Genug Zeit seit der letzten Prüfung vergangen"
 
     if (memberAge < level.age) {
         val s = "Zu jung"
