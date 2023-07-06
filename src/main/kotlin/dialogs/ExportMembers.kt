@@ -157,11 +157,7 @@ private fun NewLevel(member: Member) {
 private fun UnitsSinceLastExam(member: Member, teilnahme: List<Teilnahme>) {
     Text(
         if (member.date_last_exam == null) "" else "${
-            countId(
-                member,
-                teilnahme,
-                member.date_last_exam
-            )
+            countId(member.id, teilnahme, member.date_last_exam)
         }",
         modifier = Modifier.width(unitsWidth), textAlign = TextAlign.Center
     )
@@ -206,7 +202,7 @@ fun isReadyForExam(member: Member, teilnahme: List<Teilnahme>): Pair<String, Str
         "Der Schüler war noch nie im Training"
     )
 
-    val unitsSinceLastExam = countId(member, teilnahme, dateLastExam) + member.add_units_since_last_exam
+    val unitsSinceLastExam = countId(member.id, teilnahme, dateLastExam) + member.add_units_since_last_exam
     val monthsSinceLastExam = Period.between(dateLastExam, LocalDate.now()).toTotalMonths()
     // add two months to the birthday in case of holidays
     val memberAge = Period.between(member.birthday, LocalDate.now().plusMonths(2)).years
@@ -292,7 +288,7 @@ private suspend fun exportMembers(drivePath: String) {
         csvPrinter.printRecord(
             member.surname + " " + member.prename,
             member.date_last_exam,
-            countId(member, teilnahme, member.date_last_exam)
+            countId(member.id, teilnahme, member.date_last_exam)
         )
 
     }

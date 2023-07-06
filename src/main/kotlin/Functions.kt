@@ -31,11 +31,11 @@ fun createConfigFile() {
  *
  * @param since nur Einheiten ab dem dann gegebenen Datum
  **/
-fun countId(member: Member, teilnahme: List<Teilnahme>, since: LocalDate = LocalDate.EPOCH): Int {
+fun countId(memberId: Int, teilnahme: List<Teilnahme>, since: LocalDate = LocalDate.EPOCH): Int {
     var counter = 0
     for (day in teilnahme) {
         if (day.userIds != null && day.date > since) {
-            counter += day.userIds.split(",").filter { member.id.toString() == it }.size
+            counter += day.userIds.split(",").filter { memberId.toString() == it }.size
         }
     }
     return counter
@@ -59,7 +59,7 @@ fun getFirstDate(id: Int, teilnahme: List<Teilnahme>): LocalDate? {
  * da diese Trainingseinheiten sonst nicht berücksichtigt werden würden
  */
 fun getTotalTrainingSessions(member: Member, teilnahme: List<Teilnahme>): Int {
-    return member.total + countId(member, teilnahme)
+    return member.total + countId(member.id, teilnahme)
 }
 
 /**
