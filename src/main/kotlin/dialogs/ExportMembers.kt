@@ -22,10 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import levels
-import models.Member
-import models.Teilnahme
-import models.loadFullMemberTable
-import models.loadTeilnahme
+import models.*
 import next
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
@@ -279,7 +276,7 @@ private suspend fun exportMembers(drivePath: String) {
 
     val csvPrinter = CSVPrinter(writer, CSVFormat.EXCEL)
 
-    val members = loadFullMemberTable()
+    val members = loadMembers(false)
     csvPrinter.printRecord("Name", "Dat. lzt. Prüf.", "Einh. s. l. Prüf.")
     members.forEach { member ->
         if (!member.is_active) return@forEach

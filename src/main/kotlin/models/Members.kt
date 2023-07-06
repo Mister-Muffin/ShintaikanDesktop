@@ -82,35 +82,13 @@ data class Trainer(
     val trainer_units: Int
 )
 
-suspend fun loadMembers(): List<Member> {
+suspend fun loadMembers(hideInactive: Boolean = true): List<Member> {
     return suspendedTransactionAsync(Dispatchers.IO) {
-        MemberTable.select(where = { MemberTable.is_active eq true }).sortedByDescending { it[MemberTable.level] }
-            .map {
-                Member(
-                    id = it[MemberTable.id],
-                    surname = it[MemberTable.surname],
-                    prename = it[MemberTable.prename],
-                    group = it[MemberTable.group],
-                    level = it[MemberTable.level],
-                    total = it[MemberTable.total],
-                    birthday = it[MemberTable.birthday],
-                    date_last_exam = getLastExamDate(it[MemberTable.id]),
-                    is_trainer = it[MemberTable.is_trainer],
-                    sticker_animal = it[MemberTable.sticker_animal],
-                    sticker_recieved = it[MemberTable.sticker_recieved],
-                    sticker_date_recieved = it[MemberTable.sticker_date_recieved],
-                    sticker_recieved_by = it[MemberTable.sticker_recieved_by],
-                    is_active = it[MemberTable.is_active],
-                    trainer_units = it[MemberTable.trainer_units],
-                    add_units_since_last_exam = it[MemberTable.add_units_since_last_exam]
-                )
-            }
-    }.await()
-}
-
-fun loadFullMemberTable(): List<Member> {
-    return transaction {
-        MemberTable.selectAll().sortedByDescending { it[MemberTable.level] }.map {
+        val members =
+            if (hideInactive) MemberTable.select(where = { MemberTable.is_active eq true })
+            else MemberTable.selectAll()
+        
+        members.sortedByDescending { it[MemberTable.level] }.map {
             Member(
                 id = it[MemberTable.id],
                 surname = it[MemberTable.surname],
@@ -130,7 +108,7 @@ fun loadFullMemberTable(): List<Member> {
                 add_units_since_last_exam = it[MemberTable.add_units_since_last_exam]
             )
         }
-    }
+    }.await()
 }
 
 fun loadTrainers(): List<Trainer> {

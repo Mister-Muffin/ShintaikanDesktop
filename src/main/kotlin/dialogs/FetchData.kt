@@ -96,7 +96,7 @@ private suspend fun dumpCurrentDatabase() {
         //.withHeader(StudentTable.columns)
     )
 
-    val members = loadFullMemberTable()
+    val members = loadMembers(false)
     val messages = loadMessages()
     val teilnahme = loadTeilnahme()
 
