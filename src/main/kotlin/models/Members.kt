@@ -87,7 +87,7 @@ suspend fun loadMembers(hideInactive: Boolean = true): List<Member> {
         val members =
             if (hideInactive) MemberTable.select(where = { MemberTable.is_active eq true })
             else MemberTable.selectAll()
-        
+
         members.sortedByDescending { it[MemberTable.level] }.map {
             Member(
                 id = it[MemberTable.id],
@@ -112,7 +112,6 @@ suspend fun loadMembers(hideInactive: Boolean = true): List<Member> {
 }
 
 fun loadTrainers(): List<Trainer> {
-
     return transaction {
         MemberTable.select(where = MemberTable.is_trainer eq true).map {
             Trainer(
@@ -130,8 +129,7 @@ fun getLastExamDate(memberId: Int): LocalDate? {
     return transaction {
         MemberTable.join(TeilnahmeTable, JoinType.CROSS)
             .select(where = { TeilnahmeTable.userIdExam like "%${memberId}%" and (MemberTable.id eq memberId) })
-            .orderBy(TeilnahmeTable.id, SortOrder.DESC)
-            .limit(1).map {
+            .orderBy(TeilnahmeTable.id, SortOrder.DESC).limit(1).map {
                 mapOf("date" to it[TeilnahmeTable.date])
             }.let {
                 if (it.isNotEmpty()) {
@@ -162,12 +160,10 @@ fun increaseTrainerUnitCount(trainer: Trainer) {
 @Suppress("RemoveRedundantQualifierName")
 fun editMemberSticker(member: Member) {
     val currentStickerRecievedBy = transaction {
-        MemberTable
-            .slice(MemberTable.id, MemberTable.sticker_recieved_by)
-            .select(where = MemberTable.id eq member.id).map {
+        MemberTable.slice(MemberTable.id, MemberTable.sticker_recieved_by).select(where = MemberTable.id eq member.id)
+            .map {
                 MemberWithIdAndString(
-                    id = it[MemberTable.id],
-                    sticker_recieved_by = it[MemberTable.sticker_recieved_by]
+                    id = it[MemberTable.id], sticker_recieved_by = it[MemberTable.sticker_recieved_by]
                 )
             }
     }[0]
@@ -175,10 +171,8 @@ fun editMemberSticker(member: Member) {
         MemberTable.update(where = { MemberTable.id eq member.id }) {
             it[MemberTable.sticker_recieved] = member.sticker_recieved
             it[MemberTable.sticker_recieved_by] =
-                if (currentStickerRecievedBy.sticker_recieved_by.isNullOrEmpty())
-                    "${member.sticker_recieved_by},"
-                else
-                    "${currentStickerRecievedBy.sticker_recieved_by}${member.sticker_recieved_by},"
+                if (currentStickerRecievedBy.sticker_recieved_by.isNullOrEmpty()) "${member.sticker_recieved_by},"
+                else "${currentStickerRecievedBy.sticker_recieved_by}${member.sticker_recieved_by},"
             //it[StudentTable.sticker_animal] = student.sticker_animal!!
             it[MemberTable.sticker_date_recieved] = LocalDate.now()
         }
@@ -192,8 +186,7 @@ fun editMemberSticker(member: Member) {
  */
 suspend fun deactivateMember(name: Pair<String, String>): Int {
     return suspendedTransactionAsync(Dispatchers.IO) {
-        MemberTable.update(
-            where = { MemberTable.prename eq name.first and (MemberTable.surname eq name.second) }) {
+        MemberTable.update(where = { MemberTable.prename eq name.first and (MemberTable.surname eq name.second) }) {
             it[is_active] = false
         }
     }.await()
@@ -208,8 +201,7 @@ suspend fun deactivateMember(name: Pair<String, String>): Int {
  */
 suspend fun renameMember(oldName: Pair<String, String>, newName: Pair<String, String>): Int {
     return suspendedTransactionAsync(Dispatchers.IO) {
-        MemberTable.update(
-            where = { MemberTable.prename eq oldName.first and (MemberTable.surname eq oldName.second) }) {
+        MemberTable.update(where = { MemberTable.prename eq oldName.first and (MemberTable.surname eq oldName.second) }) {
             it[prename] = newName.first
             it[surname] = newName.second
         }
@@ -224,13 +216,12 @@ suspend fun renameMember(oldName: Pair<String, String>, newName: Pair<String, St
  */
 suspend fun updateMember(name: Pair<String, String>, group: String, level: String, birthday: String): Any {
     val memberExists = suspendedTransactionAsync(Dispatchers.IO) {
-        MemberTable.select(
-            where = { MemberTable.prename eq name.first and (MemberTable.surname eq name.second) }).toList()
+        MemberTable.select(where = { MemberTable.prename eq name.first and (MemberTable.surname eq name.second) })
+            .toList()
     }.await().isNotEmpty()
     if (memberExists) {
         return suspendedTransactionAsync(Dispatchers.IO) {
-            MemberTable.update(
-                where = { MemberTable.prename eq name.first and (MemberTable.surname eq name.second) }) {
+            MemberTable.update(where = { MemberTable.prename eq name.first and (MemberTable.surname eq name.second) }) {
                 it[MemberTable.group] = group
                 it[MemberTable.level] = level.removeMultipleWhitespaces()
                 it[MemberTable.is_active] = true
