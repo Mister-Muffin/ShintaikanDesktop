@@ -21,11 +21,13 @@ import format
 import getTotalTrainingSessions
 import models.Member
 import models.Teilnahme
+import net.time4j.PrettyTime
 import next
 import stickerUnits
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
+import java.util.*
 
 @Composable
 fun ExamsDialog(members: List<Member>, teilnahme: List<Teilnahme>, onDismiss: () -> Unit) {
@@ -119,36 +121,8 @@ private fun StudentStats(
 
             // Zeitraum zwischen der letzten Prüfung und dem heutigen Datum
             val period = Period.between(member.date_last_exam, LocalDate.now())
-
-
-            //<editor-fold desc="Date constants">
-            // Zeigt die Jahre, falls diese nicht 0 sind
-            val years =
-                when (period.years) {
-                    0 -> ""
-                    1 -> period.years.toString() + " Jahr"
-                    else -> period.years.toString() + " Jahren"
-                }
-
-            // Zeigt die Monate, falls diese nicht 0 sind
-            val months =
-                when (period.months) {
-                    0 -> ""
-                    1 -> period.months.toString() + " Monat"
-                    else -> period.months.toString() + " Monaten"
-                }
-
-            // Zeigt die Tage, falls diese nicht 0 sind
-            val days =
-                when (period.days) {
-                    0 -> ""
-                    1 -> period.days.toString() + " Tag"
-                    else -> period.days.toString() + " Tagen"
-                }
-            //</editor-fold>
-
-            Text("Letzte Prüfung vor: " +
-                    "${if (years.isNotEmpty()) "$years, " else ""}${months.ifEmpty { "" }}${if (days.isNotEmpty() && months.isNotEmpty()) " und " else ""}${days.ifEmpty { "" }}"
+            Text(
+                "Letzte Prüfung vor: ${PrettyTime.of(Locale.GERMANY).print(period)}"
             )
 
         } else {

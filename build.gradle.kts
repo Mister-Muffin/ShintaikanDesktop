@@ -37,6 +37,7 @@ dependencies {
     implementation("org.postgresql:postgresql:42.5.2")
     implementation("org.apache.commons:commons-csv:1.10.0")
     implementation("cc.ekblad:4koma:1.2.0")
+    implementation("net.time4j:time4j-base:5.9.3")
 }
 
 compose.desktop {
