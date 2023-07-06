@@ -232,7 +232,7 @@ fun isReadyForExam(member: Member, teilnahme: List<Teilnahme>): Pair<String, Str
         val remainingMonths = level.months - monthsSinceLastExam
         val s = "Zu wenig Zeit seit der letzten Prüfung vergangen"
         val text =
-            "\n❌ $s (mind. $monthsSinceLastExam Monate) noch $remainingMonths ${if (remainingMonths == 1.toLong()) "Monat" else "Monate"}"
+            "\n❌ $s (mind. ${level.months} Monate) noch $remainingMonths ${if (remainingMonths == 1.toLong()) "Monat" else "Monate"}"
         returnString += text
         returnString2 = s
     } else returnString += "\n✔️ Genug Zeit seit der letzten Prüfung"
