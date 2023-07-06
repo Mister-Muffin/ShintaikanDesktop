@@ -46,3 +46,4 @@ bin/
 /src/pythonMain/.idea/
 .directory
 /src/main/resources/buildDate.txt
+.idea/
