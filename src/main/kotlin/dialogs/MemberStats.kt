@@ -107,14 +107,15 @@ private fun StudentStats(
 
         Text("Grad: ${member.formattedLevel()}")
 
-        TextTotalTrainingSessions(member, teilnahme)
+        Text("Alle Trainingseinheiten: " + getTotalTrainingSessions(member, teilnahme))
 
         Divider()
 
         // Sollte die Person bereits eine Prüfung gemacht haben,
         // zeige das Datum der letzten Prüfung und bau den string für die Differenz zu diesem Datum zusammen
         if (member.date_last_exam != null) {
-            TextLastExam(member)
+            Text("Letzte Prüfung am: ${(member.date_last_exam.format())}")
+
             Text(
                 "Einheiten seit der letzten Prüfung: ${countId(member.id, teilnahme, member.date_last_exam)}"
             )
@@ -168,24 +169,4 @@ private fun StudentStats(
             Text("Nächster Sticker: $nextStickerName ($nextStickerCount)")
         }
     }
-}
-
-/**
- * Text composable with displays the date of the student's total trainings sessions with some additional text
- */
-@Composable
-private fun TextTotalTrainingSessions(member: Member, teilnahme: List<Teilnahme>) {
-    Text("Alle Trainingseinheiten: " + getTotalTrainingSessions(member, teilnahme))
-}
-
-/**
- * Text composable with displays the date of the student's last exam with some additional text
- */
-@Composable
-private fun TextLastExam(member: Member) {
-    Text(
-        "Letzte Prüfung am: ${
-            DateTimeFormatter.ofPattern("dd.MM.yyyy").format(member.date_last_exam)
-        }"
-    )
 }
