@@ -35,40 +35,27 @@ fun ExamsDialog(members: List<Member>, teilnahme: List<Teilnahme>, onDismiss: ()
     var searchFieldVal by remember { mutableStateOf("") }
 
     val studentFilter = members.filter {
-        (it.prename + it.surname)
-            .lowercase()
-            .contains(searchFieldVal.lowercase().replace(" ", ""))
+        (it.prename + it.surname).lowercase().contains(searchFieldVal.lowercase().replace(" ", ""))
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxSize().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Mitgliedsdaten abfragen", style = MaterialTheme.typography.h6)
         Divider(modifier = Modifier.padding(vertical = 16.dp))
-        OutlinedTextField(
-            value = searchFieldVal,
-            onValueChange = { searchFieldVal = it },
-            placeholder = {
-                Text(
-                    "Suchen... (mind. 3 Zeichen)",
-                    style = TextStyle.Default.copy(fontSize = 16.sp)
-                )
-            },
-            modifier = Modifier.padding(bottom = 10.dp).width(300.dp)
+        OutlinedTextField(value = searchFieldVal, onValueChange = { searchFieldVal = it }, placeholder = {
+            Text(
+                "Suchen... (mind. 3 Zeichen)", style = TextStyle.Default.copy(fontSize = 16.sp)
+            )
+        }, modifier = Modifier.padding(bottom = 10.dp).width(300.dp)
         )
         LazyColumn {
             if (searchFieldVal.length > 2) {
                 if (studentFilter.size >= 2) {
                     items(members.filter {
-                        (it.prename + it.surname)
-                            .lowercase()
-                            .contains(searchFieldVal.lowercase().replace(" ", ""))
+                        (it.prename + it.surname).lowercase().contains(searchFieldVal.lowercase().replace(" ", ""))
                     }) {
-                        StudentList(
-                            it.id,
-                            members,
-                            onClick = { nameString -> searchFieldVal = nameString })
+                        StudentList(it.id, members, onClick = { nameString -> searchFieldVal = nameString })
                     }
                 } else if (studentFilter.size == 1) {
                     item { StudentStats(studentFilter[0], members, teilnahme) }
@@ -82,9 +69,7 @@ fun ExamsDialog(members: List<Member>, teilnahme: List<Teilnahme>, onDismiss: ()
 
 @Composable
 private fun StudentStats(
-    member: Member,
-    members: List<Member>,
-    teilnahme: List<Teilnahme>
+    member: Member, members: List<Member>, teilnahme: List<Teilnahme>
 ) { //datum letzte prüfung | wie lange her y m d | einheiten seit l prüf | einheiten gesamt
     return Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
@@ -116,15 +101,11 @@ private fun StudentStats(
         if (member.date_last_exam != null) {
             Text("Letzte Prüfung am: ${(member.date_last_exam.format())}")
 
-            Text(
-                "Einheiten seit der letzten Prüfung: ${countId(member.id, teilnahme, member.date_last_exam)}"
-            )
+            Text("Einheiten seit der letzten Prüfung: ${countId(member.id, teilnahme, member.date_last_exam)}")
 
             // Zeitraum zwischen der letzten Prüfung und dem heutigen Datum
             val period = Period.between(member.date_last_exam, LocalDate.now())
-            Text(
-                "Letzte Prüfung vor: ${PrettyTime.of(Locale.GERMANY).print(period)}"
-            )
+            Text("Letzte Prüfung vor: ${PrettyTime.of(Locale.GERMANY).print(period)}")
 
         } else {
             Text("Noch keine Prüfung")
@@ -161,8 +142,7 @@ private fun StudentStats(
             }
         }
 
-        if (member.sticker_recieved == stickerUnits.keys.last())
-            Text("Es gibt keinen weiteren Sticker")
+        if (member.sticker_recieved == stickerUnits.keys.last()) Text("Es gibt keinen weiteren Sticker")
         else {
             val nextStickerCount = stickerUnits.next(activeStickerCount).first
             val nextStickerName = stickerUnits[nextStickerCount]
