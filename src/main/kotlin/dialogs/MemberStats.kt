@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import composables.StudentList
 import countId
+import format
 import getTotalTrainingSessions
 import models.Member
 import models.Teilnahme
@@ -84,22 +85,19 @@ private fun StudentStats(
     teilnahme: List<Teilnahme>
 ) { //datum letzte prüfung | wie lange her y m d | einheiten seit l prüf | einheiten gesamt
     return Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
             val nameString: String = member.prename + " " + member.surname // Join pre- and surname
-
+            // Name of the member
             Text(
                 "$nameString${if (member.is_trainer) " (Trainer)" else ""}", // This adds "(Trainer)" to the name string if the member is also a trainer
                 style = MaterialTheme.typography.h6,
                 textDecoration = TextDecoration.Underline,
                 modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
-            ) // Name of the member
+            )
         }
-        //Divider(modifier = Modifier.padding(vertical = 16.dp))
 
         Text(
-            "Hat am: ${
-                DateTimeFormatter.ofPattern("dd.MM.yyyy").format(member.birthday)
-            } Geburtstag, ist ${Period.between(member.birthday, LocalDate.now()).years} Jahre alt"
+            "Hat am: ${member.birthday.format()} Geburtstag, ist ${member.age} Jahre alt"
         )
 
         // Show member's group and replace "Benjamini" with "Karamini" if so

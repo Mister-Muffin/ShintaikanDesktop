@@ -8,6 +8,7 @@ import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionA
 import org.jetbrains.exposed.sql.transactions.transaction
 import removeMultipleWhitespaces
 import java.time.LocalDate
+import java.time.Period
 import java.time.format.DateTimeFormatter
 
 object MemberTable : Table("main") {
@@ -49,7 +50,10 @@ data class Member(
     val radioClicked: Boolean = false, // for sticker dialog (all radio buttons must be clicked before button activated)
     val stickerRecieved: Boolean = false, // for sticker dialog, if radio button is checked or not
     val sticker_show_again: Boolean = true, // for sticker dialog, if student is still missing stickers and the dialog should open again with this student
-)
+) {
+    val age = Period.between(birthday, LocalDate.now()).years
+
+}
 
 data class MemberWithIdAndString(
     val id: Int,

@@ -2,6 +2,7 @@ import models.Member
 import models.Teilnahme
 import java.nio.file.Path
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import kotlin.io.path.copyTo
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createDirectory
@@ -122,3 +123,10 @@ fun <K, V> Map<K, V>.next(oldKey: K) =
  */
 fun <K, V> Map<K, V>.previous(oldKey: K) =
     this.keys.let { keys -> keys.elementAt(keys.indexOf(oldKey) - 1) }.let { newKey -> newKey to this[newKey] }
+
+/**
+ * Format a LocalDate with a project default formatter
+ */
+fun LocalDate.format(): String {
+    return DateTimeFormatter.ofPattern("dd.MM.yyyy").format(this)
+}
