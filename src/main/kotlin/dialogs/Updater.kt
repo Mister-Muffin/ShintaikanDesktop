@@ -16,16 +16,23 @@ import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
 import getRunningJar
-import java.awt.FileDialog
+import showFileDialog
+import java.nio.file.Files
 import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
+import kotlin.io.path.name
 import kotlin.reflect.KClass
+import kotlin.system.exitProcess
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun UpdaterDialog(window: ComposeWindow, kclass: KClass<out FrameWindowScope>, onDismiss: () -> Unit) {
 
+    var status by remember { mutableStateOf(States.NOF) }
+
     var path by remember { mutableStateOf("") }
-    var statusMessage by remember { mutableStateOf("Keine Datei ausgewählt") }
+
+    val updateDone = status == States.DONE
 
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -45,11 +52,11 @@ fun UpdaterDialog(window: ComposeWindow, kclass: KClass<out FrameWindowScope>, o
                         showFileDialog(window) { directory, name ->
                             if (!directory.isNullOrEmpty() && !name.isNullOrEmpty()) {
                                 path = directory + name
-                                statusMessage = if (!name.endsWith(".jar")) "Falsche Datei!"
-                                else "Bereit"
+                                status = if (!name.endsWith(".jar")) States.IFE
+                                else States.RDY
                             } else {
                                 path = ""
-                                statusMessage = "Keine Datei ausgewählt"
+                                status = States.NOF
                             }
                         }
                     })
@@ -57,27 +64,25 @@ fun UpdaterDialog(window: ComposeWindow, kclass: KClass<out FrameWindowScope>, o
         )
 
         Text(
-            "Status: $statusMessage",
+            "Status: ${status.s}",
             modifier = Modifier.padding(vertical = 8.dp)
         )
 
         Button(
             onClick = {
-                try {
-                    upgrade(path, kclass)
-                } catch (e: IllegalFileException) {
-                    statusMessage = e.toString()
-                }
+                if (updateDone) exitProcess(0)
+
+                upgrade(path, kclass)
                 path = ""
-                statusMessage = "Fertig"
+                status = States.DONE
             },
-            enabled = path.isNotEmpty(),
+            enabled = path.isNotEmpty() || updateDone,
             modifier = Modifier.width(250.dp)
         ) {
-            Text("Aktualisieren!")
+            Text(if (updateDone) "Program beenden" else "Aktualisieren!")
         }
 
-        Button(onClick = onDismiss, modifier = Modifier.width(250.dp)) {
+        Button(onClick = onDismiss, enabled = !updateDone, modifier = Modifier.width(250.dp)) {
             Text("Zurück")
         }
     }
@@ -88,16 +93,16 @@ private fun upgrade(path: String, kclass: KClass<out FrameWindowScope>) {
     val runningJar = Paths.get(getRunningJar(kclass))
     val newJarPath = Paths.get(path)
 
-    if (!newJarPath.endsWith(".jar")) throw IllegalFileException("Wrong file extension!")
+    if (!newJarPath.name.endsWith(".jar")) throw IllegalFileException("Wrong file extension!")
 
-    // Files.copy(newJarPath, runningJar, StandardCopyOption.REPLACE_EXISTING)
+    Files.copy(newJarPath, runningJar, StandardCopyOption.REPLACE_EXISTING)
 }
 
-private fun showFileDialog(window: ComposeWindow, onCompleted: (directory: String?, name: String?) -> Unit) {
-    val fd = FileDialog(window, "Choose a file", FileDialog.LOAD)
-    fd.file = "*.jar"
-    fd.isVisible = true
-    onCompleted(fd.directory, fd.file)
+enum class States(val s: String) {
+    NOF("Keine Datei ausgewählt"),
+    RDY("Bereit"),
+    IFE("Falsche Datei!"),
+    DONE("Fertig")
 }
 
 class IllegalFileException(s: String) : Throwable(s)

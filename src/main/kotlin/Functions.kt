@@ -1,6 +1,8 @@
+import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.window.FrameWindowScope
 import models.Member
 import models.Teilnahme
+import java.awt.FileDialog
 import java.nio.file.Path
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -135,4 +137,11 @@ fun LocalDate.format(): String {
 
 fun getRunningJar(kclass: KClass<out FrameWindowScope>): String {
     return kclass.java.protectionDomain.codeSource.location.toURI().path
+}
+
+fun showFileDialog(window: ComposeWindow, onCompleted: (directory: String?, name: String?) -> Unit) {
+    val fd = FileDialog(window, "Choose a file", FileDialog.LOAD)
+    fd.file = "*.jar"
+    fd.isVisible = true
+    onCompleted(fd.directory, fd.file)
 }
