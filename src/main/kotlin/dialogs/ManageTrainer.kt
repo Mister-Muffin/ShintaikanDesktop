@@ -40,6 +40,7 @@ fun ManageTrainerDialog(members: List<Member>, reloadMembers: () -> Unit, onDism
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
+        // Space the button all the way to the bottom of the page
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text("Trainer verwalten", style = MaterialTheme.typography.h6)
             Divider(modifier = Modifier.padding(vertical = 16.dp))

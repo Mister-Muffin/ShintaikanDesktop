@@ -93,6 +93,7 @@ fun main() = application {
             Menu("Administration", mnemonic = 'A', enabled = screenID == HOME) {
                 Item("Trainer verwalten", onClick = { screenID = PASSWORD; forwardedScreenId = MANAGE_TRAINER })
                 Item("Daten holen", onClick = { screenID = PASSWORD; forwardedScreenId = FETCH_DATA })
+                Item("Programm aktualisieren", onClick = { screenID = PASSWORD; forwardedScreenId = UPDATER })
                 Item("Hilfe/Info", onClick = { screenID = HELP })
             }
             Menu("Mitglieder", mnemonic = 'P') {
@@ -163,12 +164,17 @@ fun main() = application {
                     screenID = HOME
                 }
 
-                HELP -> HelpDialog(drivePath) { screenID = HOME }
+                UPDATER -> UpdaterDialog(this.window, this::class) { screenID = HOME }
+
+                HELP -> HelpDialog(
+                    drivePath,
+                    this::class
+                ) { screenID = HOME }
             }
         }
     }
 }
 
 enum class Screen {
-    HOME, SELECT_TRAINER, MANAGE_TRAINER, SELECT_MEMBER, SUCCESS, PASSWORD, EXAMS, FETCH_DATA, EXPORT_MEMBERS, HELP
+    HOME, SELECT_TRAINER, MANAGE_TRAINER, SELECT_MEMBER, SUCCESS, PASSWORD, EXAMS, FETCH_DATA, EXPORT_MEMBERS, UPDATER, HELP
 }

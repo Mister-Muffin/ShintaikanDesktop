@@ -12,11 +12,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import java.io.File
+import androidx.compose.ui.window.FrameWindowScope
+import getRunningJar
+import kotlin.reflect.KClass
 
 @Composable
-fun HelpDialog(drivePath: String, onDismiss: () -> Unit) {
-    val cmdPath = File(".").canonicalPath
+fun HelpDialog(drivePath: String, kclass: KClass<out FrameWindowScope>, onDismiss: () -> Unit) {
+    val cmdPath = getRunningJar(kclass)
 
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),

@@ -1,3 +1,4 @@
+import androidx.compose.ui.window.FrameWindowScope
 import models.Member
 import models.Teilnahme
 import java.nio.file.Path
@@ -8,6 +9,7 @@ import kotlin.io.path.createDirectories
 import kotlin.io.path.createDirectory
 import kotlin.io.path.notExists
 import kotlin.random.Random
+import kotlin.reflect.KClass
 
 /**
  * Creates the initial configuration file for this application is case it does not exist.
@@ -129,4 +131,8 @@ fun <K, V> Map<K, V>.previous(oldKey: K) =
  */
 fun LocalDate.format(): String {
     return DateTimeFormatter.ofPattern("dd.MM.yyyy").format(this)
+}
+
+fun getRunningJar(kclass: KClass<out FrameWindowScope>): String {
+    return kclass.java.protectionDomain.codeSource.location.toURI().path
 }
