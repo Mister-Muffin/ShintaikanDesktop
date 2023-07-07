@@ -81,7 +81,7 @@ fun main() = application {
         var activeTrainer: Trainer? by remember { mutableStateOf(null) }
 
         MenuBar {
-            Menu("Datei", mnemonic = 'F') {
+            Menu("Datei", mnemonic = 'F', enabled = !viewModel.dataLoading) {
                 Item(
                     "Startseite",
                     onClick = { screenID = HOME },
@@ -90,13 +90,13 @@ fun main() = application {
                 )
                 Item("Beenden", onClick = { exitApplication() }, mnemonic = 'E')
             }
-            Menu("Administration", mnemonic = 'A', enabled = screenID == HOME) {
+            Menu("Administration", mnemonic = 'A', enabled = screenID == HOME && !viewModel.dataLoading) {
                 Item("Trainer verwalten", onClick = { screenID = PASSWORD; forwardedScreenId = MANAGE_TRAINER })
                 Item("Daten holen", onClick = { screenID = PASSWORD; forwardedScreenId = FETCH_DATA })
                 Item("Programm aktualisieren", onClick = { screenID = PASSWORD; forwardedScreenId = UPDATER })
                 Item("Hilfe/Info", onClick = { screenID = HELP })
             }
-            Menu("Mitglieder", mnemonic = 'P') {
+            Menu("Mitglieder", mnemonic = 'P', enabled = !viewModel.dataLoading) {
                 Item("Daten abfragen", onClick = { screenID = EXAMS })
                 Item("Daten exportieren", onClick = { screenID = EXPORT_MEMBERS })
             }

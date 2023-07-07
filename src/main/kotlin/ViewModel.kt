@@ -1,4 +1,7 @@
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import models.*
@@ -12,8 +15,12 @@ class ViewModel(val coroutineScope: CoroutineScope) {
     val trainers = mutableStateListOf<Trainer>()
     val teilnahme = mutableStateListOf<Teilnahme>()
 
+    var dataLoading by mutableStateOf(true)
+
     fun loadAll() {
         coroutineScope.launch {
+            dataLoading = true
+
             val members = loadMembers()
             val messages = loadMessages()
             val trainers = loadTrainers()
@@ -30,22 +37,32 @@ class ViewModel(val coroutineScope: CoroutineScope) {
             birthdays.addAll(loadBirthdays(members))
             this@ViewModel.trainers.addAll(trainers)
             this@ViewModel.teilnahme.addAll(teilnahme)
+
+            dataLoading = false
         }
     }
 
     fun reloadMembers() {
         coroutineScope.launch {
+            dataLoading = true
+
             val members = loadMembers()
             allMembers.clear()
             allMembers.addAll(members)
+
+            dataLoading = false
         }
     }
 
     fun reloadMessages() {
         coroutineScope.launch {
+            dataLoading = true
+
             val messages = loadMessages()
             allMessages.clear()
             allMessages.addAll(messages)
+
+            dataLoading = false
         }
     }
 
