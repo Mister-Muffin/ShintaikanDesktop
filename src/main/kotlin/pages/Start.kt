@@ -54,7 +54,9 @@ fun StartPage(
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp).fillMaxSize()) {
 
         if (members.isEmpty()) {
-            Text("Wird geladen...")
+            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                Text("Bitte warten...")
+            }
         } else {
             Text("Willkommen", style = MaterialTheme.typography.h1)
             Text("Heute ist der ${DateTimeFormatter.ofPattern("dd.MM.yyyy").format(LocalDate.now())}")
