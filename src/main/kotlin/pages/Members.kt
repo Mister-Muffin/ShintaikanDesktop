@@ -155,7 +155,7 @@ fun MemberSelector(
                 modifier = Modifier.width(500.dp).fillMaxHeight()
             ) {
                 // Search Field
-                TextField(
+                OutlinedTextField(
                     searchQuery.value,
                     singleLine = true,
                     label = { Text("Suchen") },
