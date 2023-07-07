@@ -12,6 +12,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -152,12 +154,17 @@ fun MemberSelector(
                 verticalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.width(500.dp).fillMaxHeight()
             ) {
-                Column { // search column
-                    Text("Suchen:")
-                    TextField(searchQuery.value, onValueChange = { newVal ->
+                // Search Field
+                TextField(
+                    searchQuery.value,
+                    singleLine = true,
+                    label = { Text("Suchen") },
+                    leadingIcon = { Icon(Icons.Default.Search, "Search Icon") },
+                    onValueChange = { newVal ->
                         searchQuery.value = newVal.lowercase(Locale.getDefault())
-                    })
-                }
+                    },
+                    modifier = Modifier.fillMaxWidth(.75f)
+                )
                 Column {
                     CustomFilter(DegreeColor.values(), checkedColors)
                     Divider(modifier = Modifier.padding(vertical = 30.dp))
@@ -199,13 +206,15 @@ fun MemberSelector(
                         }
                     }
 
-                    Button( // eingabe bestätigen
+                    // Eingabe bestätigen
+                    Button(
                         enabled = newMembers.isNotEmpty(),
                         modifier = Modifier.fillMaxWidth().height(60.dp),
                         onClick = { submit(handleAsExam) }) {
                         Text(
                             textAlign = TextAlign.Center,
-                            text = if (newMembers.isEmpty()) "Teilnehmen aus der ersten Spalte auswählen" else "${newMembers.size} Teilnehmer eintragen!"
+                            text = if (newMembers.isEmpty()) "Teilnehmen aus der ersten Spalte auswählen"
+                            else "${newMembers.size} Teilnehmer eintragen!"
                         )
                     }
                 }
