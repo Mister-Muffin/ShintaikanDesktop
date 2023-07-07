@@ -3,10 +3,9 @@ package dialogs
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
-import androidx.compose.material.Divider
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,14 +50,15 @@ fun ExportMembersDialog(members: List<Member>, teilnahme: List<Teilnahme>, drive
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        TextField(
+        OutlinedTextField(
             searchFieldValue,
+            leadingIcon = { Icon(Icons.Default.Search, "Search Icon") },
             onValueChange = { searchFieldValue = it },
             placeholder = {
-                Text("Hier suchen...", style = TextStyle.Default.copy(fontSize = 16.sp))
+                Text("Suchen", style = TextStyle.Default.copy(fontSize = 16.sp))
             },
             singleLine = true,
-            modifier = Modifier.padding(horizontal = 8.dp)
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
         )
         Column(
             verticalArrangement = Arrangement.Top,

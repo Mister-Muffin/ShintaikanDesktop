@@ -3,10 +3,9 @@ package dialogs
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,11 +42,17 @@ fun ExamsDialog(members: List<Member>, teilnahme: List<Teilnahme>, onDismiss: ()
     ) {
         Text("Mitgliedsdaten abfragen", style = MaterialTheme.typography.h6)
         Divider(modifier = Modifier.padding(vertical = 16.dp))
-        OutlinedTextField(value = searchFieldVal, onValueChange = { searchFieldVal = it }, placeholder = {
-            Text(
-                "Suchen... (mind. 3 Zeichen)", style = TextStyle.Default.copy(fontSize = 16.sp)
-            )
-        }, modifier = Modifier.padding(bottom = 10.dp).width(300.dp)
+        OutlinedTextField(
+            value = searchFieldVal,
+            leadingIcon = { Icon(Icons.Default.Search, "Search Icon") },
+            onValueChange = { searchFieldVal = it },
+            placeholder = {
+                Text(
+                    "Suchen... (mind. 3 Zeichen)",
+                    style = TextStyle.Default.copy(fontSize = 16.sp)
+                )
+            },
+            modifier = Modifier.padding(bottom = 10.dp).width(300.dp)
         )
         LazyColumn {
             if (searchFieldVal.length > 2) {

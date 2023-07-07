@@ -7,11 +7,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import composables.StudentList
 import models.Member
 import models.editIsTrainer
@@ -33,80 +37,91 @@ fun ManageTrainerDialog(members: List<Member>, reloadMembers: () -> Unit, onDism
 
     Column(
         modifier = Modifier.fillMaxWidth().fillMaxHeight().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().fillMaxHeight(.8f).padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceAround
-        ) {
-            Column(
-                modifier = Modifier.padding(8.dp)
-                    .width(studentListTextWidth + 30.dp), // use textWidth here to make them both the same width
-                horizontalAlignment = Alignment.CenterHorizontally
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text("Trainer verwalten", style = MaterialTheme.typography.h6)
+            Divider(modifier = Modifier.padding(vertical = 16.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth().fillMaxHeight(.8f),
+                horizontalArrangement = Arrangement.SpaceAround
             ) {
-                Text("Aktuelle Trainer:", style = MaterialTheme.typography.h6)
-                Divider(modifier = Modifier.padding(4.dp))
-                CurrentTrainerList(members) { newVal, student ->
-                    editIsTrainer(student.id, newVal)
-                    reloadMembers()
+                Column(
+                    modifier = Modifier.padding(8.dp)
+                        .width(studentListTextWidth + 30.dp), // use textWidth here to make them both the same width
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("Aktuelle Trainer:", style = MaterialTheme.typography.h6)
+                    Divider(modifier = Modifier.padding(4.dp))
+                    CurrentTrainerList(members) { newVal, student ->
+                        editIsTrainer(student.id, newVal)
+                        reloadMembers()
+                    }
                 }
-            }
-            Column(
-                modifier = Modifier.padding(8.dp).width(studentListTextWidth + 30.dp), // +30 for scrollbar
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text("Trainer hinzufügen:", style = MaterialTheme.typography.h6)
-                Spacer(modifier = Modifier.padding(4.dp))
-                // Search field to select person as trainer
-                OutlinedTextField(
-                    value = searchFieldVal,
-                    onValueChange = { searchFieldVal = it },
-                    placeholder = { Text("Suchen... (mind. 3 Zeichen)") },
-                    modifier = Modifier.padding(bottom = 10.dp).width(300.dp)
-                )
-                Row {
-                    LazyColumn(state = lazyState) {
-                        if (searchFieldVal.length > 2) {
-                            if (studentFilter.size >= 2) {
-                                items(members.filter {
-                                    (it.prename + it.surname)
-                                        .lowercase()
-                                        .contains(searchFieldVal.lowercase().replace(" ", ""))
-                                }) {
-                                    StudentList(
-                                        it.id,
-                                        members,
-                                        studentListTextWidth,
-                                        onClick = { nameString -> searchFieldVal = nameString })
+                Column(
+                    modifier = Modifier.padding(8.dp).width(studentListTextWidth + 30.dp), // +30 for scrollbar
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text("Trainer hinzufügen:", style = MaterialTheme.typography.h6)
+                    Spacer(modifier = Modifier.padding(4.dp))
+                    // Search field to select person as trainer
+                    OutlinedTextField(
+                        value = searchFieldVal,
+                        onValueChange = { searchFieldVal = it },
+                        leadingIcon = { Icon(Icons.Default.Search, "Search Icon") },
+                        placeholder = {
+                            Text(
+                                "Suchen... (mind. 3 Zeichen)",
+                                style = TextStyle.Default.copy(fontSize = 16.sp)
+                            )
+                        },
+                        modifier = Modifier.padding(bottom = 10.dp).fillMaxWidth()
+                    )
+                    Row {
+                        LazyColumn(state = lazyState) {
+                            if (searchFieldVal.length > 2) {
+                                if (studentFilter.size >= 2) {
+                                    items(members.filter {
+                                        (it.prename + it.surname)
+                                            .lowercase()
+                                            .contains(searchFieldVal.lowercase().replace(" ", ""))
+                                    }) {
+                                        StudentList(
+                                            it.id,
+                                            members,
+                                            studentListTextWidth,
+                                            onClick = { nameString -> searchFieldVal = nameString })
 
-                                }
-                            } else if (studentFilter.size == 1) {
-                                item {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Text(
-                                            "${studentFilter[0].prename} ${studentFilter[0].surname}",
-                                            style = MaterialTheme.typography.body1
-                                        )
-                                        Checkbox(
-                                            checked = studentFilter[0].is_trainer,
-                                            onCheckedChange = {
-                                                editIsTrainer(studentFilter[0].id, it)
-                                                reloadMembers()
-                                                searchFieldVal = ""
-                                            })
                                     }
+                                } else if (studentFilter.size == 1) {
+                                    item {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Text(
+                                                "${studentFilter[0].prename} ${studentFilter[0].surname}",
+                                                style = MaterialTheme.typography.body1
+                                            )
+                                            Checkbox(
+                                                checked = studentFilter[0].is_trainer,
+                                                onCheckedChange = {
+                                                    editIsTrainer(studentFilter[0].id, it)
+                                                    reloadMembers()
+                                                    searchFieldVal = ""
+                                                })
+                                        }
+                                    }
+                                } else {
+                                    item { Text("Keine Personen gefunden") }
                                 }
-                            } else {
-                                item { Text("Keine Personen gefunden") }
                             }
                         }
-                    }
-                    VerticalScrollbar(
-                        modifier = Modifier.fillMaxHeight().width(8.dp).padding(start = 2.dp),
-                        adapter = rememberScrollbarAdapter(
-                            scrollState = lazyState
+                        VerticalScrollbar(
+                            modifier = Modifier.fillMaxHeight().width(8.dp).padding(start = 2.dp),
+                            adapter = rememberScrollbarAdapter(
+                                scrollState = lazyState
+                            )
                         )
-                    )
+                    }
                 }
             }
         }
