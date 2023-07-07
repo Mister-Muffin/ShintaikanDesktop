@@ -29,6 +29,7 @@ import pages.SuccessPage
 import pages.TrainerSelector
 import java.nio.file.Path
 
+const val PRODUCTION = false
 const val configFileName = "config.toml"
 val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
 
@@ -72,7 +73,9 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = "Teilnahme",
         icon = BitmapPainter(image = imageBitmap),
-        state = rememberWindowState(placement = WindowPlacement.Maximized),
+        state = if (PRODUCTION) rememberWindowState(placement = WindowPlacement.Maximized)
+        else rememberWindowState(width = 1280.dp, height = 1024.dp),
+        resizable = PRODUCTION,
     ) {
         var screenID by remember { mutableStateOf(HOME) }
         var activeTrainer: Trainer? by remember { mutableStateOf(null) }
