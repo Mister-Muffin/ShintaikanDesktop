@@ -1,10 +1,18 @@
+package viewmodel
+
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import models.*
+import org.apache.commons.csv.CSVFormat
+import org.apache.commons.csv.CSVParser
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.time.LocalDate
 
 class ViewModel(val coroutineScope: CoroutineScope) {
@@ -99,4 +107,52 @@ class ViewModel(val coroutineScope: CoroutineScope) {
         return birthdays
     }
 
+    /**
+     * csv structure: Name;Gruppe;Grad;Geb.Dat;e;f;g
+     *
+     *                0   ;  1   ; 2  ; 3     ;4;5;6
+     *
+     * // exMembers(csvParser)
+     */
+    fun fetchData(csvPath: String, setText: (String) -> Unit, onComplete: () -> Unit) {
+        coroutineScope.launch {
+            val reader1 = withContext(Dispatchers.IO) {
+                Files.newBufferedReader(Paths.get(csvPath))
+            }
+            val reader2 = withContext(Dispatchers.IO) {
+                Files.newBufferedReader(Paths.get(csvPath))
+            }
+            val reader3 = withContext(Dispatchers.IO) {
+                Files.newBufferedReader(Paths.get(csvPath))
+            }
+            val csvParser1 = CSVParser(
+                reader1, CSVFormat.DEFAULT
+                    .withDelimiter(';')
+                    .withFirstRecordAsHeader()
+                    .withIgnoreHeaderCase()
+                    .withTrim()
+            )
+            val csvParser2 = CSVParser(
+                reader2, CSVFormat.DEFAULT
+                    .withDelimiter(';')
+                    .withFirstRecordAsHeader()
+                    .withIgnoreHeaderCase()
+                    .withTrim()
+            )
+            val csvParser3 = CSVParser(
+                reader3, CSVFormat.DEFAULT
+                    .withDelimiter(';')
+                    .withFirstRecordAsHeader()
+                    .withIgnoreHeaderCase()
+                    .withTrim()
+            )
+
+            dumpCurrentDatabase()
+            exMembers(setText, csvParser1)
+            renameMembers(setText, csvParser2)
+            updateMembers(setText, csvParser3)
+
+            onComplete()
+        }
+    }
 }

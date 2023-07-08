@@ -27,14 +27,19 @@ import pages.MemberSelector
 import pages.StartPage
 import pages.SuccessPage
 import pages.TrainerSelector
+import viewmodel.ViewModel
 import java.nio.file.Path
 
-const val PRODUCTION = false
 const val configFileName = "config.toml"
 val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
 
 @OptIn(ExperimentalComposeUiApi::class)
-fun main() = application {
+fun main(args: Array<String>) = application {
+    var production = true
+    if (args.isNotEmpty()) {
+        production = args[0] != "--development"
+    }
+
     // create file/directories in case the config file does not exist
     createConfigFile()
 
@@ -73,9 +78,9 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = "Teilnahme",
         icon = BitmapPainter(image = imageBitmap),
-        state = if (PRODUCTION) rememberWindowState(placement = WindowPlacement.Maximized)
+        state = if (production) rememberWindowState(placement = WindowPlacement.Maximized)
         else rememberWindowState(width = 1280.dp, height = 1024.dp),
-        resizable = PRODUCTION,
+        resizable = production,
     ) {
         var screenID by remember { mutableStateOf(HOME) }
         var activeTrainer: Trainer? by remember { mutableStateOf(null) }
@@ -155,7 +160,7 @@ fun main() = application {
 
                 EXAMS -> ExamsDialog(viewModel.allMembers, viewModel.teilnahme, onDismiss = { screenID = HOME })
 
-                FETCH_DATA -> FetchDataWindow(drivePath) {
+                FETCH_DATA -> FetchDataWindow(this.window, viewModel::fetchData) {
                     viewModel.loadAll()
                     screenID = HOME
                 }
