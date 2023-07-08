@@ -16,7 +16,7 @@ import showFileDialog
 
 
 /**
- *
+ * @param onProceed called when the dialog window closes
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -57,6 +57,11 @@ fun FilePicker(
 
 }
 
+/**
+ * Checks if a filename matches the given extension
+ * @return The according status
+ * @see States
+ */
 fun getStatus(path: String, fileExtension: String): States {
     return if (path.isEmpty()) {
         States.NO_FILE_SELECTED
