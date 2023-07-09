@@ -7,7 +7,7 @@ import androidx.compose.foundation.onClick
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +36,7 @@ fun FilePicker(
             onValueChange = { path = it },
             trailingIcon = {
                 Icon(
-                    Icons.Default.Search,
+                    Icons.Outlined.FolderOpen,
                     "",
                     modifier = Modifier.onClick {
                         showFileDialog(window) { directory, name ->

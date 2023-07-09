@@ -38,6 +38,7 @@ dependencies {
     implementation("org.apache.commons:commons-csv:1.10.0")
     implementation("cc.ekblad:4koma:1.2.0")
     implementation("net.time4j:time4j-base:5.9.3")
+    implementation("org.jetbrains.compose.material:material-icons-extended:${project.extra["compose.version"] as String}")
 }
 
 compose.desktop {
