@@ -259,8 +259,10 @@ private fun <T : FilterOption> CustomFilter(filterOptions: Array<T>, checked: Mu
                 if (checked.contains(option)) checked.remove(option) else checked.add(option)
             }
 
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.width(200.dp)
-                .clickable { handleChecked() }) {
+            Row(verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.width(200.dp)
+                    .clickable { handleChecked() }) {
                 Checkbox(
                     checked = checked.contains(option),
                     colors = when (option) {
@@ -270,7 +272,7 @@ private fun <T : FilterOption> CustomFilter(filterOptions: Array<T>, checked: Mu
                     onCheckedChange = null,
                     modifier = Modifier.padding(CHECKBOX_PADDING.dp)
                 )
-                Text(text = option.optionName)
+                Text(text = option.optionName, modifier = Modifier.fillMaxWidth(.5f))
             }
 
         }

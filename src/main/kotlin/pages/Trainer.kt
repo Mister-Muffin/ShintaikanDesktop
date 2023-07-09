@@ -3,8 +3,9 @@ package pages
 import Screen
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
@@ -29,7 +30,7 @@ fun TrainerSelector(trainers: List<Trainer>, changeScreen: (screen: Screen, acti
         ) {
             var selectedTrainer: Trainer? by remember { mutableStateOf(null) }
 
-            LazyColumn() {
+            LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.fillMaxWidth(.5f)) {
                 items(trainers.sortedBy { it.prename }) { trainer ->
                     var trainerNameExtended = trainer.prename
                     var trainerNameWasExtended = false
@@ -45,8 +46,10 @@ fun TrainerSelector(trainers: List<Trainer>, changeScreen: (screen: Screen, acti
                         }
                     }
                     if (trainerNameWasExtended) trainerNameExtended += "."
+
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.clickable {
                             selectedTrainer = trainer
                         }.padding(24.dp).width(COMPONENT_WIDTH.dp)
@@ -56,7 +59,7 @@ fun TrainerSelector(trainers: List<Trainer>, changeScreen: (screen: Screen, acti
                             onClick = null,
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(trainerNameExtended)
+                        Text(trainerNameExtended, modifier = Modifier.fillMaxWidth(.4f))
                     }
                 }
             }
