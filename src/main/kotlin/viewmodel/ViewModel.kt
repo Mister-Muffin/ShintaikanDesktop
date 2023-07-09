@@ -115,6 +115,7 @@ class ViewModel(val coroutineScope: CoroutineScope) {
      * // exMembers(csvParser)
      */
     fun fetchData(csvPath: String, setText: (String) -> Unit, onComplete: () -> Unit) {
+        dataLoading = true
         coroutineScope.launch {
             val reader1 = withContext(Dispatchers.IO) {
                 Files.newBufferedReader(Paths.get(csvPath))
@@ -152,6 +153,7 @@ class ViewModel(val coroutineScope: CoroutineScope) {
             renameMembers(setText, csvParser2)
             updateMembers(setText, csvParser3)
 
+            dataLoading = false
             onComplete()
         }
     }
