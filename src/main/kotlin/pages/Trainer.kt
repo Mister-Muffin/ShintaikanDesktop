@@ -3,18 +3,21 @@ package pages
 import Screen
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import models.Trainer
 
+const val COMPONENT_WIDTH = 250
+
 @Composable
-fun TrainerSelector(trainers: List<Trainer>, changeScreen: (screen: Screen, activeTrainer: Trainer?) -> Unit) {
+fun TrainerSelector(trainers: List<Trainer>, changeScreen: (screen: Screen, activeTrainer: Trainer) -> Unit) {
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
         Text("Wer bist du?", style = MaterialTheme.typography.h1)
@@ -26,7 +29,7 @@ fun TrainerSelector(trainers: List<Trainer>, changeScreen: (screen: Screen, acti
         ) {
             var selectedTrainer: Trainer? by remember { mutableStateOf(null) }
 
-            LazyVerticalGrid(GridCells.Fixed(4)) {
+            LazyColumn() {
                 items(trainers.sortedBy { it.prename }) { trainer ->
                     var trainerNameExtended = trainer.prename
                     var trainerNameWasExtended = false
@@ -46,24 +49,25 @@ fun TrainerSelector(trainers: List<Trainer>, changeScreen: (screen: Screen, acti
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.clickable {
                             selectedTrainer = trainer
-                        }.padding(24.dp)
+                        }.padding(24.dp).width(COMPONENT_WIDTH.dp)
                     ) {
                         RadioButton(
                             selectedTrainer == trainer,
                             onClick = null,
-                            colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colors.primary),
-                            modifier = Modifier.size(32.dp)
                         )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(trainerNameExtended)
                     }
                 }
             }
 
             Button(
-                enabled = selectedTrainer != null, modifier = Modifier.width(350.dp).height(60.dp),
-                onClick = { if (selectedTrainer != null) changeScreen(Screen.SELECT_MEMBER, selectedTrainer) }
+                enabled = selectedTrainer != null, modifier = Modifier.width(COMPONENT_WIDTH.dp),
+                onClick = { if (selectedTrainer != null) changeScreen(Screen.SELECT_MEMBER, selectedTrainer!!) }
             ) {
                 Text("Weiter")
+                Spacer(modifier = Modifier.width(8.dp))
+                Icon(Icons.Default.ArrowForward, "")
             }
         }
     }

@@ -3,9 +3,10 @@ package dialogs
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -15,12 +16,13 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.unit.dp
+import pages.COMPONENT_WIDTH
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun PasswordPrompt(password: String, result: (pwCorrect: Boolean) -> Unit) {
 
-    var textViewText by remember { mutableStateOf("Bitte gib das Passwort ein") }
+    var textViewText by remember { mutableStateOf("Bitte gib das Passwort ein:") }
     var passwordFieldVal by remember { mutableStateOf("") }
     var errorTextField by remember { mutableStateOf(false) }
 
@@ -32,6 +34,8 @@ fun PasswordPrompt(password: String, result: (pwCorrect: Boolean) -> Unit) {
     }
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("Passwortabfrage", style = MaterialTheme.typography.h6)
+        Divider(modifier = Modifier.padding(vertical = 16.dp))
         Text(textViewText, modifier = Modifier.padding(bottom = 16.dp))
         OutlinedTextField(
             value = passwordFieldVal,
@@ -42,6 +46,7 @@ fun PasswordPrompt(password: String, result: (pwCorrect: Boolean) -> Unit) {
             },
             singleLine = true,
             isError = errorTextField,
+            leadingIcon = { Icon(Icons.Outlined.Lock, "") },
             modifier = Modifier.padding(bottom = 16.dp).onKeyEvent { keyEvent ->
                 if (keyEvent.key != Key.Enter) return@onKeyEvent false
                 if (keyEvent.type == KeyEventType.KeyUp) {
@@ -50,9 +55,12 @@ fun PasswordPrompt(password: String, result: (pwCorrect: Boolean) -> Unit) {
                 true
             },
             onValueChange = { passwordFieldVal = it })
-        Button(onClick = {
-            checkPasswordAndReturn()
-        }) { Text("OK") }
+        Button(modifier = Modifier.width(COMPONENT_WIDTH.dp),
+            onClick = {
+                checkPasswordAndReturn()
+            }) {
+            Text("OK")
+        }
     }
 
 }

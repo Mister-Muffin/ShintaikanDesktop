@@ -122,7 +122,8 @@ fun main(args: Array<String>) = application {
             ),
             shapes = Shapes(RoundedCornerShape(0.dp)),
             colors = lightColors(
-                primary = Color(0xFF212121)
+                primary = Color(0xFF212121),
+                secondary = Color(0xFF212121)
             )
         ) {
             when (screenID) {

@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -34,6 +35,8 @@ import models.*
 import next
 import stickerUnits
 import java.util.*
+
+private const val CHECKBOX_PADDING = 16
 
 @Composable
 fun MemberSelector(
@@ -148,46 +151,48 @@ fun MemberSelector(
                     )
                 )
             }
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.width(500.dp).fillMaxHeight()
-            ) {
-                // Search Field
-                OutlinedTextField(
-                    searchQuery.value,
-                    singleLine = true,
-                    label = { Text("Suchen") },
-                    leadingIcon = { Icon(Icons.Default.Search, "Search Icon") },
-                    onValueChange = { newVal ->
-                        searchQuery.value = newVal.lowercase(Locale.getDefault())
-                    },
-                    modifier = Modifier.fillMaxWidth(.75f)
-                )
-                Column {
-                    CustomFilter(DegreeColor.values(), checkedColors)
-                    Divider(modifier = Modifier.padding(vertical = 30.dp))
-                    CustomFilter(Group.values(), checkedGroups)
-                }
-                Column {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().padding(4.dp)
-                            .clickable {
-                                // just remove the tick if it was checked without password
-                                if (handleAsExam) handleAsExam = false
-                                else showCheckboxPasswordDialog = true
-                            }) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Checkbox(
-                                checked = handleAsExam,
-                                colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary),
-                                onCheckedChange = {
+            Card {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.width(500.dp).fillMaxHeight().padding(8.dp)
+                ) {
+                    // Search Field
+                    OutlinedTextField(
+                        searchQuery.value,
+                        singleLine = true,
+                        label = {
+                            Text(
+                                "Suchen",
+                                style = TextStyle.Default.copy(fontSize = 16.sp)
+                            )
+                        },
+                        leadingIcon = { Icon(Icons.Default.Search, "Search Icon") },
+                        onValueChange = { newVal ->
+                            searchQuery.value = newVal.lowercase(Locale.getDefault())
+                        },
+                        modifier = Modifier.fillMaxWidth(.75f)
+                    )
+                    Column {
+                        CustomFilter(DegreeColor.values(), checkedColors)
+                        Divider(modifier = Modifier.padding(vertical = 30.dp))
+                        CustomFilter(Group.values(), checkedGroups)
+                    }
+                    Column {
+                        Row(verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth().height(60.dp)
+                                .clickable {
                                     // just remove the tick if it was checked without password
                                     if (handleAsExam) handleAsExam = false
                                     else showCheckboxPasswordDialog = true
-
-                                })
+                                }) {
+                            Checkbox(
+                                checked = handleAsExam,
+                                colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colors.primary),
+                                onCheckedChange = null,
+                                modifier = Modifier.padding(CHECKBOX_PADDING.dp)
+                            )
                             if (handleAsExam)
                                 Text(
                                     text = "Prüfung!",
@@ -195,27 +200,26 @@ fun MemberSelector(
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 35.sp,
                                     textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth(.9f)
                                 )
                             else
                                 Text(
                                     "Auswahl als Prüfung eintragen",
                                     textAlign = TextAlign.Center,
-                                    modifier = Modifier.fillMaxWidth(.9f)
                                 )
                         }
-                    }
 
-                    // Eingabe bestätigen
-                    Button(
-                        enabled = newMembers.isNotEmpty(),
-                        modifier = Modifier.fillMaxWidth().height(60.dp),
-                        onClick = { submit(handleAsExam) }) {
-                        Text(
-                            textAlign = TextAlign.Center,
-                            text = if (newMembers.isEmpty()) "Teilnehmer aus der ersten Spalte auswählen"
-                            else "${newMembers.size} Teilnehmer eintragen!"
-                        )
+                        Spacer(Modifier.height(4.dp))
+                        // Eingabe bestätigen
+                        Button(
+                            enabled = newMembers.isNotEmpty(),
+                            modifier = Modifier.fillMaxWidth().height(60.dp),
+                            onClick = { submit(handleAsExam) }) {
+                            Text(
+                                textAlign = TextAlign.Center,
+                                text = if (newMembers.isEmpty()) "Teilnehmer aus der ersten Spalte auswählen"
+                                else "${newMembers.size} Teilnehmer eintragen!"
+                            )
+                        }
                     }
                 }
 
@@ -255,21 +259,20 @@ private fun <T : FilterOption> CustomFilter(filterOptions: Array<T>, checked: Mu
                 if (checked.contains(option)) checked.remove(option) else checked.add(option)
             }
 
-            Box(
-                modifier = Modifier.width(200.dp)
-                    .clickable { handleChecked() }) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Checkbox(
-                        checked = checked.contains(option),
-                        colors = when (option) {
-                            is DegreeColor -> option.checkboxColors
-                            else -> CheckboxDefaults.colors(MaterialTheme.colors.primary)
-                        },
-                        onCheckedChange = { handleChecked() },
-                    )
-                    Text(text = option.optionName)
-                }
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.width(200.dp)
+                .clickable { handleChecked() }) {
+                Checkbox(
+                    checked = checked.contains(option),
+                    colors = when (option) {
+                        is DegreeColor -> option.checkboxColors
+                        else -> CheckboxDefaults.colors(MaterialTheme.colors.primary)
+                    },
+                    onCheckedChange = null,
+                    modifier = Modifier.padding(CHECKBOX_PADDING.dp)
+                )
+                Text(text = option.optionName)
             }
+
         }
     }
 }
