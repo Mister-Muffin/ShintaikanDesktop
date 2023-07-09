@@ -15,7 +15,6 @@ import composables.IllegalFileException
 import composables.States
 import composables.getStatus
 
-private const val textWhenDone = "Complete!\nExit Program."
 private const val fileExtension = ".csv"
 
 @Composable
