@@ -213,7 +213,7 @@ fun MemberSelector(
                         onClick = { submit(handleAsExam) }) {
                         Text(
                             textAlign = TextAlign.Center,
-                            text = if (newMembers.isEmpty()) "Teilnehmen aus der ersten Spalte auswählen"
+                            text = if (newMembers.isEmpty()) "Teilnehmer aus der ersten Spalte auswählen"
                             else "${newMembers.size} Teilnehmer eintragen!"
                         )
                     }
