@@ -10,10 +10,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.unit.dp
-import composables.FilePicker
-import composables.IllegalFileException
-import composables.States
-import composables.getStatus
+import composables.*
 
 private const val fileExtension = ".csv"
 
@@ -51,7 +48,7 @@ fun FetchDataWindow(
         Button(
             onClick = {
                 status = States.BUSY
-                if (!path.endsWith(fileExtension)) throw IllegalFileException("Wrong file selected!")
+                if (!checkFileExtension(path, fileExtension)) throw IllegalFileException("Wrong file selected!")
                 fetchData(path, { v -> textFieldValue = v }) {
                     textFieldValue = ""
                     status = States.DONE

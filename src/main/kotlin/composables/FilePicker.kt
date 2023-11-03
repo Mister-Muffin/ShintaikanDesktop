@@ -79,7 +79,7 @@ fun getStatus(path: String, fileExtension: String): States {
  * maches the provided extension
  */
 fun checkFileExtension(fileName: String, extension: String): Boolean {
-    return fileName.endsWith(extension)
+    return fileName.lowercase().endsWith(extension)
 }
 
 enum class States(val status: String) {
