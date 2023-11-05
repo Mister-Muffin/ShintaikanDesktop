@@ -1,5 +1,6 @@
 package dialogs
 
+import Datastore
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
@@ -11,6 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.unit.dp
 import composables.*
+import configFilePath
+import dataStoreFileName
+import kotlinx.serialization.json.Json
+import java.io.File
+import java.time.LocalDateTime
 
 private const val fileExtension = ".csv"
 
@@ -24,6 +30,8 @@ fun FetchDataWindow(
     var status by remember { mutableStateOf(States.NO_FILE_SELECTED) }
 
     var path by remember { mutableStateOf("") }
+
+    setLastImportDate()
 
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -52,6 +60,7 @@ fun FetchDataWindow(
                 fetchData(path, { v -> textFieldValue = v }) {
                     textFieldValue = ""
                     status = States.DONE
+                    setLastImportDate()
                 }
             },
             enabled = path.isNotEmpty() && status != States.BUSY,
@@ -65,4 +74,13 @@ fun FetchDataWindow(
         }
 
     }
+}
+
+private fun setLastImportDate() {
+    val datastoreFile = File(configFilePath + dataStoreFileName)
+    val datastoreFileText = datastoreFile.readText()
+    val datastore = Json.decodeFromString<Datastore>(datastoreFileText)
+    val newDatastore = datastore.copy(lastImport = LocalDateTime.now().toString())
+    val newDatastoreText = Json.encodeToString(Datastore.serializer(), newDatastore)
+    datastoreFile.writeText(newDatastoreText)
 }

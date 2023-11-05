@@ -3,7 +3,8 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 plugins {
-    kotlin("jvm")
+    kotlin("jvm") version "1.9.0"
+    kotlin("plugin.serialization") version "1.9.0"
     id("org.jetbrains.compose")
 }
 
@@ -24,12 +25,13 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 }
 
 dependencies {
-    implementation(compose.desktop.currentOs)
+    implementation(compose.desktop.linux_x64)
     // https://youtrack.jetbrains.com/issue/KTIJ-22262/Compose-IDE-False-positive-Cannot-access-class-androidxcomposeuigeometrySize-error#focus=Comments-27-6447983.0-0
     implementation("org.jetbrains.compose.ui:ui-graphics-desktop:${project.extra["compose.version"] as String}")
     implementation("org.jetbrains.compose.ui:ui-geometry-desktop:${project.extra["compose.version"] as String}")
     implementation("org.jetbrains.compose.foundation:foundation-desktop:${project.extra["compose.version"] as String}")
     //
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
     implementation("org.slf4j:slf4j-nop:2.0.7")
     implementation("org.jetbrains.exposed:exposed-core:${project.extra["exposed.version"] as String}")
     implementation("org.jetbrains.exposed:exposed-jdbc:${project.extra["exposed.version"] as String}")

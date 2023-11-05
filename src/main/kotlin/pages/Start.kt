@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.res.useResource
@@ -36,12 +35,12 @@ import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun StartPage(
     members: List<Member>,
     messages: List<Message>,
     birthdays: List<Member>,
+    lastImport: String,
     reloadMessages: () -> Unit,
     submitNewMessage: (newMessage: String) -> Unit,
     changeScreen: (id: Screen) -> Unit
@@ -171,15 +170,26 @@ fun StartPage(
                 }
             }
 
-            Text(
-                try {
-                    val dateString: String = useResource("buildDate.txt") { it.readBytes().toString(Charsets.UTF_8) }
-                    "BuildDate: $dateString"
-                } catch (e: java.io.FileNotFoundException) {
-                    "N/A"
-                },
-                modifier = Modifier.align(Alignment.End).padding(8.dp)
-            )
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxSize().padding(8.dp)
+            ) {
+                Text(
+                    "Letzter Datenimport: $lastImport"
+                )
+
+                Text(
+                    try {
+                        val dateString: String =
+                            useResource("buildDate.txt") { it.readBytes().toString(Charsets.UTF_8) }
+                        "BuildDate: $dateString"
+                    } catch (e: java.io.FileNotFoundException) {
+                        "N/A"
+                    }
+                )
+            }
+
         }
     }
 }

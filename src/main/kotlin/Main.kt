@@ -5,7 +5,6 @@ import androidx.compose.material.Shapes
 import androidx.compose.material.Typography
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.*
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.input.key.Key
@@ -21,6 +20,7 @@ import androidx.compose.ui.window.*
 import cc.ekblad.toml.decode
 import cc.ekblad.toml.tomlMapper
 import dialogs.*
+import kotlinx.serialization.json.Json
 import models.Trainer
 import org.jetbrains.exposed.sql.Database
 import pages.MemberSelector
@@ -28,12 +28,13 @@ import pages.StartPage
 import pages.SuccessPage
 import pages.TrainerSelector
 import viewmodel.ViewModel
+import java.io.File
 import java.nio.file.Path
 
 const val configFileName = "config.toml"
 val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
+const val dataStoreFileName = "datastore.json"
 
-@OptIn(ExperimentalComposeUiApi::class)
 fun main(args: Array<String>) = application {
     var production = true
     if (args.isNotEmpty()) {
@@ -45,11 +46,18 @@ fun main(args: Array<String>) = application {
 
     // Create a TOML mapper without any custom configuration
     val mapper = tomlMapper { }
-
     // Read config from file
     val tomlFile = Path.of(configFilePath + configFileName)
     val config = mapper.decode<Config>(tomlFile)
     //println(config.settings)
+
+    val datastoreFile = File(configFilePath + dataStoreFileName)
+    if (!datastoreFile.exists()) {
+        datastoreFile.createNewFile()
+        datastoreFile.writeText("{}")
+    }
+    val datastoreFileText = datastoreFile.readText()
+    val datastore = Json.decodeFromString<Datastore>(datastoreFileText)
 
     val ip: String = config.settings.ip
     val port: String = config.settings.port
@@ -131,6 +139,7 @@ fun main(args: Array<String>) = application {
                     viewModel.allMembers,
                     viewModel.allMessages,
                     viewModel.birthdays,
+                    datastore.lastImportPretty,
                     viewModel::reloadMessages,
                     viewModel::submitNewMessage
                 ) { screenID = it }
