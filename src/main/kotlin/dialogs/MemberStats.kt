@@ -138,8 +138,16 @@ private fun StudentStats(
                 val stickerUnit: Int = singleStats[0].toInt()
                 val stickerName = stickerUnits[stickerUnit]
                 val stickerBy: Int = singleStats[1].toInt()
-                val stickerByTrainer = members.filter { f -> stickerBy == f.id }[0]
-                val stickerByTrainerName = "${stickerByTrainer.prename} ${stickerByTrainer.surname}"
+
+                val stickerByTrainer: Member
+                var stickerByTrainerName: String
+                try {
+                    stickerByTrainer = members.filter { f -> stickerBy == f.id }[0]
+                    stickerByTrainerName = "${stickerByTrainer.prename} ${stickerByTrainer.surname}"
+                } catch (e: IndexOutOfBoundsException) {
+                    stickerByTrainerName = "[Nicht gefunden]"
+                }
+
                 val stickerDate = singleStats[2]
                 val stickerDateFormatted = LocalDate.parse(stickerDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
                     .format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))

@@ -35,6 +35,7 @@ const val configFileName = "config.toml"
 val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
 const val dataStoreFileName = "datastore.json"
 
+//NOTE: Archivgröße zur Vorherigen release version 28mb -> 69mb...
 fun main(args: Array<String>) = application {
     var production = true
     if (args.isNotEmpty()) {
