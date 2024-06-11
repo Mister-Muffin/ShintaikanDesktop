@@ -142,7 +142,8 @@ fun main(args: Array<String>) = application {
                     viewModel.birthdays,
                     datastore.lastImportPretty,
                     viewModel::reloadMessages,
-                    viewModel::submitNewMessage
+                    viewModel::submitNewMessage,
+                    viewModel::loadTime
                 ) { screenID = it }
 
                 SELECT_TRAINER -> TrainerSelector(viewModel.trainers) { screen, selectedTrainer ->

@@ -14,6 +14,8 @@ import org.apache.commons.csv.CSVParser
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
+import kotlin.time.Duration
+import kotlin.time.TimeSource
 
 class ViewModel(val coroutineScope: CoroutineScope) {
 
@@ -25,14 +27,24 @@ class ViewModel(val coroutineScope: CoroutineScope) {
 
     var dataLoading by mutableStateOf(true)
 
+    var loadTime = Duration.ZERO
+
     fun loadAll() {
         coroutineScope.launch {
+            println("Start loading members")
+            val timeSource = TimeSource.Monotonic
+            val startTime = timeSource.markNow()
+
             dataLoading = true
 
             val members = loadMembers()
+            val memberTime = timeSource.markNow()
             val messages = loadMessages()
+            val messagesTime = timeSource.markNow()
             val trainers = loadTrainers()
+            val trainersTime = timeSource.markNow()
             val teilnahme = loadTeilnahme()
+            val teilnahmeTime = timeSource.markNow()
 
             allMembers.clear()
             allMessages.clear()
@@ -47,6 +59,16 @@ class ViewModel(val coroutineScope: CoroutineScope) {
             this@ViewModel.teilnahme.addAll(teilnahme)
 
             dataLoading = false
+
+            val endTime = timeSource.markNow()
+            loadTime = endTime - startTime // avg time: 440ms
+            println("Finished loading members, took $loadTime")
+            println(
+                "Members: ${memberTime - startTime}, " +
+                        "Messages: ${messagesTime - memberTime}, " +
+                        "Trainer: ${trainersTime - messagesTime}, " +
+                        "Teilnahme: ${teilnahmeTime - trainersTime}."
+            )
         }
     }
 

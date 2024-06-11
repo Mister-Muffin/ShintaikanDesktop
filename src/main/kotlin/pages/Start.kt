@@ -34,6 +34,7 @@ import models.editMessage
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
+import kotlin.time.Duration
 
 @Composable
 fun StartPage(
@@ -43,6 +44,7 @@ fun StartPage(
     lastImport: String,
     reloadMessages: () -> Unit,
     submitNewMessage: (newMessage: String) -> Unit,
+    startupTime: () -> Duration,
     changeScreen: (id: Screen) -> Unit
 ) {
 
@@ -70,7 +72,7 @@ fun StartPage(
                     onClick = { changeScreen(Screen.SELECT_TRAINER) }
                 ) {
                     Text(text = "Teilnehmer eintragen")
-                    Icon(Icons.Default.ArrowForward, "")
+                    Icon(Icons.Default.ArrowForward, "", modifier = Modifier.padding(start = 8.dp))
                 }
             }
 
@@ -179,11 +181,13 @@ fun StartPage(
                     "Letzter Datenimport: $lastImport"
                 )
 
+                Text(startupTime().toString())
+
                 Text(
                     try {
                         val dateString: String =
                             useResource("buildDate.txt") { it.readBytes().toString(Charsets.UTF_8) }
-                        "BuildDate: $dateString"
+                        "Programmversion vom: $dateString"
                     } catch (e: java.io.FileNotFoundException) {
                         "N/A"
                     }
