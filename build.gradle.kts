@@ -25,7 +25,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 }
 
 dependencies {
-    implementation(compose.desktop.linux_x64)
+    implementation(compose.desktop.currentOs)
     // https://youtrack.jetbrains.com/issue/KTIJ-22262/Compose-IDE-False-positive-Cannot-access-class-androidxcomposeuigeometrySize-error#focus=Comments-27-6447983.0-0
     implementation("org.jetbrains.compose.ui:ui-graphics-desktop:${project.extra["compose.version"] as String}")
     implementation("org.jetbrains.compose.ui:ui-geometry-desktop:${project.extra["compose.version"] as String}")
@@ -36,7 +36,8 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:${project.extra["exposed.version"] as String}")
     implementation("org.jetbrains.exposed:exposed-jdbc:${project.extra["exposed.version"] as String}")
     implementation("org.jetbrains.exposed:exposed-java-time:${project.extra["exposed.version"] as String}")
-    implementation("org.postgresql:postgresql:42.5.2")
+    implementation("org.postgresql:postgresql:42.7.2")
+    implementation("org.xerial:sqlite-jdbc:3.44.1.0")
     implementation("org.apache.commons:commons-csv:1.10.0")
     implementation("cc.ekblad:4koma:1.2.0")
     implementation("net.time4j:time4j-base:5.9.3")

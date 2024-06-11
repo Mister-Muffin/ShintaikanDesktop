@@ -75,6 +75,8 @@ fun main(args: Array<String>) = application {
         password = dbPassword
     )
 
+    // Database.connect("jdbc:sqlite:${configFilePath}database.db", "org.sqlite.JDBC")
+
     val scope = rememberCoroutineScope()
     val viewModel = remember { ViewModel(scope) }
     viewModel.loadAll()

@@ -27,10 +27,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
-import models.Member
-import models.Message
-import models.deleteMessage
-import models.editMessage
+import models.*
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
@@ -51,6 +48,12 @@ fun StartPage(
     var newMessage by remember { mutableStateOf("") }
 
     val lazyMessagesListState = rememberLazyListState()
+
+    createStickerTable()
+    members.forEach {
+        if (it.sticker_recieved_by != null)
+            importSticker(it)
+    }
 
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp).fillMaxSize()) {
