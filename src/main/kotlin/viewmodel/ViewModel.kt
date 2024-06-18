@@ -302,13 +302,13 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
 
         //<editor-fold desc="Participation operations">
         suspend fun loadParticipations(): List<Participation> {
-            return suspendedTransactionAsync {
+            return suspendedTransactionAsync(Dispatchers.IO) {
                 Participation.selectAll().map(Participation::fromRow)
             }.await()
         }
 
         suspend fun addParticipation(temporaryParticipation: Participation): Int {
-            return suspendedTransactionAsync {
+            return suspendedTransactionAsync(Dispatchers.IO) {
                 if (temporaryParticipation.id < 0) {
                     Participation.insertAndGetId {
                         temporaryParticipation.upsertInto(it)
@@ -327,7 +327,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
 
         //<editor-fold desc="Member operations">
         suspend fun loadMembers(): List<Member> {
-            return suspendedTransactionAsync {
+            return suspendedTransactionAsync(Dispatchers.IO) {
                 Member.selectAll().map {
                     Member.fromRow(it, getLastExamDate = { getLastExamDate(it) })
                 }
@@ -335,7 +335,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         }
 
         suspend fun clearUnitsSinceLastExam(member: Member) {
-            suspendedTransactionAsync {
+            suspendedTransactionAsync(Dispatchers.IO) {
                 Member.update(where = { Member.id eq member.id }) {
                     it[unitsSinceLastExam] = 0
                 }
@@ -343,7 +343,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         }
 
         suspend fun deactivateMember(member: Member) {
-            suspendedTransactionAsync {
+            suspendedTransactionAsync(Dispatchers.IO) {
                 Member.update(where = { Member.id eq member.id }) {
                     it[isActive] = false
                 }
@@ -351,7 +351,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         }
 
         suspend fun updateMemberName(member: Member, firstName: String, lastName: String) {
-            suspendedTransactionAsync {
+            suspendedTransactionAsync(Dispatchers.IO) {
                 Member.update(where = { Member.id eq member.id }) {
                     it[prename] = firstName
                     it[surname] = lastName
@@ -360,7 +360,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         }
 
         suspend fun insertMember(member: Member): Int {
-            return suspendedTransactionAsync {
+            return suspendedTransactionAsync(Dispatchers.IO) {
                 Member.insertAndGetId {
                     member.upsertInto(it)
                 }.value
@@ -368,7 +368,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         }
 
         suspend fun updateMemberData(member: Member, group: String, level: String, birthday: LocalDate) {
-            suspendedTransactionAsync {
+            suspendedTransactionAsync(Dispatchers.IO) {
                 Member.update(where = { Member.id eq member.id }) {
                     it[Member.group] = group
                     it[Member.level] = level
@@ -378,7 +378,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         }
 
         suspend fun setTrainerStatus(member: Member, isTrainer: Boolean) {
-            suspendedTransactionAsync {
+            suspendedTransactionAsync(Dispatchers.IO) {
                 Member.update(where = { Member.id eq member.id }) {
                     it[Member.isTrainer] = isTrainer
                 }
@@ -386,7 +386,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         }
 
         suspend fun updateStickers(member: Member, stickerNumber: Int, stickerData: String, stickerDate: LocalDate) {
-            suspendedTransactionAsync {
+            suspendedTransactionAsync(Dispatchers.IO) {
                 Member.update(where = { Member.id eq member.id }) {
                     it[stickerReceived] = stickerNumber
                     it[stickerReceivedBy] = stickerData
@@ -396,7 +396,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         }
 
         suspend fun incrementTrainerUnits(member: Member) {
-            suspendedTransactionAsync {
+            suspendedTransactionAsync(Dispatchers.IO) {
                 Member.update(where = { Member.id eq member.id }) {
                     with(SqlExpressionBuilder) {
                         it.update(trainerUnits, trainerUnits + 1)
@@ -406,7 +406,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         }
 
         suspend fun increaseUnitsSinceLastExam(member: Member, count: Int) {
-            suspendedTransactionAsync {
+            suspendedTransactionAsync(Dispatchers.IO) {
                 Member.update(where = { Member.id eq member.id }) {
                     with(SqlExpressionBuilder) {
                         it.update(unitsSinceLastExam, unitsSinceLastExam + count)
