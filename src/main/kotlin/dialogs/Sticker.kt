@@ -18,10 +18,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
 import getTotalTrainingSessions
-import models.Member
-import models.Trainer
-import models.editMemberSticker
-import models.loadTeilnahme
+import model.Member
+import model.Participation
 import next
 import nextStickerUnit
 import stickerUnits
@@ -30,15 +28,15 @@ import java.time.LocalDate
 @Composable
 fun StickerDialog(
     stickerStudentsList: List<Member>,
-    activeTrainer: Trainer,
+    participations: List<Participation>,
+    updateSticker: (Member, Int, String) -> Unit,
+    activeTrainer: Member,
     onDismiss: () -> Unit
 ) {
     val mutableMembers = remember { stickerStudentsList.toMutableStateList() }
-    fun SnapshotStateList<Member>.filterShowSticker() = filter { it.sticker_show_again }
+    fun SnapshotStateList<Member>.filterShowSticker() = filter { it.stickerShowAgain }
 
     val lazyState = rememberLazyListState()
-
-    val teilnahme = loadTeilnahme()
 
     /**
      * This function returns true if all radio buttons have been clicked at lease once to ensure,
@@ -71,7 +69,7 @@ fun StickerDialog(
                         Divider(modifier = Modifier.padding(vertical = 10.dp))
                     }
                     items(mutableMembers.filterShowSticker()) { member ->
-                        val total = getTotalTrainingSessions(member, teilnahme)
+                        val total = getTotalTrainingSessions(member, participations)
                         Row(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically,
@@ -96,37 +94,36 @@ fun StickerDialog(
             }
             Button(enabled = buttonEnabled(), modifier = Modifier.fillMaxWidth(.5f), onClick = {
                 mutableMembers.filterShowSticker().forEach { member ->
-                    if (member.stickerRecieved) {
-                        val nextStickerRecieved = stickerUnits.next(member.sticker_recieved).first
+                    if (member.stickerReceived) {
+                        val nextStickerRecieved = stickerUnits.next(member.receivedStickerNumber).first
                         val nextStickerRecievedBy = "$nextStickerRecieved:${activeTrainer.id}:${LocalDate.now()}"
 
                         mutableMembers[mutableMembers.indexOf(member)] =
                             member.copy(
-                                sticker_recieved_by = nextStickerRecievedBy,
+                                stickerReceivedBy = nextStickerRecievedBy,
                                 radioClicked = false,
-                                sticker_recieved = nextStickerRecieved,
-                                sticker_show_again = if (member.sticker_recieved == stickerUnits.keys.toList()[stickerUnits.keys.size - 2]) false else
+                                receivedStickerNumber = nextStickerRecieved,
+                                stickerShowAgain = if (member.receivedStickerNumber == stickerUnits.keys.toList()[stickerUnits.keys.size - 2]) false else
                                     getTotalTrainingSessions(
                                         member,
-                                        teilnahme
-                                    ) >= stickerUnits.next(stickerUnits.next(member.sticker_recieved).first).first // erster Teil vor dem && ist das gegenereignis von der if oben < / >=
+                                        participations
+                                    ) >= stickerUnits.next(stickerUnits.next(member.receivedStickerNumber).first).first // erster Teil vor dem && ist das gegenereignis von der if oben < / >=
                             )
 
-                        editMemberSticker(
-                            member.copy(
-                                sticker_recieved_by = nextStickerRecievedBy,
-                                sticker_recieved = nextStickerRecieved
-                            )
+                        updateSticker(
+                            member,
+                            nextStickerRecieved,
+                            nextStickerRecievedBy
                         )
                     } else {
                         mutableMembers[mutableMembers.indexOf(member)] =
                             member.copy(
-                                sticker_show_again = false
+                                stickerShowAgain = false
                             )
                     }
                 }
 
-                if (mutableMembers.none { it.sticker_show_again }) onDismiss()
+                if (mutableMembers.none { it.stickerShowAgain }) onDismiss()
             }) {
                 Text("OK")
             }
@@ -141,11 +138,11 @@ private fun RadioRecieved(
 ) {
     Text("Erhalten")
     RadioButton(
-        student.stickerRecieved && student.radioClicked,
+        student.stickerReceived && student.radioClicked,
         onClick = {
             mutableMembers[mutableMembers.indexOf(student)] =
                 student.copy(
-                    stickerRecieved = true,
+                    stickerReceived = true,
                     radioClicked = true
                 )
         }
@@ -159,11 +156,11 @@ private fun RadioNotRecieved(
 ) {
     Text("Nicht erhalten")
     RadioButton(
-        !student.stickerRecieved && student.radioClicked,
+        !student.stickerReceived && student.radioClicked,
         onClick = {
             mutableMembers[mutableMembers.indexOf(student)] =
                 student.copy(
-                    stickerRecieved = false,
+                    stickerReceived = false,
                     radioClicked = true
                 )
         }
@@ -173,21 +170,21 @@ private fun RadioNotRecieved(
 @Composable
 private fun Description(student: Member, total: Int) {
     val textModifier = Modifier.padding(8.dp).width(300.dp)
-    if (student.sticker_recieved != stickerUnits.keys.last()) {
+    if (student.receivedStickerNumber != stickerUnits.keys.last()) {
         if (
-            student.sticker_recieved == stickerUnits.keys.elementAt(stickerUnits.keys.size - 2) ||
-            total < student.sticker_recieved.nextStickerUnit().nextStickerUnit().first
+            student.receivedStickerNumber == stickerUnits.keys.elementAt(stickerUnits.keys.size - 2) ||
+            total < student.receivedStickerNumber.nextStickerUnit().nextStickerUnit().first
         ) {
             Text(
                 "${student.prename} ${student.surname}, hat " +
                         "$total Trainingseinheiten und bekommt einen " +
-                        "${stickerUnits.next(student.sticker_recieved).second} Aufkleber",
+                        "${stickerUnits.next(student.receivedStickerNumber).second} Aufkleber",
                 modifier = textModifier
             )
         } else {
             Text(
                 "${student.prename} ${student.surname}, hat $total Trainingseinheiten und bekommt aber immer noch einen " +
-                        "${stickerUnits.next(student.sticker_recieved).second} Aufkleber",
+                        "${stickerUnits.next(student.receivedStickerNumber).second} Aufkleber",
                 modifier = textModifier
             )
         }

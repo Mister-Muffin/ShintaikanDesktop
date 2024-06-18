@@ -20,6 +20,7 @@ import java.time.LocalDateTime
 
 private const val fileExtension = ".csv"
 
+// Eigentlich einfach weg mit dem Scheiß
 @Composable
 fun FetchDataWindow(
     window: ComposeWindow,
