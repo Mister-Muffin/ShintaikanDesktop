@@ -63,7 +63,7 @@ data class Member(
         val trainerUnits = integer("trainer_units")
         val unitsSinceLastExam = integer("add_units_since_last_exam") // TODO: Pls confirm
 
-        fun fromRow(row: ResultRow, getLastExamDate: (Int) -> LocalDate) = Member(
+        fun fromRow(row: ResultRow, getLastExamDate: (Int) -> LocalDate?) = Member(
             id = row[id].value,
             surname = row[surname],
             prename = row[prename],
