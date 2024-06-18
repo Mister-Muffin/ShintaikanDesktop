@@ -130,7 +130,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
     fun getBirthdayMembers(): List<Member> {
         val now = LocalDate.now()
         return members.filter {
-            it.birthday.plusYears(it.birthday.until(now).years.toLong()) in now.minusDays(3)..now.plusDays(3)
+            it.birthday.plusYears((now.year - it.birthday.year).toLong()) in now.minusDays(3)..now.plusDays(3)
         }
     }
 
