@@ -21,7 +21,7 @@ import kotlin.time.Duration
 
 class ViewModel(private val coroutineScope: CoroutineScope) {
 
-    var dataLoading by mutableStateOf(true)
+    var dataLoading by mutableStateOf(false)
     var loadTime = Duration.ZERO
 
     private val mutableMembers = mutableStateListOf<Member>()
