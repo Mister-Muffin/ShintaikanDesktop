@@ -18,7 +18,7 @@ data class Participation(
         val userIdsExam = text("user_ids_exam")
         val date = date("date")
 
-        fun fromRow(row: ResultRow) = Participation(row[id].value, row[userIds], row[userIdsExam], row[date])
+        fun fromRow(row: ResultRow) = Participation(row[id].value, row[userIds] ?: "", row[userIdsExam] ?: "", row[date])
     }
 
     fun <T: Any> upsertInto(insert: UpdateBuilder<T>) {
