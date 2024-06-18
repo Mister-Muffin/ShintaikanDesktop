@@ -121,6 +121,12 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         mutableMembers.add(member.copy(trainerUnits = member.trainerUnits + 1))
     }
 
+    fun increaseUnitsSinceLastExam(member: Member, count: Int) {
+        coroutineScope.launch { database.increaseUnitsSinceLastExam(member, count) }
+        mutableMembers.remove(member)
+        mutableMembers.add(member.copy(trainerUnits = member.unitsSinceLastExam + count))
+    }
+
     fun getBirthdayMembers(): List<Member> {
         val now = LocalDate.now()
         return members.filter {
@@ -132,8 +138,9 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         return members.filter(Member::isTrainer)
     }
 
-    fun getLastExamDate(id: Int): LocalDate {
-        return participations.filter { id.toString() in it.userIdsExam }.maxBy { it.date }.date
+    fun getLastExamDate(id: Int): LocalDate? {
+        return participations.filter { id.toString() in it.userIdsExam }.takeIf { it.isNotEmpty() }
+            ?.maxBy { it.date }?.date
     }
     //</editor-fold>
 
@@ -152,6 +159,15 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
 
         if (participationToday != null) {
             mutableParticipations.remove(participationToday)
+        }
+
+        val updates = members.filter { member -> member.id.toString() in participants }.map { member ->
+            val count = participants.split(',').count { it == member.id.toString() }
+            member to count
+        }
+
+        for ((member, count) in updates) {
+            increaseUnitsSinceLastExam(member, count)
         }
 
         mutableParticipations.add(participation)
@@ -384,6 +400,16 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
                 Member.update(where = { Member.id eq member.id }) {
                     with(SqlExpressionBuilder) {
                         it.update(trainerUnits, trainerUnits + 1)
+                    }
+                }
+            }.await()
+        }
+
+        suspend fun increaseUnitsSinceLastExam(member: Member, count: Int) {
+            suspendedTransactionAsync {
+                Member.update(where = { Member.id eq member.id }) {
+                    with(SqlExpressionBuilder) {
+                        it.update(unitsSinceLastExam, unitsSinceLastExam + count)
                     }
                 }
             }.await()
