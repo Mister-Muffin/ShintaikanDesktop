@@ -26,7 +26,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
 
     private val mutableMembers = mutableStateListOf<Member>()
     val members: List<Member> by lazy {
-        coroutineScope.launch {
+        runBlocking {
             mutableMembers.addAll(database.loadMembers())
         }
         mutableMembers
