@@ -21,7 +21,6 @@ import cc.ekblad.toml.decode
 import cc.ekblad.toml.tomlMapper
 import dialogs.*
 import kotlinx.serialization.json.Json
-import models.Trainer
 import org.jetbrains.exposed.sql.Database
 import pages.MemberSelector
 import pages.StartPage
@@ -30,6 +29,8 @@ import pages.TrainerSelector
 import viewmodel.ViewModel
 import java.io.File
 import java.nio.file.Path
+import Screen.*
+import model.Member
 
 const val configFileName = "config.toml"
 val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
@@ -77,7 +78,6 @@ fun main(args: Array<String>) = application {
 
     val scope = rememberCoroutineScope()
     val viewModel = remember { ViewModel(scope) }
-    viewModel.loadAll()
 
     val imageBitmap = remember { useResource("pelli2.jpg") { loadImageBitmap(it) } }
 
@@ -92,7 +92,7 @@ fun main(args: Array<String>) = application {
         resizable = production,
     ) {
         var screenID by remember { mutableStateOf(HOME) }
-        var activeTrainer: Trainer? by remember { mutableStateOf(null) }
+        var activeTrainer: Member? by remember { mutableStateOf(null) }
 
         MenuBar {
             Menu("Datei", mnemonic = 'F', enabled = !viewModel.dataLoading) {
@@ -135,49 +135,54 @@ fun main(args: Array<String>) = application {
                 secondary = Color(0xFF212121)
             )
         ) {
+            val birthdayMembers = remember(viewModel.members) { viewModel.getBirthdayMembers() }
+            val trainers = remember(viewModel.members) { viewModel.getTrainers() }
+
             when (screenID) {
                 HOME -> StartPage(
-                    viewModel.allMembers,
-                    viewModel.allMessages,
-                    viewModel.birthdays,
+                    viewModel.members,
+                    viewModel.messages,
+                    birthdayMembers,
                     datastore.lastImportPretty,
-                    viewModel::reloadMessages,
-                    viewModel::submitNewMessage,
+                    viewModel::addMessage,
+                    viewModel::deleteMessage,
+                    viewModel::updateMessage,
                     viewModel::loadTime
                 ) { screenID = it }
 
-                SELECT_TRAINER -> TrainerSelector(viewModel.trainers) { screen, selectedTrainer ->
+                SELECT_TRAINER -> TrainerSelector(trainers) { screen, selectedTrainer ->
                     screenID = screen; activeTrainer = selectedTrainer
                 }
 
                 SELECT_MEMBER -> MemberSelector(
-                    viewModel.allMembers,
-                    viewModel.teilnahme,
+                    viewModel.members,
+                    viewModel.participations,
                     activeTrainer!!,
                     appPassword,
-                    viewModel::insertTeilnahme
+                    viewModel::clearUnitsSinceLastExam,
+                    viewModel::updateStickers,
+                    viewModel::incrementTrainerUnits,
+                    viewModel::addParticipation
                 ) { screenID = it }
 
                 SUCCESS -> SuccessPage {
-                    viewModel.loadAll()
                     screenID = it
                 }
                 // needed because dialog windows don't work on Raspberry Pi
                 PASSWORD -> PasswordPrompt(password = appPassword) { if (it) screenID = forwardedScreenId }
 
-                MANAGE_TRAINER -> ManageTrainerDialog(viewModel.allMembers, viewModel::reloadMembers, onDismiss = {
-                    viewModel.loadAll()
-                    screenID = HOME
-                })
+                MANAGE_TRAINER -> ManageTrainerDialog(
+                    viewModel.members,
+                    viewModel::setTrainerStatus,
+                    onDismiss = { screenID = HOME })
 
-                EXAMS -> ExamsDialog(viewModel.allMembers, viewModel.teilnahme, onDismiss = { screenID = HOME })
+                EXAMS -> ExamsDialog(viewModel.members, viewModel.participations, onDismiss = { screenID = HOME })
 
                 FETCH_DATA -> FetchDataWindow(this.window, viewModel::fetchData) {
-                    viewModel.loadAll()
                     screenID = HOME
                 }
 
-                EXPORT_MEMBERS -> ExportMembersDialog(viewModel.allMembers, viewModel.teilnahme, drivePath) {
+                EXPORT_MEMBERS -> ExportMembersDialog(viewModel.members, viewModel.participations, drivePath) {
                     screenID = HOME
                 }
 

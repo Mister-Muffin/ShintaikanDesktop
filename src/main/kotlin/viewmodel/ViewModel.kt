@@ -4,130 +4,176 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import models.*
+import kotlinx.coroutines.*
+import model.Member
+import model.Message
+import model.Participation
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
+import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
+import kotlin.math.absoluteValue
 import kotlin.time.Duration
-import kotlin.time.TimeSource
 
-class ViewModel(val coroutineScope: CoroutineScope) {
+class ViewModel(private val coroutineScope: CoroutineScope) {
 
-    val allMembers = mutableStateListOf<Member>()
-    val allMessages = mutableStateListOf<Message>()
-    val birthdays = mutableStateListOf<Member>()
-    val trainers = mutableStateListOf<Trainer>()
-    val teilnahme = mutableStateListOf<Teilnahme>()
-
-    var dataLoading by mutableStateOf(true)
-
+    var dataLoading by mutableStateOf(false)
     var loadTime = Duration.ZERO
 
-    fun loadAll() {
+    private val mutableMembers = mutableStateListOf<Member>()
+    val members: List<Member> by lazy {
+        runBlocking {
+            mutableMembers.addAll(database.loadMembers())
+        }
+        mutableMembers
+    }
+
+    private val mutableMessages = mutableStateListOf<Message>()
+    val messages: List<Message> by lazy {
         coroutineScope.launch {
-            println("Start loading members")
-            val timeSource = TimeSource.Monotonic
-            val startTime = timeSource.markNow()
-
-            dataLoading = true
-
-            val members = loadMembers()
-            val memberTime = timeSource.markNow()
-            val messages = loadMessages()
-            val messagesTime = timeSource.markNow()
-            val trainers = loadTrainers()
-            val trainersTime = timeSource.markNow()
-            val teilnahme = loadTeilnahme()
-            val teilnahmeTime = timeSource.markNow()
-
-            allMembers.clear()
-            allMessages.clear()
-            birthdays.clear()
-            this@ViewModel.trainers.clear()
-            this@ViewModel.teilnahme.clear()
-
-            allMembers.addAll(members)
-            allMessages.addAll(messages)
-            birthdays.addAll(loadBirthdays(members))
-            this@ViewModel.trainers.addAll(trainers)
-            this@ViewModel.teilnahme.addAll(teilnahme)
-
-            dataLoading = false
-
-            val endTime = timeSource.markNow()
-            loadTime = endTime - startTime // avg time: 440ms
-            println("Finished loading members, took $loadTime")
-            println(
-                "Members: ${memberTime - startTime}, " +
-                        "Messages: ${messagesTime - memberTime}, " +
-                        "Trainer: ${trainersTime - messagesTime}, " +
-                        "Teilnahme: ${teilnahmeTime - trainersTime}."
-            )
+            mutableMessages.addAll(database.loadMessages())
         }
+        mutableMessages
     }
 
-    fun reloadMembers() {
+    private val mutableParticipations = mutableStateListOf<Participation>()
+    val participations: List<Participation> by lazy {
         coroutineScope.launch {
-            dataLoading = true
+            mutableParticipations.addAll(database.loadParticipations())
+        }
+        mutableParticipations
+    }
 
-            val members = loadMembers()
-            allMembers.clear()
-            allMembers.addAll(members)
+    //<editor-fold desc="Message operations">
+    fun addMessage(newMessage: String): Message {
+        val temporaryMessage = Message(-1, newMessage, "", LocalDate.now())
+        val id = runBlocking { database.insertMessage(temporaryMessage) }
+        val message = temporaryMessage.copy(id = id)
+        mutableMessages.add(message)
+        return message
+    }
 
-            dataLoading = false
+    fun deleteMessage(id: Int) {
+        coroutineScope.launch { database.deleteMessage(id) }
+        mutableMessages.removeIf { it.id == id }
+    }
+
+    fun updateMessage(updatedMessage: Message) {
+        coroutineScope.launch { database.updateMessage(updatedMessage) }
+        mutableMessages.apply {
+            removeIf { it.id == updatedMessage.id }
+            add(updatedMessage)
+        }
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="Member operations">
+    fun clearUnitsSinceLastExam(member: Member) {
+        coroutineScope.launch { database.clearUnitsSinceLastExam(member) }
+        mutableMembers.remove(member)
+        mutableMembers.add(member.copy(unitsSinceLastExam = 0))
+    }
+
+    fun deactivateMember(member: Member) {
+        coroutineScope.launch { database.deactivateMember(member) }
+        mutableMembers.remove(member)
+        mutableMembers.add(member.copy(isActive = false))
+    }
+
+    fun updateMemberName(member: Member, firstName: String, lastName: String) {
+        coroutineScope.launch { database.updateMemberName(member, firstName, lastName) }
+        mutableMembers.remove(member)
+        mutableMembers.add(member.copy(prename = firstName, surname = lastName))
+    }
+
+    fun upsertMemberData(member: Member, group: String, level: String, birthday: LocalDate) {
+        if (member.id >= 0) {
+            coroutineScope.launch { database.updateMemberData(member, group, level, birthday) }
+            mutableMembers.remove(member)
+            mutableMembers.add(member.copy(group = group, level = level, birthday = birthday))
+        } else {
+            val id = runBlocking { database.insertMember(member) }
+            mutableMembers.add(member.copy(id = id))
         }
     }
 
-    fun reloadMessages() {
-        coroutineScope.launch {
-            dataLoading = true
+    fun setTrainerStatus(member: Member, isTrainer: Boolean) {
+        coroutineScope.launch { database.setTrainerStatus(member, isTrainer) }
+        mutableMembers.remove(member)
+        mutableMembers.add(member.copy(isTrainer = isTrainer))
+    }
 
-            val messages = loadMessages()
-            allMessages.clear()
-            allMessages.addAll(messages)
+    fun updateStickers(member: Member, stickerNumber: Int, stickerData: String) {
+        val updateStickerData = "${member.stickerReceivedBy},$stickerData".trim(',')
+        val today = LocalDate.now()
+        coroutineScope.launch { database.updateStickers(member, stickerNumber, updateStickerData, today) }
+        mutableMembers.remove(member)
+        mutableMembers.add(member.copy(stickerReceivedBy = updateStickerData, receivedStickerNumber = stickerNumber))
+    }
 
-            dataLoading = false
+    fun incrementTrainerUnits(member: Member) {
+        coroutineScope.launch { database.incrementTrainerUnits(member) }
+        mutableMembers.remove(member)
+        mutableMembers.add(member.copy(trainerUnits = member.trainerUnits + 1))
+    }
+
+    fun increaseUnitsSinceLastExam(member: Member, count: Int) {
+        coroutineScope.launch { database.increaseUnitsSinceLastExam(member, count) }
+        mutableMembers.remove(member)
+        mutableMembers.add(member.copy(trainerUnits = member.unitsSinceLastExam + count))
+    }
+
+    fun getBirthdayMembers(): List<Member> {
+        val now = LocalDate.now()
+        return members.filter {
+            it.birthday.plusYears((now.year - it.birthday.year).toLong()) in now.minusDays(3)..now.plusDays(3)
         }
     }
 
-    fun submitNewMessage(newMessage: String) {
-        val newMessageObj = Message(-1, newMessage, "", LocalDate.now())
-        val id = addMessage(newMessageObj)
-        allMessages.add(
-            Message(
-                id = id,
-                message = newMessage,
-                short = "",
-                newMessageObj.dateCreated
-            )
-        )
+    fun getTrainers(): List<Member> {
+        return members.filter(Member::isTrainer)
     }
 
-    fun insertTeilnahme(insertString: String, isExam: Boolean) {
-        coroutineScope.launch {
-            models.insertTeilnahme(insertString, isExam)
+    fun getLastExamDate(id: Int): LocalDate? {
+        return participations.filter { id.toString() in it.userIdsExam }.takeIf { it.isNotEmpty() }
+            ?.maxBy { it.date }?.date
+    }
+    //</editor-fold>
+
+    //<editor-fold desc="Participation operations">
+    fun addParticipation(participants: String, isExam: Boolean): Participation {
+        // TODO: Heilige Scheiße, ist das schlimm...
+        val today = LocalDate.now()
+        val participationToday = participations.firstOrNull { it.date == today }
+        val participantsString = (participationToday?.userIds?.let { "$it," } ?: "") + if (!isExam) participants else ""
+        val examParticipantString =
+            (participationToday?.userIdsExam?.let { "$it," } ?: "") + if (isExam) participants else ""
+        val temporaryParticipation =
+            Participation(-1, participantsString.trim(','), examParticipantString.trim(','), today)
+        val id = runBlocking { database.addParticipation(temporaryParticipation) }
+        val participation = temporaryParticipation.copy(id = id)
+
+        if (participationToday != null) {
+            mutableParticipations.remove(participationToday)
         }
-    }
 
-    private fun loadBirthdays(members: List<Member>): MutableList<Member> {
-        val birthdays = mutableListOf<Member>()
-
-        for (student in members) {
-            val birthday = student.birthday.plusYears((LocalDate.now().year - student.birthday.year).toLong())
-            if (birthday >= (LocalDate.now().minusDays(3)) &&
-                birthday <= LocalDate.now().plusDays(3)
-            ) {
-                birthdays.add(student)
-            }
+        val updates = members.filter { member -> member.id.toString() in participants }.map { member ->
+            val count = participants.split(',').count { it == member.id.toString() }
+            member to count
         }
-        return birthdays
+
+        for ((member, count) in updates) {
+            increaseUnitsSinceLastExam(member, count)
+        }
+
+        mutableParticipations.add(participation)
+        return participation
     }
+    //</editor-fold>
 
     /**
      * csv structure: Name;Gruppe;Grad;Geb.Dat;e;f;g
@@ -170,13 +216,204 @@ class ViewModel(val coroutineScope: CoroutineScope) {
                     .withTrim()
             )
 
-            dumpCurrentDatabase()
-            exMembers(setText, csvParser1)
-            renameMembers(setText, csvParser2)
-            updateMembers(setText, csvParser3)
+            dumpCurrentDatabase(members, messages, participations)
+            exMembers(
+                setText,
+                { f, l -> members.find { it.prename == f && it.surname == l }?.let { deactivateMember(it) } },
+                csvParser1
+            )
+            renameMembers(
+                setText,
+                { (oldFirst, oldLast), (newFirst, newLast) ->
+                    members.find { it.prename == oldFirst && it.surname == oldLast }
+                        ?.let { updateMemberName(it, newFirst, newLast) }
+                }, csvParser2
+            )
+            updateMembers(
+                setText,
+                { (first, last), group, level, birthday ->
+                    members.find { it.prename == first && it.surname == last }.let {
+                        it ?: Member(
+                            -1,
+                            first,
+                            last,
+                            group,
+                            level,
+                            0,
+                            LocalDate.parse(birthday),
+                            null,
+                            false,
+                            null,
+                            0,
+                            null,
+                            null,
+                            true, // TODO: Confirm
+                            0,
+                            0
+                        )
+                    }.let {
+                        upsertMemberData(
+                            it,
+                            group,
+                            level,
+                            LocalDate.parse(birthday)
+                        )
+                    } // Es besteht Hoffnung, dass das mit dem Date einfach so funktioniert
+                }, csvParser3
+            )
 
             dataLoading = false
             onComplete()
         }
+    }
+
+    private val database = object {
+        //<editor-fold desc="Message operations">
+        suspend fun loadMessages(): List<Message> {
+            return suspendedTransactionAsync(Dispatchers.IO) {
+                Message.selectAll().map(Message::fromRow)
+            }.await()
+        }
+
+        suspend fun insertMessage(message: Message): Int {
+            return suspendedTransactionAsync {
+                Message.insertAndGetId {
+                    message.updateInto(it)
+                }.value
+            }.await()
+        }
+
+        suspend fun deleteMessage(id: Int) {
+            suspendedTransactionAsync(Dispatchers.IO) {
+                Message.deleteWhere {
+                    Message.id eq id
+                }
+            }.await()
+        }
+
+        suspend fun updateMessage(message: Message) {
+            suspendedTransactionAsync(Dispatchers.IO) {
+                Message.update(where = { Message.id eq message.id }) {
+                    message.updateInto(it)
+                }
+            }.await()
+        }
+        //</editor-fold>
+
+        //<editor-fold desc="Participation operations">
+        suspend fun loadParticipations(): List<Participation> {
+            return suspendedTransactionAsync(Dispatchers.IO) {
+                Participation.selectAll().map(Participation::fromRow)
+            }.await()
+        }
+
+        suspend fun addParticipation(temporaryParticipation: Participation): Int {
+            return suspendedTransactionAsync(Dispatchers.IO) {
+                if (temporaryParticipation.id < 0) {
+                    Participation.insertAndGetId {
+                        temporaryParticipation.upsertInto(it)
+                    }.value
+                } else {
+                    val today = LocalDate.now()
+                    Participation.update({ Participation.date eq today }) {
+                        temporaryParticipation.upsertInto(it)
+                    }
+                    temporaryParticipation.id
+                }
+            }.await()
+        }
+        //</editor-fold>
+
+
+        //<editor-fold desc="Member operations">
+        suspend fun loadMembers(): List<Member> {
+            return suspendedTransactionAsync(Dispatchers.IO) {
+                Member.selectAll().map {
+                    Member.fromRow(it, getLastExamDate = { getLastExamDate(it) })
+                }
+            }.await()
+        }
+
+        suspend fun clearUnitsSinceLastExam(member: Member) {
+            suspendedTransactionAsync(Dispatchers.IO) {
+                Member.update(where = { Member.id eq member.id }) {
+                    it[unitsSinceLastExam] = 0
+                }
+            }.await()
+        }
+
+        suspend fun deactivateMember(member: Member) {
+            suspendedTransactionAsync(Dispatchers.IO) {
+                Member.update(where = { Member.id eq member.id }) {
+                    it[isActive] = false
+                }
+            }.await()
+        }
+
+        suspend fun updateMemberName(member: Member, firstName: String, lastName: String) {
+            suspendedTransactionAsync(Dispatchers.IO) {
+                Member.update(where = { Member.id eq member.id }) {
+                    it[prename] = firstName
+                    it[surname] = lastName
+                }
+            }.await()
+        }
+
+        suspend fun insertMember(member: Member): Int {
+            return suspendedTransactionAsync(Dispatchers.IO) {
+                Member.insertAndGetId {
+                    member.upsertInto(it)
+                }.value
+            }.await()
+        }
+
+        suspend fun updateMemberData(member: Member, group: String, level: String, birthday: LocalDate) {
+            suspendedTransactionAsync(Dispatchers.IO) {
+                Member.update(where = { Member.id eq member.id }) {
+                    it[Member.group] = group
+                    it[Member.level] = level
+                    it[Member.birthday] = birthday
+                }
+            }.await()
+        }
+
+        suspend fun setTrainerStatus(member: Member, isTrainer: Boolean) {
+            suspendedTransactionAsync(Dispatchers.IO) {
+                Member.update(where = { Member.id eq member.id }) {
+                    it[Member.isTrainer] = isTrainer
+                }
+            }.await()
+        }
+
+        suspend fun updateStickers(member: Member, stickerNumber: Int, stickerData: String, stickerDate: LocalDate) {
+            suspendedTransactionAsync(Dispatchers.IO) {
+                Member.update(where = { Member.id eq member.id }) {
+                    it[stickerReceived] = stickerNumber
+                    it[stickerReceivedBy] = stickerData
+                    it[stickerDateReceived] = stickerDate
+                }
+            }.await()
+        }
+
+        suspend fun incrementTrainerUnits(member: Member) {
+            suspendedTransactionAsync(Dispatchers.IO) {
+                Member.update(where = { Member.id eq member.id }) {
+                    with(SqlExpressionBuilder) {
+                        it.update(trainerUnits, trainerUnits + 1)
+                    }
+                }
+            }.await()
+        }
+
+        suspend fun increaseUnitsSinceLastExam(member: Member, count: Int) {
+            suspendedTransactionAsync(Dispatchers.IO) {
+                Member.update(where = { Member.id eq member.id }) {
+                    with(SqlExpressionBuilder) {
+                        it.update(unitsSinceLastExam, unitsSinceLastExam + count)
+                    }
+                }
+            }.await()
+        }
+        //</editor-fold>
     }
 }

@@ -17,11 +17,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import composables.StudentList
-import models.Member
-import models.editIsTrainer
+import model.Member
 
 @Composable
-fun ManageTrainerDialog(members: List<Member>, reloadMembers: () -> Unit, onDismiss: () -> Unit) {
+fun ManageTrainerDialog(members: List<Member>, setTrainerStatus: (Member, Boolean) -> Unit, onDismiss: () -> Unit) {
 
     val studentListTextWidth: Dp = 300.dp
 
@@ -56,8 +55,8 @@ fun ManageTrainerDialog(members: List<Member>, reloadMembers: () -> Unit, onDism
                     Text("Aktuelle Trainer:", style = MaterialTheme.typography.h6)
                     Divider(modifier = Modifier.padding(4.dp))
                     CurrentTrainerList(members) { newVal, student ->
-                        editIsTrainer(student.id, newVal)
-                        reloadMembers()
+                        setTrainerStatus(student, newVal)
+
                     }
                 }
                 Column(
@@ -103,10 +102,10 @@ fun ManageTrainerDialog(members: List<Member>, reloadMembers: () -> Unit, onDism
                                                 style = MaterialTheme.typography.body1
                                             )
                                             Checkbox(
-                                                checked = studentFilter[0].is_trainer,
+                                                checked = studentFilter[0].isTrainer,
                                                 onCheckedChange = {
-                                                    editIsTrainer(studentFilter[0].id, it)
-                                                    reloadMembers()
+                                                    setTrainerStatus(studentFilter[0], it)
+
                                                     searchFieldVal = ""
                                                 })
                                         }
@@ -140,11 +139,11 @@ private fun CurrentTrainerList(
     val lazyState = rememberLazyListState()
     Row {
         LazyColumn(state = lazyState) {
-            items(members.filter { it.is_trainer }) { student ->
+            items(members.filter { it.isTrainer }) { student ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(student.prename + " " + student.surname, style = MaterialTheme.typography.body1)
                     Checkbox(
-                        checked = student.is_trainer,
+                        checked = student.isTrainer,
                         onCheckedChange = { onCheckedChange(it, student) }
                     )
                 }

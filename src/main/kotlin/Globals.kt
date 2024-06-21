@@ -1,7 +1,7 @@
 val stickerUnits = mapOf(
     0 to "", 25 to "Schlange", 50 to "Tiger", 75 to "Rabe", 100 to "Drache", 150 to "Adler",
     200 to "Fuchs", 300 to "Phoenix", 500 to "Gottesanbeterin", 800 to "Reier"
-)
+) // TODO: Change to type that guarantees order
 
 fun Int.nextStickerUnit() = stickerUnits.next(this)
 fun Pair<Int, String?>.nextStickerUnit() = first.nextStickerUnit()

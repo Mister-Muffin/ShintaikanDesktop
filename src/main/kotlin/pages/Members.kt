@@ -31,7 +31,7 @@ import dialogs.PasswordPrompt
 import dialogs.StickerDialog
 import getTotalTrainingSessions
 import gretting
-import models.*
+import model.*
 import next
 import stickerUnits
 import java.util.*
@@ -41,10 +41,13 @@ private const val CHECKBOX_PADDING = 16
 @Composable
 fun MemberSelector(
     members: List<Member>,
-    teilnahme: List<Teilnahme>,
-    activeTrainer: Trainer,
+    participations: List<Participation>,
+    activeTrainer: Member,
     password: String,
-    insertTeilnahme: (insertString: String, isExam: Boolean) -> Unit,
+    clearUnitsSinceLastExam: (Member) -> Unit,
+    updateSticker: (Member, Int, String) -> Unit,
+    incrementTrainerUnits: (Member) -> Unit,
+    addParticipation: (participants: String, isExam: Boolean) -> Unit,
     changeScreen: (screen: Screen) -> Unit
 ) {
     val searchQuery = remember { mutableStateOf("") }
@@ -69,19 +72,18 @@ fun MemberSelector(
     val studentsStickers = remember { mutableListOf<Member>() }
 
     fun submit(isExam: Boolean) {
-        var teilnahmeString = ""
+        val participants = newMembers.joinToString(",") { it.id.toString() }
         for (member in newMembers) {
-            teilnahmeString = teilnahmeString + member.id + ","
 
-            if (isExam) setAddUnitsSinceLastExam(member) // set this to 0, so it won't get added in the future
+            if (isExam) clearUnitsSinceLastExam(member) // set this to 0, so it won't get added in the future
 
-            if (member.sticker_recieved != stickerUnits.keys.last()) // Wer 800 aufkelber hat, bekommt keinen weiteren (catch indexOutOfBounds)
-                if (getTotalTrainingSessions(member, teilnahme) // ALLE Trainingseinheiten
-                    >= stickerUnits.next(member.sticker_recieved).first
+            if (member.receivedStickerNumber != stickerUnits.keys.last()) // Wer 800 aufkelber hat, bekommt keinen weiteren (catch indexOutOfBounds) // TODO: Das sieht schlimm aus, wtf
+                if (getTotalTrainingSessions(member, participations) // ALLE Trainingseinheiten
+                    >= stickerUnits.next(member.receivedStickerNumber).first
                 ) studentsStickers.add(member)
         }
-        insertTeilnahme(teilnahmeString, isExam)
-        increaseTrainerUnitCount(activeTrainer)
+        addParticipation(participants, isExam)
+        incrementTrainerUnits(activeTrainer)
 
         if (studentsStickers.isEmpty()) changeScreen(Screen.SUCCESS)
         else showStickerDialog = true
@@ -95,7 +97,7 @@ fun MemberSelector(
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
 
         if (showStickerDialog) {
-            StickerDialog(studentsStickers, activeTrainer) {
+            StickerDialog(studentsStickers, participations, updateSticker, activeTrainer) {
                 showStickerDialog = false
                 changeScreen(Screen.SUCCESS)
             }
@@ -195,7 +197,7 @@ fun MemberSelector(
                             )
                             if (handleAsExam)
                                 Text(
-                                    text = "Prüfung!",
+                                    text = "Prüfung!", // TODO: Sieht nach schlechter UX aus
                                     textDecoration = TextDecoration.Underline,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 35.sp,

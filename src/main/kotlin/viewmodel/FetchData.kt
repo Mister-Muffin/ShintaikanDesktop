@@ -1,7 +1,9 @@
 package viewmodel
 
 import configFilePath
-import models.*
+import model.Member
+import model.Message
+import model.Participation
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVPrinter
@@ -9,17 +11,13 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalTime
 
-suspend fun dumpCurrentDatabase() {
+suspend fun dumpCurrentDatabase(members: List<Member>, messages: List<Message>, participations: List<Participation>) {
     val writer = Files.newBufferedWriter(Paths.get("${configFilePath}backups/backup-${LocalTime.now()}.csv"))
 
     val csvPrinter = CSVPrinter(
         writer, CSVFormat.DEFAULT
         //.withHeader(StudentTable.columns)
     )
-
-    val members = loadMembers(false)
-    val messages = loadMessages()
-    val teilnahme = loadTeilnahme()
 
     members.forEach { member ->
         csvPrinter.printRecord(
@@ -30,14 +28,14 @@ suspend fun dumpCurrentDatabase() {
             member.level,
             member.total,
             member.birthday,
-            member.is_trainer,
-            member.date_last_exam,
-            member.sticker_animal,
-            member.sticker_date_recieved,
-            member.sticker_recieved_by,
-            member.sticker_recieved,
-            member.is_active,
-            member.trainer_units
+            member.isTrainer,
+            member.lastExamDate,
+            member.stickerAnimal,
+            member.stickerDateReceived,
+            member.stickerReceivedBy,
+            member.receivedStickerNumber,
+            member.isActive,
+            member.trainerUnits
         )
 
     }
@@ -53,7 +51,7 @@ suspend fun dumpCurrentDatabase() {
     }
     //csvPrinter.printRecords(messages)
     csvPrinter.println()
-    teilnahme.forEach {
+    participations.forEach {
         csvPrinter.printRecord(
             it.id,
             it.date,
@@ -66,7 +64,11 @@ suspend fun dumpCurrentDatabase() {
     csvPrinter.close()
 }
 
-suspend fun exMembers(setText: (String) -> Unit, csvParser: CSVParser) {
+suspend fun exMembers(
+    setText: (String) -> Unit,
+    deactivateMember: (String, String) -> Unit,
+    csvParser: CSVParser
+) {
     for (csvRecord in csvParser) {
         try {
             // Accessing Values by Column Index
@@ -85,7 +87,7 @@ suspend fun exMembers(setText: (String) -> Unit, csvParser: CSVParser) {
             if (!exMember.isNullOrEmpty()) {
                 val exMemberName = splitName(exMember)
                 setText("${exMemberName.first}|${exMemberName.second}")
-                deactivateMember(exMemberName)
+                deactivateMember(exMemberName.first, exMemberName.second)
             }
 
         } catch (_: ArrayIndexOutOfBoundsException) {
@@ -95,7 +97,11 @@ suspend fun exMembers(setText: (String) -> Unit, csvParser: CSVParser) {
     }
 }
 
-suspend fun renameMembers(setText: (String) -> Unit, csvParser: CSVParser) {
+suspend fun renameMembers(
+    setText: (String) -> Unit,
+    renameMember: (Pair<String, String>, Pair<String, String>) -> Unit,
+    csvParser: CSVParser
+) {
     for (csvRecord in csvParser) {
         try {
             // Accessing Values by Column Index
@@ -129,7 +135,11 @@ suspend fun renameMembers(setText: (String) -> Unit, csvParser: CSVParser) {
     }
 }
 
-suspend fun updateMembers(setText: (String) -> Unit, csvParser: CSVParser) {
+suspend fun updateMembers(
+    setText: (String) -> Unit,
+    updateMember: (Pair<String, String>, String, String, String) -> Unit,
+    csvParser: CSVParser
+) {
     for (csvRecord in csvParser) {
         try {
             // Accessing Values by Column Index
