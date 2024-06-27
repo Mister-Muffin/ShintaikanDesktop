@@ -280,7 +280,7 @@ private suspend fun exportMembers(drivePath: String) {
     csvPrinter.printRecord("Name", "Dat. lzt. Prüf.", "Einh. s. l. Prüf.")
     members.forEach { member ->
         if (!member.is_active) return@forEach
-        if (member.date_last_exam == null) return@forEach
+        if (member.date_last_exam == null) return@forEach // TODO: To be removed
 
         csvPrinter.printRecord(
             member.surname + " " + member.prename,
