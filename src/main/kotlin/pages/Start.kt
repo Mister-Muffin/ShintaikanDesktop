@@ -64,7 +64,6 @@ fun StartPage(
             Divider(
                 modifier = Modifier.padding(vertical = 16.dp)
             )
-
             Row {
                 Button(
                     modifier = Modifier.width(250.dp),

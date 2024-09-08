@@ -139,13 +139,11 @@ private fun StudentStats(
                 val stickerName = stickerUnits[stickerUnit]
                 val stickerBy: Int = singleStats[1].toInt()
 
-                val stickerByTrainer: Member
-                var stickerByTrainerName: String
-                try {
-                    stickerByTrainer = members.filter { f -> stickerBy == f.id }[0]
-                    stickerByTrainerName = "${stickerByTrainer.prename} ${stickerByTrainer.surname}"
-                } catch (e: IndexOutOfBoundsException) {
-                    stickerByTrainerName = "[Nicht gefunden]"
+                val stickerByTrainer = members.firstOrNull { f -> stickerBy == f.id }
+                val stickerByTrainerName: String = if (stickerByTrainer != null) {
+                    "${stickerByTrainer.prename} ${stickerByTrainer.surname}"
+                } else {
+                    "[Nicht gefunden]"
                 }
 
                 val stickerDate = singleStats[2]
