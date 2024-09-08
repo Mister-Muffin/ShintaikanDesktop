@@ -12,6 +12,9 @@ import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import model.Member
 
@@ -30,38 +33,48 @@ fun TrainerSelector(trainers: List<Member>, changeScreen: (screen: Screen, activ
         ) {
             var selectedTrainer: Member? by remember { mutableStateOf(null) }
 
-            LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.fillMaxWidth(.5f)) {
-                items(trainers.sortedBy { it.prename }) { trainer ->
-                    var trainerNameExtended = trainer.prename
-                    var trainerNameWasExtended = false
-                    trainers.forEach { t ->
-                        var i = 0
-                        if (trainer.prename == t.prename && trainer.surname != t.surname) {
-                            while ((t.prename + " " + t.surname).contains(trainerNameExtended)) {
-                                if (trainerNameExtended == trainer.prename) trainerNameExtended += " "
-                                trainerNameExtended += trainer.surname[i]
-                                i++
-                                trainerNameWasExtended = true
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.fillMaxWidth(.5f)) {
+                    items(trainers.sortedBy { it.prename }) { trainer ->
+                        var trainerNameExtended = trainer.prename
+                        var trainerNameWasExtended = false
+                        trainers.forEach { t ->
+                            var i = 0
+                            if (trainer.prename == t.prename && trainer.surname != t.surname) {
+                                while ((t.prename + " " + t.surname).contains(trainerNameExtended)) {
+                                    if (trainerNameExtended == trainer.prename) trainerNameExtended += " "
+                                    trainerNameExtended += trainer.surname[i]
+                                    i++
+                                    trainerNameWasExtended = true
+                                }
                             }
                         }
-                    }
-                    if (trainerNameWasExtended) trainerNameExtended += "."
+                        if (trainerNameWasExtended) trainerNameExtended += "."
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.clickable {
-                            selectedTrainer = trainer
-                        }.padding(24.dp).width(COMPONENT_WIDTH.dp)
-                    ) {
-                        RadioButton(
-                            selectedTrainer == trainer,
-                            onClick = null,
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(trainerNameExtended, modifier = Modifier.fillMaxWidth(.4f))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.clickable {
+                                selectedTrainer = trainer
+                            }.padding(24.dp).width(COMPONENT_WIDTH.dp)
+                        ) {
+                            RadioButton(
+                                selectedTrainer == trainer,
+                                onClick = null,
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(trainerNameExtended, modifier = Modifier.fillMaxWidth(.4f))
+                        }
                     }
                 }
+
+                Text(
+                    "Zur Trainerverwaltung",
+                    textDecoration = TextDecoration.Underline,
+                    modifier = Modifier.padding(top = 8.dp).pointerHoverIcon(PointerIcon.Hand)
+                        .clickable { changeScreen(Screen.MANAGE_TRAINER, null) }
+                )
+
             }
 
             Button(
@@ -69,8 +82,7 @@ fun TrainerSelector(trainers: List<Member>, changeScreen: (screen: Screen, activ
                 onClick = { if (selectedTrainer != null) changeScreen(Screen.SELECT_MEMBER, selectedTrainer!!) }
             ) {
                 Text("Weiter")
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(Icons.Default.ArrowForward, "")
+                Icon(Icons.Default.ArrowForward, "", modifier = Modifier.padding(start = 8.dp))
             }
         }
     }

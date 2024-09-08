@@ -21,6 +21,7 @@ import cc.ekblad.toml.decode
 import cc.ekblad.toml.tomlMapper
 import dialogs.*
 import kotlinx.serialization.json.Json
+import model.Member
 import org.jetbrains.exposed.sql.Database
 import pages.MemberSelector
 import pages.StartPage
@@ -29,8 +30,6 @@ import pages.TrainerSelector
 import viewmodel.ViewModel
 import java.io.File
 import java.nio.file.Path
-import Screen.*
-import model.Member
 
 const val configFileName = "config.toml"
 val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
@@ -127,7 +126,8 @@ fun main(args: Array<String>) = application {
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                 ),
-                body1 = TextStyle(fontSize = 18.sp) // All 'Text' use this as default as it seems
+                body1 = TextStyle(fontSize = 18.sp), // All 'Text' use this as default as it seems
+                caption = TextStyle(fontSize = 13.sp, color = Color(0xFF666666))
             ),
             shapes = Shapes(RoundedCornerShape(0.dp)),
             colors = lightColors(
@@ -151,7 +151,12 @@ fun main(args: Array<String>) = application {
                 ) { screenID = it }
 
                 SELECT_TRAINER -> TrainerSelector(trainers) { screen, selectedTrainer ->
-                    screenID = screen; activeTrainer = selectedTrainer
+                    if (screen == MANAGE_TRAINER) {
+                        screenID = PASSWORD
+                        forwardedScreenId = screen
+                    } else {
+                        screenID = screen; activeTrainer = selectedTrainer
+                    }
                 }
 
                 SELECT_MEMBER -> MemberSelector(

@@ -51,7 +51,6 @@ fun StartPage(
 
     val lazyMessagesListState = rememberLazyListState()
 
-
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp).fillMaxSize()) {
 
         if (members.isEmpty()) {
@@ -64,15 +63,19 @@ fun StartPage(
             Divider(
                 modifier = Modifier.padding(vertical = 16.dp)
             )
-            Row {
-                Button(
-                    modifier = Modifier.width(250.dp),
-                    onClick = { changeScreen(Screen.SELECT_TRAINER) }
-                ) {
-                    Text(text = "Teilnehmer eintragen")
-                    Icon(Icons.Default.ArrowForward, "", modifier = Modifier.padding(start = 8.dp))
-                }
+            Button(
+                modifier = Modifier.width(COMPONENT_WIDTH.dp),
+                onClick = { changeScreen(Screen.SELECT_TRAINER) }
+            ) {
+                Text(text = "Teilnehmer eintragen")
+                Icon(Icons.Default.ArrowForward, "", modifier = Modifier.padding(start = 8.dp))
             }
+
+            Text(
+                "Jederzeit zurück zum Startbildschrim mit 'ESC'",
+                style = MaterialTheme.typography.caption,
+                modifier = Modifier.padding(top = 4.dp)
+            )
 
             Row(
                 verticalAlignment = Alignment.Top,
@@ -83,7 +86,11 @@ fun StartPage(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     item {
-                        Text("Es haben/hatten Geburtstag:", style = MaterialTheme.typography.subtitle1)
+                        Text(
+                            "Es haben/hatten Geburtstag:",
+                            style = MaterialTheme.typography.subtitle1,
+                            modifier = Modifier.padding(vertical = 4.dp)
+                        )
                     }
                     items(birthdays) {
                         Row {
@@ -115,7 +122,11 @@ fun StartPage(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Text(text = "Kurznachrichten", style = MaterialTheme.typography.subtitle1)
+                    Text(
+                        text = "Kurznachrichten",
+                        style = MaterialTheme.typography.subtitle1,
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
 
                     Row {
                         OutlinedTextField(
@@ -149,7 +160,7 @@ fun StartPage(
                     }
                     Text(
                         "CTRL / SHIFT + Enter oder '+' zum erstellen drücken",
-                        style = TextStyle.Default.copy(fontSize = 12.sp)
+                        style = MaterialTheme.typography.caption
                     )
                     Row(modifier = Modifier.fillMaxWidth().padding(top = 24.dp, start = 24.dp)) {
                         LazyColumn(
