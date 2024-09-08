@@ -21,7 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import levels
-import models.*
+import model.*
 import next
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVPrinter
@@ -37,7 +37,7 @@ private val monthWidth = 90.dp
 private val readyWidth = 500.dp
 
 @Composable
-fun ExportMembersDialog(members: List<Member>, teilnahme: List<Teilnahme>, drivePath: String, onDismiss: () -> Unit) {
+fun ExportMembersDialog(members: List<Member>, participations: List<Participation>, drivePath: String, onDismiss: () -> Unit) {
     var searchFieldValue by remember { mutableStateOf("") }
     var showTimedSuccessDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -88,12 +88,12 @@ fun ExportMembersDialog(members: List<Member>, teilnahme: List<Teilnahme>, drive
             items(members.filter {
                 (it.prename + it.surname).lowercase().contains(searchFieldValue.lowercase().replace(" ", ""))
             }) { member ->
-                val isReadyString = isReadyForExam(member, teilnahme)
+                val isReadyString = isReadyForExam(member, participations)
                 Row {
                     NameText(member, isReadyString.second)
                     OldLevel(member)
                     NewLevel(member)
-                    UnitsSinceLastExam(member, teilnahme)
+                    UnitsSinceLastExam(member, participations)
                     PeriodLastExam(member)
                     ReasonText(isReadyString.second)
                 }
@@ -107,7 +107,7 @@ fun ExportMembersDialog(members: List<Member>, teilnahme: List<Teilnahme>, drive
 
             Button(onClick = {
                 exportRunning = true
-                coroutineScope.launch { exportMembers(drivePath) }.invokeOnCompletion {
+                coroutineScope.launch { exportMembers(drivePath, members, participations) }.invokeOnCompletion {
                     /* commented out because dialogs don't work on Raspberry Pi (yet?)
                     coroutineScope.launch {
                         showTimedSuccessDialog = true
@@ -151,10 +151,10 @@ private fun NewLevel(member: Member) {
 }
 
 @Composable
-private fun UnitsSinceLastExam(member: Member, teilnahme: List<Teilnahme>) {
+private fun UnitsSinceLastExam(member: Member, teilnahme: List<Participation>) {
     Text(
-        if (member.date_last_exam == null) "" else "${
-            countId(member.id, teilnahme, member.date_last_exam)
+        if (member.lastExamDate == null) "" else "${
+            countId(member, teilnahme, member.lastExamDate)
         }",
         modifier = Modifier.width(unitsWidth), textAlign = TextAlign.Center
     )
@@ -163,10 +163,10 @@ private fun UnitsSinceLastExam(member: Member, teilnahme: List<Teilnahme>) {
 
 @Composable
 private fun PeriodLastExam(member: Member) {
-    if (member.date_last_exam == null) {
+    if (member.lastExamDate == null) {
         Text("", modifier = Modifier.width(monthWidth))
     } else {
-        val period = Period.between(member.date_last_exam, LocalDate.now())
+        val period = Period.between(member.lastExamDate, LocalDate.now())
         Text("${period.toTotalMonths()},${period.days}", textAlign = TextAlign.Center, modifier = Modifier.width(90.dp))
     }
 }
@@ -193,13 +193,13 @@ private fun ReasonText(isReadyString: String?) {
  * @see studentStats
  * @see ExportMembersDialog
  */
-fun isReadyForExam(member: Member, teilnahme: List<Teilnahme>): Pair<String, String?> {
+fun isReadyForExam(member: Member, teilnahme: List<Participation>): Pair<String, String?> {
     val dateLastExam: LocalDate = getLastExamOrFirstTrainingDate(member, teilnahme) ?: return Pair<String, String?>(
         "❌ Der Schüler war noch nie im Training",
         "Der Schüler war noch nie im Training"
     )
 
-    val unitsSinceLastExam = countId(member.id, teilnahme, dateLastExam) + member.add_units_since_last_exam
+    val unitsSinceLastExam = countId(member, teilnahme, dateLastExam) + member.unitsSinceLastExam
     val monthsSinceLastExam = Period.between(dateLastExam, LocalDate.now()).toTotalMonths()
     // add two months to the birthday in case of holidays
     val memberAge = Period.between(member.birthday, LocalDate.now().plusMonths(2)).years
@@ -252,9 +252,9 @@ fun isReadyForExam(member: Member, teilnahme: List<Teilnahme>): Pair<String, Str
  *
  * If the student wasn't in training ever, the funtion returns null
  */
-fun getLastExamOrFirstTrainingDate(member: Member, teilnahme: List<Teilnahme>): LocalDate? {
+fun getLastExamOrFirstTrainingDate(member: Member, teilnahme: List<Participation>): LocalDate? {
     var dateLastExam: LocalDate?
-    if (member.date_last_exam == null) { // set date last exam to first traing unit
+    if (member.lastExamDate == null) { // set date last exam to first traing unit
         val totalTrainingSessions = getTotalTrainingSessions(member, teilnahme)
         dateLastExam = if (totalTrainingSessions == 0) null else getFirstDate(member.id, teilnahme)
         if (dateLastExam == null) {
@@ -263,29 +263,27 @@ fun getLastExamOrFirstTrainingDate(member: Member, teilnahme: List<Teilnahme>): 
             dateLastExam = getFirstDate(member.id, teilnahme)
         }
     } else {
-        dateLastExam = member.date_last_exam
+        dateLastExam = member.lastExamDate
     }
     return dateLastExam
 }
 
-private suspend fun exportMembers(drivePath: String) {
-    val teilnahme = loadTeilnahme()
+private suspend fun exportMembers(drivePath: String, members: List<Member>, participations: List<Participation>) {
     val writer = withContext(Dispatchers.IO) {
         Files.newBufferedWriter(Paths.get("${drivePath}pruefungsabfrage.csv"))
     }
 
     val csvPrinter = CSVPrinter(writer, CSVFormat.EXCEL)
 
-    val members = loadMembers(false)
     csvPrinter.printRecord("Name", "Dat. lzt. Prüf.", "Einh. s. l. Prüf.")
     members.forEach { member ->
-        if (!member.is_active) return@forEach
-        if (member.date_last_exam == null) return@forEach // TODO: To be removed
+        if (!member.isActive) return@forEach
+        if (member.lastExamDate == null) return@forEach
 
         csvPrinter.printRecord(
             member.surname + " " + member.prename,
-            member.date_last_exam,
-            countId(member.id, teilnahme, member.date_last_exam)
+            member.lastExamDate,
+            countId(member, participations, member.lastExamDate)
         )
 
     }

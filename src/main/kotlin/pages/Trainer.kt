@@ -13,12 +13,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import models.Trainer
+import model.Member
 
 const val COMPONENT_WIDTH = 250
 
 @Composable
-fun TrainerSelector(trainers: List<Trainer>, changeScreen: (screen: Screen, activeTrainer: Trainer) -> Unit) {
+fun TrainerSelector(trainers: List<Member>, changeScreen: (screen: Screen, activeTrainer: Member?) -> Unit) {
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
         Text("Wer bist du?", style = MaterialTheme.typography.h1)
@@ -28,7 +28,7 @@ fun TrainerSelector(trainers: List<Trainer>, changeScreen: (screen: Screen, acti
             verticalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier.fillMaxSize(),
         ) {
-            var selectedTrainer: Trainer? by remember { mutableStateOf(null) }
+            var selectedTrainer: Member? by remember { mutableStateOf(null) }
 
             LazyVerticalGrid(columns = GridCells.Fixed(2), modifier = Modifier.fillMaxWidth(.5f)) {
                 items(trainers.sortedBy { it.prename }) { trainer ->

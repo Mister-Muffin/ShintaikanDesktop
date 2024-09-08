@@ -27,10 +27,8 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
-import models.Member
-import models.Message
-import models.deleteMessage
-import models.editMessage
+import model.Member
+import model.Message
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
@@ -42,8 +40,9 @@ fun StartPage(
     messages: List<Message>,
     birthdays: List<Member>,
     lastImport: String,
-    reloadMessages: () -> Unit,
-    submitNewMessage: (newMessage: String) -> Unit,
+    addMessage: (newMessage: String) -> Unit,
+    deleteMessage: (id: Int) -> Unit,
+    updateMessage: (Message) -> Unit,
     startupTime: () -> Duration,
     changeScreen: (id: Screen) -> Unit
 ) {
@@ -131,14 +130,14 @@ fun StartPage(
                                 // submit new message when either "ctrl" or "shift" is pressed
                                 // together with "Enter"
                                 if (((it.isCtrlPressed || it.isShiftPressed) && it.key == Key.Enter && it.type == KeyEventType.KeyUp)) {
-                                    submitNewMessage(newMessage)
+                                    addMessage(newMessage)
                                     newMessage = ""
                                     true
                                 } else false
                             },
                             trailingIcon = {
                                 IconButton(onClick = {
-                                    submitNewMessage(newMessage)
+                                    addMessage(newMessage)
                                     newMessage = ""
                                 }) {
                                     Icon(Icons.Default.Add, contentDescription = null)
@@ -158,9 +157,7 @@ fun StartPage(
                             state = lazyMessagesListState
                         ) {
                             items(messages.sortedBy { it.dateCreated }) {
-                                Message(it, onMessagesChanged = {
-                                    reloadMessages()
-                                })
+                                MessageView(it, { deleteMessage(it.id) }, updateMessage)
                             }
                         }
                         VerticalScrollbar(
@@ -198,11 +195,11 @@ fun StartPage(
 }
 
 @Composable
-private fun Message(message: Message, onMessagesChanged: () -> Unit) {
+private fun MessageView(message: Message, deleteMessage: () -> Unit, updateMessage: (Message) -> Unit) {
 
     var showEditMessageDialog by remember { mutableStateOf(false) }
 
-    if (showEditMessageDialog) EditMessageDialog(message) { showEditMessageDialog = false; onMessagesChanged() }
+    if (showEditMessageDialog) EditMessageDialog(message, updateMessage) { showEditMessageDialog = false; }
     LazyRow(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth(.9f)) {
         item {
             Text(text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(message.dateCreated).toString() + ": ")
@@ -213,22 +210,21 @@ private fun Message(message: Message, onMessagesChanged: () -> Unit) {
                 showEditMessageDialog = true
             })
             Icon(Icons.Default.Delete, null, modifier = Modifier.padding(2.dp).clickable {
-                deleteMessage(message.id)
-                onMessagesChanged()
+                deleteMessage()
             })
         }
     }
 }
 
 @Composable
-private fun EditMessageDialog(message: Message, onDismiss: () -> Unit) {
+private fun EditMessageDialog(message: Message, updateMessage: (Message) -> Unit, close: () -> Unit) {
 
     var textFieldValue by remember { mutableStateOf(message.message) }
 
     Dialog(
         state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 600.dp, height = 250.dp),
         title = "Kurznachricht bearbeiten",
-        onCloseRequest = { onDismiss() }
+        onCloseRequest = close
     ) {
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),
@@ -236,8 +232,8 @@ private fun EditMessageDialog(message: Message, onDismiss: () -> Unit) {
         ) {
             OutlinedTextField(textFieldValue, onValueChange = { textFieldValue = it })
             Button(onClick = {
-                editMessage(message.copy(message = textFieldValue))
-                onDismiss()
+                updateMessage(message.copy(message = textFieldValue))
+                close()
             }) {
                 Text("Nachicht ändern")
             }

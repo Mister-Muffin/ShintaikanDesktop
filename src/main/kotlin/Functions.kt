@@ -1,7 +1,7 @@
 import androidx.compose.ui.awt.ComposeWindow
 import androidx.compose.ui.window.FrameWindowScope
-import models.Member
-import models.Teilnahme
+import model.Member
+import model.Participation
 import java.awt.FileDialog
 import java.nio.file.Path
 import java.time.LocalDate
@@ -31,29 +31,16 @@ fun createConfigFile() {
 /**
  * Zählt die Trainingseinheiten eines Mitglieds
  *
- * Standardmäßig werden alle (ohne student.total) Einheien gezählt
+ * Standardmäßig werden alle (ohne student.total) Einheiten gezählt
  *
  * @param since nur Einheiten ab dem dann gegebenen Datum
  **/
-fun countId(memberId: Int, teilnahme: List<Teilnahme>, since: LocalDate = LocalDate.EPOCH): Int {
-    var counter = 0
-    for (day in teilnahme) {
-        if (day.userIds != null && day.date > since) {
-            counter += day.userIds.split(",").filter { memberId.toString() == it }.size
-        }
-    }
-    return counter
+fun countId(member: Member, participations: List<Participation>, since: LocalDate = LocalDate.EPOCH): Int {
+    return participations.filter { it.date >= since }.sumOf { it.userIds.split(',').count { it == member.id.toString() } }
 }
 
-fun getFirstDate(id: Int, teilnahme: List<Teilnahme>): LocalDate? {
-    for (day in teilnahme) {
-        if (day.userIds != null) {
-            if (day.userIds.split(",").filter { id.toString() == it }.isNotEmpty()) {
-                return day.date
-            }
-        }
-    }
-    return null
+fun getFirstDate(id: Int, participations: List<Participation>): LocalDate? {
+    return participations.firstOrNull{ id.toString() in it.userIds }?.date
 }
 
 /**
@@ -62,8 +49,8 @@ fun getFirstDate(id: Int, teilnahme: List<Teilnahme>): LocalDate? {
  * student.total sind die Trainingseinheiten, die zu den in der neuen Datenbank vorhandenen Trainingseinheiten dazu addiert werden müssen,
  * da diese Trainingseinheiten sonst nicht berücksichtigt werden würden
  */
-fun getTotalTrainingSessions(member: Member, teilnahme: List<Teilnahme>): Int {
-    return member.total + countId(member.id, teilnahme)
+fun getTotalTrainingSessions(member: Member, teilnahme: List<Participation>): Int {
+    return member.total + countId(member, teilnahme)
 }
 
 /**

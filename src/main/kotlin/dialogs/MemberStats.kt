@@ -18,9 +18,9 @@ import composables.StudentList
 import countId
 import format
 import getTotalTrainingSessions
-import models.Member
-import models.Teilnahme
 import net.time4j.PrettyTime
+import model.Member
+import model.Participation
 import next
 import stickerUnits
 import java.time.LocalDate
@@ -29,7 +29,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Composable
-fun ExamsDialog(members: List<Member>, teilnahme: List<Teilnahme>, onDismiss: () -> Unit) {
+fun ExamsDialog(members: List<Member>, teilnahme: List<Participation>, onDismiss: () -> Unit) {
 
     var searchFieldVal by remember { mutableStateOf("") }
 
@@ -74,14 +74,14 @@ fun ExamsDialog(members: List<Member>, teilnahme: List<Teilnahme>, onDismiss: ()
 
 @Composable
 private fun StudentStats(
-    member: Member, members: List<Member>, teilnahme: List<Teilnahme>
+    member: Member, members: List<Member>, teilnahme: List<Participation>
 ) { //datum letzte prüfung | wie lange her y m d | einheiten seit l prüf | einheiten gesamt
     return Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
             val nameString: String = member.prename + " " + member.surname // Join pre- and surname
             // Name of the member
             Text(
-                "$nameString${if (member.is_trainer) " (Trainer)" else ""}", // This adds "(Trainer)" to the name string if the member is also a trainer
+                "$nameString${if (member.isTrainer) " (Trainer)" else ""}", // This adds "(Trainer)" to the name string if the member is also a trainer
                 style = MaterialTheme.typography.h6,
                 textDecoration = TextDecoration.Underline,
                 modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
@@ -103,13 +103,13 @@ private fun StudentStats(
 
         // Sollte die Person bereits eine Prüfung gemacht haben,
         // zeige das Datum der letzten Prüfung und bau den string für die Differenz zu diesem Datum zusammen
-        if (member.date_last_exam != null) {
-            Text("Letzte Prüfung am: ${(member.date_last_exam.format())}")
+        if (member.lastExamDate != null) {
+            Text("Letzte Prüfung am: ${(member.lastExamDate.format())}")
 
-            Text("Einheiten seit der letzten Prüfung: ${countId(member.id, teilnahme, member.date_last_exam)}")
+            Text("Einheiten seit der letzten Prüfung: ${countId(member, teilnahme, member.lastExamDate)}")
 
             // Zeitraum zwischen der letzten Prüfung und dem heutigen Datum
-            val period = Period.between(member.date_last_exam, LocalDate.now())
+            val period = Period.between(member.lastExamDate, LocalDate.now())
             Text("Letzte Prüfung vor: ${PrettyTime.of(Locale.GERMANY).print(period)}")
 
         } else {
@@ -117,22 +117,22 @@ private fun StudentStats(
         }
 
         val ready = isReadyForExam(member, teilnahme)
-        if (member.date_last_exam != null) Text(ready.first)
+        if (member.lastExamDate != null) Text(ready.first)
         if (ready.second == null) {
             Text("Bereit für die nächste Prüfung", color = Color.Green)
         } else {
             Text("Noch nicht bereit für die nächste Prüfung", color = Color.Red)
         }
 
-        if (member.trainer_units != 0) Text("Hat ${member.trainer_units} mal Training gegeben")
+        if (member.trainerUnits != 0) Text("Hat ${member.trainerUnits} mal Training gegeben")
 
         Divider()
 
-        val activeStickerCount = member.sticker_recieved
-        if (member.sticker_recieved == 0) {
+        val activeStickerCount = member.receivedStickerNumber
+        if (member.receivedStickerNumber == 0) {
             Text("Hat noch keinen Sticker bekommen")
         } else {
-            val stickerHistoryList = member.sticker_recieved_by.toString().trim(',').split(",")
+            val stickerHistoryList = member.stickerReceivedBy.toString().trim(',').split(",")
             stickerHistoryList.forEach {
                 val singleStats = it.split(":")
                 val stickerUnit: Int = singleStats[0].toInt()
@@ -153,7 +153,7 @@ private fun StudentStats(
             }
         }
 
-        if (member.sticker_recieved == stickerUnits.keys.last()) Text("Es gibt keinen weiteren Sticker")
+        if (member.receivedStickerNumber == stickerUnits.keys.last()) Text("Es gibt keinen weiteren Sticker")
         else {
             val nextStickerCount = stickerUnits.next(activeStickerCount).first
             val nextStickerName = stickerUnits[nextStickerCount]
