@@ -31,7 +31,8 @@ import dialogs.PasswordPrompt
 import dialogs.StickerDialog
 import getTotalTrainingSessions
 import gretting
-import model.*
+import model.Member
+import model.Participation
 import next
 import stickerUnits
 import java.util.*
@@ -106,6 +107,7 @@ fun MemberSelector(
         if (showCheckboxPasswordDialog) {
             PasswordPrompt(
                 password = password,
+                cancel = { showCheckboxPasswordDialog = false },
                 result = { pwCorrect ->
                     handleAsExam = pwCorrect
                     showCheckboxPasswordDialog = !pwCorrect

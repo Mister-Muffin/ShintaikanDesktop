@@ -9,7 +9,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.*
 import androidx.compose.ui.text.AnnotatedString
@@ -18,9 +17,8 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.unit.dp
 import pages.COMPONENT_WIDTH
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-fun PasswordPrompt(password: String, result: (pwCorrect: Boolean) -> Unit) {
+fun PasswordPrompt(password: String, cancel: () -> Unit, result: (pwCorrect: Boolean) -> Unit) {
 
     var textViewText by remember { mutableStateOf("Bitte gib das Passwort ein:") }
     var passwordFieldVal by remember { mutableStateOf("") }
@@ -56,10 +54,12 @@ fun PasswordPrompt(password: String, result: (pwCorrect: Boolean) -> Unit) {
             },
             onValueChange = { passwordFieldVal = it })
         Button(modifier = Modifier.width(COMPONENT_WIDTH.dp),
-            onClick = {
-                checkPasswordAndReturn()
-            }) {
-            Text("OK")
+            onClick = { checkPasswordAndReturn() }) {
+            Text("Weiter")
+        }
+        Button(modifier = Modifier.width(COMPONENT_WIDTH.dp),
+            onClick = { cancel() }) {
+            Text("Zurück")
         }
     }
 

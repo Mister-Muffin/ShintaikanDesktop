@@ -91,6 +91,8 @@ fun main(args: Array<String>) = application {
         resizable = production,
     ) {
         var screenID by remember { mutableStateOf(HOME) }
+        var fallBackScreenId by remember { mutableStateOf(HOME) } // fall back if passwort prompt cancelled
+
         var activeTrainer: Member? by remember { mutableStateOf(null) }
 
         MenuBar {
@@ -104,9 +106,15 @@ fun main(args: Array<String>) = application {
                 Item("Beenden", onClick = { exitApplication() }, mnemonic = 'E')
             }
             Menu("Administration", mnemonic = 'A', enabled = screenID == HOME && !viewModel.dataLoading) {
-                Item("Trainer verwalten", onClick = { screenID = PASSWORD; forwardedScreenId = MANAGE_TRAINER })
-                Item("Daten holen", onClick = { screenID = PASSWORD; forwardedScreenId = FETCH_DATA })
-                Item("Programm aktualisieren", onClick = { screenID = PASSWORD; forwardedScreenId = UPDATER })
+                Item(
+                    "Trainer verwalten",
+                    onClick = { fallBackScreenId = screenID; screenID = PASSWORD; forwardedScreenId = MANAGE_TRAINER })
+                Item(
+                    "Daten holen",
+                    onClick = { fallBackScreenId = screenID; screenID = PASSWORD; forwardedScreenId = FETCH_DATA })
+                Item(
+                    "Programm aktualisieren",
+                    onClick = { fallBackScreenId = screenID; screenID = PASSWORD; forwardedScreenId = UPDATER })
                 Item("Hilfe/Info", onClick = { screenID = HELP })
             }
             Menu("Mitglieder", mnemonic = 'P', enabled = !viewModel.dataLoading) {
@@ -152,8 +160,9 @@ fun main(args: Array<String>) = application {
 
                 SELECT_TRAINER -> TrainerSelector(trainers) { screen, selectedTrainer ->
                     if (screen == MANAGE_TRAINER) {
-                        screenID = PASSWORD
+                        fallBackScreenId = SELECT_TRAINER
                         forwardedScreenId = screen
+                        screenID = PASSWORD
                     } else {
                         screenID = screen; activeTrainer = selectedTrainer
                     }
@@ -174,7 +183,9 @@ fun main(args: Array<String>) = application {
                     screenID = it
                 }
                 // needed because dialog windows don't work on Raspberry Pi
-                PASSWORD -> PasswordPrompt(password = appPassword) { if (it) screenID = forwardedScreenId }
+                PASSWORD -> PasswordPrompt(
+                    password = appPassword,
+                    cancel = { screenID = fallBackScreenId }) { if (it) screenID = forwardedScreenId }
 
                 MANAGE_TRAINER -> ManageTrainerDialog(
                     viewModel.members,
