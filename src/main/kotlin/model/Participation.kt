@@ -1,7 +1,7 @@
 package model
 
 import org.jetbrains.exposed.dao.id.IntIdTable
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import java.time.LocalDate
@@ -18,14 +18,21 @@ data class Participation(
         val userIdsExam = text("user_ids_exam")
         val date = date("date")
 
-        fun fromRow(row: ResultRow) = Participation(row[id].value, row[userIds] ?: "", row[userIdsExam] ?: "", row[date])
+        fun fromRow(row: ResultRow) =
+            Participation(row[id].value, row[userIds] ?: "", row[userIdsExam] ?: "", row[date])
     }
 
-    fun <T: Any> upsertInto(insert: UpdateBuilder<T>) {
-        insert[Participation.id] = id
+    fun <T : Any> updateInto(update: UpdateBuilder<T>) {
+        update[Participation.id] = id
+        update[Participation.userIds] = userIds
+        update[Participation.userIdsExam] = userIdsExam
+        update[Participation.date] = date
+    }
+
+    fun <T : Any> insertInto(insert: UpdateBuilder<T>) {
         insert[Participation.userIds] = userIds
         insert[Participation.userIdsExam] = userIdsExam
         insert[Participation.date] = date
     }
-}
 
+}

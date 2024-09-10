@@ -16,7 +16,6 @@ import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionA
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
-import kotlin.math.absoluteValue
 import kotlin.time.Duration
 
 class ViewModel(private val coroutineScope: CoroutineScope) {
@@ -311,12 +310,12 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
             return suspendedTransactionAsync(Dispatchers.IO) {
                 if (temporaryParticipation.id < 0) {
                     Participation.insertAndGetId {
-                        temporaryParticipation.upsertInto(it)
+                        temporaryParticipation.insertInto(it)
                     }.value
                 } else {
                     val today = LocalDate.now()
                     Participation.update({ Participation.date eq today }) {
-                        temporaryParticipation.upsertInto(it)
+                        temporaryParticipation.updateInto(it)
                     }
                     temporaryParticipation.id
                 }
