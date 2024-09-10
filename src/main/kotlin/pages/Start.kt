@@ -72,7 +72,7 @@ fun StartPage(
             }
 
             Text(
-                "Jederzeit zurück zum Startbildschrim mit 'ESC'",
+                "Jederzeit zurück zum Startbildschirm mit 'ESC'",
                 style = MaterialTheme.typography.caption,
                 modifier = Modifier.padding(top = 4.dp)
             )
