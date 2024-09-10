@@ -23,6 +23,7 @@ import dialogs.*
 import kotlinx.serialization.json.Json
 import model.Member
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.transactions.TransactionManager
 import pages.MemberSelector
 import pages.StartPage
 import pages.SuccessPage
@@ -30,6 +31,7 @@ import pages.TrainerSelector
 import viewmodel.ViewModel
 import java.io.File
 import java.nio.file.Path
+import java.sql.Connection
 
 const val configFileName = "config.toml"
 val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
@@ -60,20 +62,13 @@ fun main(args: Array<String>) = application {
     val datastoreFileText = datastoreFile.readText()
     val datastore = Json.decodeFromString<Datastore>(datastoreFileText)
 
-    val ip: String = config.settings.ip
-    val port: String = config.settings.port
-    val user: String = config.settings.user
-    val dbPassword: String = config.settings.password
-    val database: String = config.settings.database
+    val database: String = "database.db" // config.settings.database
     val appPassword: String = config.settings.appPassword
     val drivePath: String = config.settings.exportPath
 
-    Database.connect(
-        "jdbc:postgresql://${ip}:${port}/${database}",
-        driver = "org.postgresql.Driver",
-        user = user,
-        password = dbPassword
-    )
+    Database.connect("jdbc:sqlite://${configFilePath}/${database}", "org.sqlite.JDBC")
+    // https://jetbrains.github.io/Exposed/working-with-database.html#sqlite
+    TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
 
     val scope = rememberCoroutineScope()
     val viewModel = remember { ViewModel(scope) }
