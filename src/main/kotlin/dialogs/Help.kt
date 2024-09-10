@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.FrameWindowScope
 import getRunningJar
+import pages.COMPONENT_WIDTH
 import kotlin.reflect.KClass
 
 @Composable
@@ -28,7 +29,7 @@ fun HelpDialog(drivePath: String, kclass: KClass<out FrameWindowScope>, onDismis
         Divider(modifier = Modifier.padding(vertical = 10.dp))
         Text("Pfad für die Importdatei: ${drivePath}transferHauseDojo.csv")
         Text("Programmpfad: $cmdPath")
-        Button(onClick = onDismiss, modifier = Modifier.width(250.dp).padding(vertical = 10.dp)) {
+        Button(onClick = onDismiss, modifier = Modifier.width(COMPONENT_WIDTH.dp).padding(vertical = 10.dp)) {
             Text("Zurück")
         }
     }
