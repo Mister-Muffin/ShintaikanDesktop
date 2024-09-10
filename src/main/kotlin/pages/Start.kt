@@ -51,7 +51,9 @@ fun StartPage(
 
     val lazyMessagesListState = rememberLazyListState()
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp).fillMaxSize()) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize().padding(all = 8.dp)
+    ) {
 
         if (members.isEmpty()) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
@@ -79,7 +81,7 @@ fun StartPage(
 
             Row(
                 verticalAlignment = Alignment.Top,
-                modifier = Modifier.fillMaxSize(.95f).padding(top = 24.dp)
+                modifier = Modifier.fillMaxSize(.9f).padding(top = 24.dp)
             ) {
                 LazyColumn(
                     modifier = Modifier.fillMaxHeight().fillMaxWidth(0.5F),

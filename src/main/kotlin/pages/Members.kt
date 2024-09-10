@@ -155,7 +155,7 @@ fun MemberSelector(
                     )
                 )
             }
-            Card {
+            Card(elevation = 10.dp) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.SpaceBetween,
