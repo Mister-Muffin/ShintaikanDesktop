@@ -115,7 +115,7 @@ fun MemberSelector(
             )
         }
 
-        Text("$greeting ${activeTrainer.prename}, Teilnehmer auswählen", style = MaterialTheme.typography.h1)
+        Text("$greeting ${activeTrainer.prename}, bitte Teilnehmer auswählen", style = MaterialTheme.typography.h1)
         Divider(modifier = Modifier.padding(vertical = 16.dp))
         Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
             Row {
@@ -178,9 +178,9 @@ fun MemberSelector(
                         modifier = Modifier.fillMaxWidth(.75f)
                     )
                     Column {
-                        CustomFilter(DegreeColor.values(), checkedColors)
+                        CustomFilter(DegreeColor.entries.toTypedArray(), checkedColors)
                         Divider(modifier = Modifier.padding(vertical = 30.dp))
-                        CustomFilter(Group.values(), checkedGroups)
+                        CustomFilter(Group.entries.toTypedArray(), checkedGroups)
                     }
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically,
@@ -199,7 +199,7 @@ fun MemberSelector(
                             )
                             if (handleAsExam)
                                 Text(
-                                    text = "Prüfung!", // TODO: Sieht nach schlechter UX aus
+                                    text = "Prüfung!",
                                     textDecoration = TextDecoration.Underline,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 35.sp,
