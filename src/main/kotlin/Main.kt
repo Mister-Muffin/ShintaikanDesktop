@@ -105,16 +105,18 @@ fun main(args: Array<String>) = application {
                     "Trainer verwalten",
                     onClick = { fallBackScreenId = screenID; screenID = PASSWORD; forwardedScreenId = MANAGE_TRAINER })
                 Item(
-                    "Daten holen",
+                    "Daten importieren",
                     onClick = { fallBackScreenId = screenID; screenID = PASSWORD; forwardedScreenId = FETCH_DATA })
                 Item(
                     "Programm aktualisieren",
                     onClick = { fallBackScreenId = screenID; screenID = PASSWORD; forwardedScreenId = UPDATER })
-                Item("Hilfe/Info", onClick = { screenID = HELP })
             }
             Menu("Mitglieder", mnemonic = 'P', enabled = !viewModel.dataLoading) {
                 Item("Daten abfragen", onClick = { screenID = EXAMS })
                 Item("Daten exportieren", onClick = { screenID = EXPORT_MEMBERS })
+            }
+            Menu("Hilfe", mnemonic = 'H') {
+                Item("Info", onClick = { screenID = HELP })
             }
         }
 
