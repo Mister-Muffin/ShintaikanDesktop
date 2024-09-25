@@ -8,8 +8,8 @@ import java.time.LocalDate
 
 data class Participation(
     val id: Int,
-    val userIds: String, // Pls help me, wtf
-    val userIdsExam: String, // AAAAAaaaahhhhhh
+    val userIds: String,
+    val userIdsExam: String,
     val date: LocalDate
 ) {
     // TODO: data as primary key, remove id, rename
