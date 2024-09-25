@@ -134,7 +134,7 @@ fun main(args: Array<String>) = application {
                 body1 = TextStyle(fontSize = 18.sp), // All 'Text' use this as default as it seems
                 caption = TextStyle(fontSize = 13.sp, color = Color(0xFF666666))
             ),
-            shapes = Shapes(RoundedCornerShape(0.dp)),
+            shapes = Shapes(RoundedCornerShape(4.dp)),
             colors = lightColors(
                 primary = Color(0xFF212121),
                 secondary = Color(0xFF212121)
