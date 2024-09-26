@@ -36,11 +36,11 @@ fun createConfigFile() {
  * @param since nur Einheiten ab dem dann gegebenen Datum
  **/
 fun countId(member: Member, participations: List<Participation>, since: LocalDate = LocalDate.EPOCH): Int {
-    return participations.filter { it.date >= since }.sumOf { it.userIds.split(',').count { it == member.id.toString() } }
+    return participations.filter { it.date >= since }.count { it.memberId == member.id }
 }
 
 fun getFirstDate(id: Int, participations: List<Participation>): LocalDate? {
-    return participations.firstOrNull{ id.toString() in it.userIds }?.date
+    return participations.sortedBy { it.date }.firstOrNull { id == it.memberId }?.date
 }
 
 /**

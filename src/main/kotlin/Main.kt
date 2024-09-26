@@ -110,6 +110,11 @@ fun main(args: Array<String>) = application {
                 Item(
                     "Programm aktualisieren",
                     onClick = { fallBackScreenId = screenID; screenID = PASSWORD; forwardedScreenId = UPDATER })
+                Item(
+                    "Datenbank migrieren",
+                    onClick = {
+                        viewModel.migrateTable()
+                    })
             }
             Menu("Mitglieder", mnemonic = 'P', enabled = !viewModel.dataLoading) {
                 Item("Daten abfragen", onClick = { screenID = EXAMS })

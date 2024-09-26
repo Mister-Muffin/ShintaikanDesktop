@@ -48,7 +48,7 @@ fun MemberSelector(
     clearUnitsSinceLastExam: (Member) -> Unit,
     updateSticker: (Member, Int, String) -> Unit,
     incrementTrainerUnits: (Member) -> Unit,
-    addParticipation: (participants: String, isExam: Boolean) -> Unit,
+    addParticipation: (participants: List<Member>, isExam: Boolean) -> Unit,
     changeScreen: (screen: Screen) -> Unit
 ) {
     val searchQuery = remember { mutableStateOf("") }
@@ -73,7 +73,7 @@ fun MemberSelector(
     val studentsStickers = remember { mutableListOf<Member>() }
 
     fun submit(isExam: Boolean) {
-        val participants = newMembers.joinToString(",") { it.id.toString() }
+        val participants = newMembers.toList()
         for (member in newMembers) {
 
             if (isExam) clearUnitsSinceLastExam(member) // set this to 0, so it won't get added in the future
