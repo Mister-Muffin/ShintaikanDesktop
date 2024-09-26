@@ -121,7 +121,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         mutableMembers.add(member.copy(trainerUnits = member.trainerUnits + 1))
     }
 
-    fun increaseUnitsSinceLastExam(member: Member, count: Int = 1) {
+    private fun increaseUnitsSinceLastExam(member: Member, count: Int = 1) {
         coroutineScope.launch { database.increaseUnitsSinceLastExam(member, count) }
         mutableMembers.remove(member)
         mutableMembers.add(member.copy(unitsSinceLastExam = member.unitsSinceLastExam + count))
