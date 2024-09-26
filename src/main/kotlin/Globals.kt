@@ -30,3 +30,5 @@ data class LevelRequirements(
     val units: Int,
     val age: Int = 0
 )
+
+const val dbDateFormat = "yyyy-MM-dd"

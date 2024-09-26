@@ -17,12 +17,10 @@ import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionA
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
-import kotlin.time.Duration
 
 class ViewModel(private val coroutineScope: CoroutineScope) {
 
     var dataLoading by mutableStateOf(false)
-    var loadTime = Duration.ZERO
 
     private val mutableMembers = mutableStateListOf<Member>()
     val members: List<Member> by lazy {
@@ -151,19 +149,17 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
     }
 
     //<editor-fold desc="Participation operations">
-    fun addParticipation(participants: List<Member>, isExam: Boolean) {
+    fun addParticipation(participant: Member, isExam: Boolean, note: String, trainerId: Int) {
         val today = LocalDate.now()
 
-        participants.forEach { member ->
-            val tmpParticipation = Participation(-1, member.id, today, "", isExam)
+        val tmpParticipation = Participation(-1, participant.id, today, note, isExam, trainerId)
 
-            val id = runBlocking { database.addParticipation(tmpParticipation) }
+        val id = runBlocking { database.addParticipation(tmpParticipation) }
 
-            val participation = tmpParticipation.copy(id = id)
-            mutableParticipations.add(participation)
+        val participation = tmpParticipation.copy(id = id)
+        mutableParticipations.add(participation)
 
-            increaseUnitsSinceLastExam(member)
-        }
+        increaseUnitsSinceLastExam(participant)
     }
     //</editor-fold>
 
@@ -303,7 +299,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
                         if (id.isBlank()) return@forEach
                         if (id == "null") return@forEach
 
-                        val tmpPre = Participation(-1, id.toInt(), part.date, "", false)
+                        val tmpPre = Participation(-1, id.toInt(), part.date, "", false, null)
                         Participation.insertAndGetId {
                             tmpPre.insertInto(it)
                         }.value
@@ -313,7 +309,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
                         if (id.isBlank()) return@forEach
                         if (id == "null") return@forEach
 
-                        val tmpPre = Participation(-1, id.toInt(), part.date, "", true)
+                        val tmpPre = Participation(-1, id.toInt(), part.date, "", true, null)
                         Participation.insertAndGetId {
                             tmpPre.insertInto(it)
                         }.value

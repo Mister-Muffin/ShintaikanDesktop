@@ -157,7 +157,6 @@ fun main(args: Array<String>) = application {
                     viewModel::addMessage,
                     viewModel::deleteMessage,
                     viewModel::updateMessage,
-                    viewModel::loadTime
                 ) { screenID = it }
 
                 SELECT_TRAINER -> TrainerSelector(trainers) { screen, selectedTrainer ->
