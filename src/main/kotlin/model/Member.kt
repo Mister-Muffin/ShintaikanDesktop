@@ -56,7 +56,7 @@ data class Member(
         val lastExamDate = date("date_last_exam")
         val isTrainer = bool("is_trainer")
         val stickerAnimal = text("sticker_animal")
-        val stickerReceived = integer("sticker_recieved") // TODO: Typo received
+        val stickerReceived = integer("sticker_recieved") // DB Typo received
         val stickerDateReceived = date("sticker_date_recieved")
         val stickerReceivedBy = text("sticker_recieved_by")
         val isActive = bool("is_active")

@@ -239,7 +239,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
                             0,
                             null,
                             null,
-                            true, // TODO: Confirm
+                            true,
                             0,
                             0
                         )
