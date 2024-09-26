@@ -7,8 +7,6 @@ import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import java.time.LocalDate
 import java.time.Period
 
-object MemberTable
-
 data class Member(
     val id: Int,
     val surname: String,
