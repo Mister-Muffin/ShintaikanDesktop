@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import kotlinx.coroutines.*
 import model.Member
 import model.Message
+import model.OldParticipation
 import model.Participation
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
@@ -120,10 +121,10 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         mutableMembers.add(member.copy(trainerUnits = member.trainerUnits + 1))
     }
 
-    fun increaseUnitsSinceLastExam(member: Member, count: Int) {
+    private fun increaseUnitsSinceLastExam(member: Member, count: Int = 1) {
         coroutineScope.launch { database.increaseUnitsSinceLastExam(member, count) }
         mutableMembers.remove(member)
-        mutableMembers.add(member.copy(trainerUnits = member.unitsSinceLastExam + count))
+        mutableMembers.add(member.copy(unitsSinceLastExam = member.unitsSinceLastExam + count))
     }
 
     fun getBirthdayMembers(): List<Member> {
@@ -138,39 +139,31 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
     }
 
     fun getLastExamDate(id: Int): LocalDate? {
-        return participations.filter { id.toString() in it.userIdsExam }.takeIf { it.isNotEmpty() }
-            ?.maxBy { it.date }?.date
+        return participations.filter { id == it.memberId && it.exam }.takeIf { it.isNotEmpty() }
+            ?.maxBy { it.date }?.date // TODO: Return date from member table if newer or existant
     }
     //</editor-fold>
 
+    fun migrateTable() {
+        runBlocking {
+            database.migrateTable()
+        }
+    }
+
     //<editor-fold desc="Participation operations">
-    fun addParticipation(participants: String, isExam: Boolean): Participation {
-        // TODO: Heilige Scheiße, ist das schlimm...
+    fun addParticipation(participants: List<Member>, isExam: Boolean) {
         val today = LocalDate.now()
-        val participationToday = participations.firstOrNull { it.date == today }
-        val participantsString = (participationToday?.userIds?.let { "$it," } ?: "") + if (!isExam) participants else ""
-        val examParticipantString =
-            (participationToday?.userIdsExam?.let { "$it," } ?: "") + if (isExam) participants else ""
-        val temporaryParticipation =
-            Participation(-1, participantsString.trim(','), examParticipantString.trim(','), today)
-        val id = runBlocking { database.addParticipation(temporaryParticipation) }
-        val participation = temporaryParticipation.copy(id = id)
 
-        if (participationToday != null) {
-            mutableParticipations.remove(participationToday)
+        participants.forEach { member ->
+            val tmpParticipation = Participation(-1, member.id, today, "", isExam)
+
+            val id = runBlocking { database.addParticipation(tmpParticipation) }
+
+            val participation = tmpParticipation.copy(id = id)
+            mutableParticipations.add(participation)
+
+            increaseUnitsSinceLastExam(member)
         }
-
-        val updates = members.filter { member -> member.id.toString() in participants }.map { member ->
-            val count = participants.split(',').count { it == member.id.toString() }
-            member to count
-        }
-
-        for ((member, count) in updates) {
-            increaseUnitsSinceLastExam(member, count)
-        }
-
-        mutableParticipations.add(participation)
-        return participation
     }
     //</editor-fold>
 
@@ -246,7 +239,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
                             0,
                             null,
                             null,
-                            true, // TODO: Confirm
+                            true,
                             0,
                             0
                         )
@@ -299,6 +292,36 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         }
         //</editor-fold>
 
+        suspend fun migrateTable() {
+            return suspendedTransactionAsync(Dispatchers.IO) {
+                val parts = loadOldParticipations()
+                parts.forEach outer@{ part ->
+                    val ids = part.userIds.split(',')
+                    val examIds = part.userIdsExam.split(',')
+
+                    ids.forEach { id ->
+                        if (id.isBlank()) return@forEach
+                        if (id == "null") return@forEach
+
+                        val tmpPre = Participation(-1, id.toInt(), part.date, "", false)
+                        Participation.insertAndGetId {
+                            tmpPre.insertInto(it)
+                        }.value
+                    }
+
+                    examIds.forEach { id ->
+                        if (id.isBlank()) return@forEach
+                        if (id == "null") return@forEach
+
+                        val tmpPre = Participation(-1, id.toInt(), part.date, "", true)
+                        Participation.insertAndGetId {
+                            tmpPre.insertInto(it)
+                        }.value
+                    }
+                }
+            }.await()
+        }
+
         //<editor-fold desc="Participation operations">
         suspend fun loadParticipations(): List<Participation> {
             return suspendedTransactionAsync(Dispatchers.IO) {
@@ -306,19 +329,17 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
             }.await()
         }
 
+        suspend fun loadOldParticipations(): List<OldParticipation> {
+            return suspendedTransactionAsync(Dispatchers.IO) {
+                OldParticipation.selectAll().map(OldParticipation::fromRow)
+            }.await()
+        }
+
         suspend fun addParticipation(temporaryParticipation: Participation): Int {
             return suspendedTransactionAsync(Dispatchers.IO) {
-                if (temporaryParticipation.id < 0) {
-                    Participation.insertAndGetId {
-                        temporaryParticipation.insertInto(it)
-                    }.value
-                } else {
-                    val today = LocalDate.now()
-                    Participation.update({ Participation.date eq today }) {
-                        temporaryParticipation.updateInto(it)
-                    }
-                    temporaryParticipation.id
-                }
+                Participation.insertAndGetId {
+                    temporaryParticipation.insertInto(it)
+                }.value
             }.await()
         }
         //</editor-fold>

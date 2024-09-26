@@ -1,7 +1,7 @@
-val stickerUnits = mapOf(
+val stickerUnits = linkedMapOf(
     0 to "", 25 to "Schlange", 50 to "Tiger", 75 to "Rabe", 100 to "Drache", 150 to "Adler",
     200 to "Fuchs", 300 to "Phoenix", 500 to "Gottesanbeterin", 800 to "Reier"
-) // TODO: Change to type that guarantees order
+)
 
 fun Int.nextStickerUnit() = stickerUnits.next(this)
 fun Pair<Int, String?>.nextStickerUnit() = first.nextStickerUnit()
@@ -24,7 +24,6 @@ val levels = mapOf(
     "1. Kyu braun" to LevelRequirements(months = 9, units = 60, age = 17),
     "1. Dan schwarz" to LevelRequirements(months = 10, units = 60, age = 18)
 )
-
 
 data class LevelRequirements(
     val months: Long = 0,

@@ -1,13 +1,11 @@
 package model
 
 import org.jetbrains.exposed.dao.id.IntIdTable
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import java.time.LocalDate
 import java.time.Period
-
-object MemberTable
 
 data class Member(
     val id: Int,
@@ -15,7 +13,7 @@ data class Member(
     val prename: String,
     val group: String,
     val level: String,
-    val total: Int, // TODO: Shit name
+    val total: Int, // Trainingseinheiten vor Einführung der Software
     val birthday: LocalDate,
     val lastExamDate: LocalDate?,
     val isTrainer: Boolean,
@@ -56,12 +54,12 @@ data class Member(
         val lastExamDate = date("date_last_exam")
         val isTrainer = bool("is_trainer")
         val stickerAnimal = text("sticker_animal")
-        val stickerReceived = integer("sticker_recieved") // TODO: So schreibt man received nicht
+        val stickerReceived = integer("sticker_recieved") // DB Typo received
         val stickerDateReceived = date("sticker_date_recieved")
         val stickerReceivedBy = text("sticker_recieved_by")
         val isActive = bool("is_active")
         val trainerUnits = integer("trainer_units")
-        val unitsSinceLastExam = integer("add_units_since_last_exam") // TODO: Pls confirm
+        val unitsSinceLastExam = integer("add_units_since_last_exam") // TODO: Please confirm
 
         fun fromRow(row: ResultRow, getLastExamDate: (Int) -> LocalDate?) = Member(
             id = row[id].value,
@@ -84,7 +82,7 @@ data class Member(
 
     }
 
-    fun <T: Any> upsertInto(insert: UpdateBuilder<T>) {
+    fun <T : Any> upsertInto(insert: UpdateBuilder<T>) {
         insert[Member.surname] = surname
         insert[Member.prename] = prename
         insert[Member.group] = group
@@ -102,8 +100,3 @@ data class Member(
         insert[Member.unitsSinceLastExam] = unitsSinceLastExam
     }
 }
-
-data class MemberWithIdAndString( // TODO: Kernsanierung
-    val id: Int,
-    val sticker_recieved_by: String?,
-)

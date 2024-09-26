@@ -18,9 +18,9 @@ import composables.StudentList
 import countId
 import format
 import getTotalTrainingSessions
-import net.time4j.PrettyTime
 import model.Member
 import model.Participation
+import net.time4j.PrettyTime
 import next
 import stickerUnits
 import java.time.LocalDate
@@ -29,7 +29,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Composable
-fun ExamsDialog(members: List<Member>, teilnahme: List<Participation>, onDismiss: () -> Unit) {
+fun MemberStatsDialog(members: List<Member>, teilnahme: List<Participation>, onDismiss: () -> Unit) {
 
     var searchFieldVal by remember { mutableStateOf("") }
 

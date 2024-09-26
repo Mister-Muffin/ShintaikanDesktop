@@ -48,7 +48,7 @@ fun MemberSelector(
     clearUnitsSinceLastExam: (Member) -> Unit,
     updateSticker: (Member, Int, String) -> Unit,
     incrementTrainerUnits: (Member) -> Unit,
-    addParticipation: (participants: String, isExam: Boolean) -> Unit,
+    addParticipation: (participants: List<Member>, isExam: Boolean) -> Unit,
     changeScreen: (screen: Screen) -> Unit
 ) {
     val searchQuery = remember { mutableStateOf("") }
@@ -73,12 +73,12 @@ fun MemberSelector(
     val studentsStickers = remember { mutableListOf<Member>() }
 
     fun submit(isExam: Boolean) {
-        val participants = newMembers.joinToString(",") { it.id.toString() }
+        val participants = newMembers.toList()
         for (member in newMembers) {
 
             if (isExam) clearUnitsSinceLastExam(member) // set this to 0, so it won't get added in the future
 
-            if (member.receivedStickerNumber != stickerUnits.keys.last()) // Wer 800 aufkelber hat, bekommt keinen weiteren (catch indexOutOfBounds) // TODO: Das sieht schlimm aus, wtf
+            if (member.receivedStickerNumber != stickerUnits.keys.last()) // Wer 800 aufkelber hat, bekommt keinen weiteren (catch indexOutOfBounds)
                 if (getTotalTrainingSessions(member, participations) // ALLE Trainingseinheiten
                     >= stickerUnits.next(member.receivedStickerNumber).first
                 ) studentsStickers.add(member)
@@ -346,10 +346,9 @@ enum class DegreeColor(
     companion object {
         fun getDegreeList(level: String) = level.trim().split(" ").last().split("-").map {
             // Could maybe use some better fallback or error
-            values().find { color -> color.databaseName.lowercase() == it.lowercase() }
+            entries.find { color -> color.databaseName.lowercase() == it.lowercase() }
         }
 
-        // TODO: This still isn't really nice, but a definite improvement
         fun getColorList(level: String) = getDegreeList(level).map {
             // Could maybe use some better fallback or error
             it?.color ?: Color.Transparent
