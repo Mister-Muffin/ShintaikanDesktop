@@ -18,9 +18,9 @@ import composables.StudentList
 import countId
 import format
 import getTotalTrainingSessions
-import net.time4j.PrettyTime
 import model.Member
 import model.Participation
+import net.time4j.PrettyTime
 import next
 import stickerUnits
 import java.time.LocalDate
