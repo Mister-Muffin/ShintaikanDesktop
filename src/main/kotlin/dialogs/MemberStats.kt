@@ -29,7 +29,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Composable
-fun ExamsDialog(members: List<Member>, teilnahme: List<Participation>, onDismiss: () -> Unit) {
+fun MemberStatsDialog(members: List<Member>, teilnahme: List<Participation>, onDismiss: () -> Unit) {
 
     var searchFieldVal by remember { mutableStateOf("") }
 

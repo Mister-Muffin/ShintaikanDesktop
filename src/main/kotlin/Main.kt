@@ -117,7 +117,7 @@ fun main(args: Array<String>) = application {
                     })
             }
             Menu("Mitglieder", mnemonic = 'P', enabled = !viewModel.dataLoading) {
-                Item("Daten abfragen", onClick = { screenID = EXAMS })
+                Item("Daten abfragen", onClick = { screenID = MEMBER_STATS })
                 Item("Daten exportieren", onClick = { screenID = EXPORT_MEMBERS })
             }
             Menu("Hilfe", mnemonic = 'H') {
@@ -194,7 +194,10 @@ fun main(args: Array<String>) = application {
                     viewModel::setTrainerStatus,
                     onDismiss = { screenID = HOME })
 
-                EXAMS -> ExamsDialog(viewModel.members, viewModel.participations, onDismiss = { screenID = HOME })
+                MEMBER_STATS -> MemberStatsDialog(
+                    viewModel.members,
+                    viewModel.participations,
+                    onDismiss = { screenID = HOME })
 
                 FETCH_DATA -> FetchDataWindow(this.window, viewModel::fetchData) {
                     screenID = HOME
@@ -216,5 +219,5 @@ fun main(args: Array<String>) = application {
 }
 
 enum class Screen {
-    HOME, SELECT_TRAINER, MANAGE_TRAINER, SELECT_MEMBER, SUCCESS, PASSWORD, EXAMS, FETCH_DATA, EXPORT_MEMBERS, UPDATER, HELP
+    HOME, SELECT_TRAINER, MANAGE_TRAINER, SELECT_MEMBER, SUCCESS, PASSWORD, MEMBER_STATS, FETCH_DATA, EXPORT_MEMBERS, UPDATER, HELP
 }
