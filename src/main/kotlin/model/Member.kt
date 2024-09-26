@@ -102,9 +102,3 @@ data class Member(
         insert[Member.unitsSinceLastExam] = unitsSinceLastExam
     }
 }
-
-data class MemberWithIdAndString(
-    // TODO: Kernsanierung
-    val id: Int,
-    val sticker_recieved_by: String?,
-)
