@@ -14,12 +14,17 @@ import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.NoteAdd
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -27,12 +32,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dialogs.NoteDialog
 import dialogs.PasswordPrompt
 import dialogs.StickerDialog
 import getTotalTrainingSessions
 import gretting
 import model.Member
 import model.Participation
+import model.withNotesForMember
 import next
 import stickerUnits
 import java.util.*
@@ -48,7 +55,7 @@ fun MemberSelector(
     clearUnitsSinceLastExam: (Member) -> Unit,
     updateSticker: (Member, Int, String) -> Unit,
     incrementTrainerUnits: (Member) -> Unit,
-    addParticipation: (participants: String, isExam: Boolean) -> Unit,
+    addParticipation: (participant: Member, isExam: Boolean, note: String, trainerId: Int) -> Unit,
     changeScreen: (screen: Screen) -> Unit
 ) {
     val searchQuery = remember { mutableStateOf("") }
@@ -68,22 +75,30 @@ fun MemberSelector(
     }
 
     var showStickerDialog by remember { mutableStateOf(false) }
+    var studentNoteEdit: Member? by remember { mutableStateOf(null) }
     var showCheckboxPasswordDialog by remember { mutableStateOf(false) }
+
+    val studentNotesMap = remember { mutableMapOf<Member, String>() }
 
     val studentsStickers = remember { mutableListOf<Member>() }
 
     fun submit(isExam: Boolean) {
-        val participants = newMembers.joinToString(",") { it.id.toString() }
-        for (member in newMembers) {
+        val participants = newMembers.toList()
 
+        for (member in newMembers) {
             if (isExam) clearUnitsSinceLastExam(member) // set this to 0, so it won't get added in the future
 
-            if (member.receivedStickerNumber != stickerUnits.keys.last()) // Wer 800 aufkelber hat, bekommt keinen weiteren (catch indexOutOfBounds) // TODO: Das sieht schlimm aus, wtf
+            if (member.receivedStickerNumber != stickerUnits.keys.last()) // Wer 800 aufkelber hat, bekommt keinen weiteren (catch indexOutOfBounds)
                 if (getTotalTrainingSessions(member, participations) // ALLE Trainingseinheiten
                     >= stickerUnits.next(member.receivedStickerNumber).first
                 ) studentsStickers.add(member)
         }
-        addParticipation(participants, isExam)
+
+        // Add all participants
+        participants.forEach { participant ->
+            addParticipation(participant, isExam, studentNotesMap[participant] ?: "", activeTrainer.id)
+        }
+
         incrementTrainerUnits(activeTrainer)
 
         if (studentsStickers.isEmpty()) changeScreen(Screen.SUCCESS)
@@ -104,6 +119,15 @@ fun MemberSelector(
             }
         }
 
+        if (studentNoteEdit != null) {
+            NoteDialog(studentNotesMap[studentNoteEdit!!] ?: "") { note, save ->
+                if (save) {
+                    studentNotesMap[studentNoteEdit!!] = note
+                }
+                studentNoteEdit = null
+            }
+        }
+
         if (showCheckboxPasswordDialog) {
             PasswordPrompt(
                 password = password,
@@ -115,7 +139,7 @@ fun MemberSelector(
             )
         }
 
-        Text("$greeting ${activeTrainer.prename}, Teilnehmer auswählen", style = MaterialTheme.typography.h1)
+        Text("$greeting ${activeTrainer.prename}, bitte Teilnehmer auswählen", style = MaterialTheme.typography.h1)
         Divider(modifier = Modifier.padding(vertical = 16.dp))
         Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
             Row {
@@ -140,7 +164,8 @@ fun MemberSelector(
                         }.sortedBy { it.prename }.sortedByDescending { it.level }.toList()
                     )
                     { /* linke spalte */ student ->
-                        ListBox(student) {
+                        val notes = participations.withNotesForMember(student)
+                        ListBox(student, notes, {}) {
                             newMembers.add(student)
                             allMembers.remove(student)
                             searchQuery.value = ""
@@ -178,9 +203,9 @@ fun MemberSelector(
                         modifier = Modifier.fillMaxWidth(.75f)
                     )
                     Column {
-                        CustomFilter(DegreeColor.values(), checkedColors)
+                        CustomFilter(DegreeColor.entries.toTypedArray(), checkedColors)
                         Divider(modifier = Modifier.padding(vertical = 30.dp))
-                        CustomFilter(Group.values(), checkedGroups)
+                        CustomFilter(Group.entries.toTypedArray(), checkedGroups)
                     }
                     Column {
                         Row(verticalAlignment = Alignment.CenterVertically,
@@ -199,7 +224,7 @@ fun MemberSelector(
                             )
                             if (handleAsExam)
                                 Text(
-                                    text = "Prüfung!", // TODO: Sieht nach schlechter UX aus
+                                    text = "Prüfung!",
                                     textDecoration = TextDecoration.Underline,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 35.sp,
@@ -235,7 +260,7 @@ fun MemberSelector(
                         .sortedBy { it.prename }
                         .sortedByDescending { it.level }
                         .toList()) { student ->
-                        ListBox(student) {
+                        ListBox(student, null, { studentNoteEdit = student }) {
                             allMembers.add(student)
                             newMembers.remove(student)
                         }
@@ -283,8 +308,16 @@ private fun <T : FilterOption> CustomFilter(filterOptions: Array<T>, checked: Mu
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun ListBox(member: Member, onBoxClicked: () -> Unit) {
+private fun ListBox(
+    member: Member,
+    notes: List<Participation>? = null,
+    onButtonClicked: () -> Unit,
+    onBoxClicked: () -> Unit
+) {
+    var pointerHover by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .width(250.dp)
@@ -302,20 +335,49 @@ private fun ListBox(member: Member, onBoxClicked: () -> Unit) {
                     drawRect(gradient)
                 }
             }
-            .clickable { onBoxClicked() },
+            .clickable { onBoxClicked() }
+            .onPointerEvent(PointerEventType.Enter) {
+                pointerHover = true
+            }
+            .onPointerEvent(PointerEventType.Exit) {
+                pointerHover = false
+            },
         contentAlignment = Alignment.CenterStart,
     ) {
-        Text(
-            fontSize = 12.sp,
-            fontFamily = FontFamily.SansSerif,
-            fontWeight = FontWeight.W500,
-            color = if (DegreeColor.getDegreeList(member.level).first()?.isDark == true)
-                Color.White
-            else
-                Color.Black,
-            modifier = Modifier.padding(start = 8.dp),
-            text = "${member.prename} ${member.surname}"
-        )
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
+        ) {
+            Text(
+                fontSize = 12.sp,
+                fontFamily = FontFamily.SansSerif,
+                fontWeight = FontWeight.W500,
+                color = if (DegreeColor.getDegreeList(member.level).first()?.isDark == true)
+                    Color.White
+                else
+                    Color.Black,
+                modifier = Modifier,
+                text = "${member.prename} ${member.surname}"
+            )
+            // if "notes" is null, the Box is on the right side, and the add note button should show on hover.
+            // Otherwise, the list would at least be empty, meaning the Box is on the left side
+            // and the note icon will be shown if necessary
+            if (pointerHover && notes == null) {
+                IconButton(onClick = onButtonClicked, modifier = Modifier.size(22.dp).padding(0.dp)) {
+                    Icon(Icons.Outlined.NoteAdd, null)
+                }
+            } else if (!notes.isNullOrEmpty()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { onButtonClicked() }) {
+                    IconButton(onClick = onButtonClicked, modifier = Modifier.size(22.dp).padding(0.dp)) {
+                        Icon(Icons.Outlined.Description, null)
+                    }
+                    Text(notes.size.toString().takeUnless { notes.size > 3 } ?: "3+", fontSize = 10.sp)
+                }
+            }
+        }
     }
 }
 
@@ -346,10 +408,9 @@ enum class DegreeColor(
     companion object {
         fun getDegreeList(level: String) = level.trim().split(" ").last().split("-").map {
             // Could maybe use some better fallback or error
-            values().find { color -> color.databaseName.lowercase() == it.lowercase() }
+            entries.find { color -> color.databaseName.lowercase() == it.lowercase() }
         }
 
-        // TODO: This still isn't really nice, but a definite improvement
         fun getColorList(level: String) = getDegreeList(level).map {
             // Could maybe use some better fallback or error
             it?.color ?: Color.Transparent

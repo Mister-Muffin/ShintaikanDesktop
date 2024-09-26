@@ -32,7 +32,6 @@ import model.Message
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
-import kotlin.time.Duration
 
 @Composable
 fun StartPage(
@@ -43,7 +42,6 @@ fun StartPage(
     addMessage: (newMessage: String) -> Unit,
     deleteMessage: (id: Int) -> Unit,
     updateMessage: (Message) -> Unit,
-    startupTime: () -> Duration,
     changeScreen: (id: Screen) -> Unit
 ) {
 
@@ -125,7 +123,7 @@ fun StartPage(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Kurznachrichten",
+                        text = "Kurznachrichten:",
                         style = MaterialTheme.typography.subtitle1,
                         modifier = Modifier.padding(vertical = 4.dp)
                     )
@@ -189,8 +187,6 @@ fun StartPage(
                 Text(
                     "Letzter Datenimport: $lastImport"
                 )
-
-                Text(startupTime().toString())
 
                 Text(
                     try {

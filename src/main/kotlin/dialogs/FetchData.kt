@@ -31,13 +31,11 @@ fun FetchDataWindow(
 
     var path by remember { mutableStateOf("") }
 
-    setLastImportDate()
-
     Column(
         modifier = Modifier.fillMaxSize().padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Daten holen", style = MaterialTheme.typography.h6)
+        Text("Daten importieren", style = MaterialTheme.typography.h6)
         Divider(modifier = Modifier.padding(vertical = 10.dp))
 
         FilePicker(window) {

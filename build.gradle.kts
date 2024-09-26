@@ -37,7 +37,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:${project.extra["exposed.version"] as String}")
     implementation("org.jetbrains.exposed:exposed-jdbc:${project.extra["exposed.version"] as String}")
     implementation("org.jetbrains.exposed:exposed-java-time:${project.extra["exposed.version"] as String}")
-    implementation("org.postgresql:postgresql:42.5.2")
+    implementation("org.xerial:sqlite-jdbc:3.44.1.0")
     implementation("org.apache.commons:commons-csv:1.10.0")
     implementation("cc.ekblad:4koma:1.2.0")
     implementation("net.time4j:time4j-base:5.9.3")

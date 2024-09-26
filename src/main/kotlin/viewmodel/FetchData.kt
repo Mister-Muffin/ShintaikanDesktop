@@ -1,6 +1,8 @@
 package viewmodel
 
 import configFilePath
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import model.Member
 import model.Message
 import model.Participation
@@ -12,7 +14,9 @@ import java.nio.file.Paths
 import java.time.LocalTime
 
 suspend fun dumpCurrentDatabase(members: List<Member>, messages: List<Message>, participations: List<Participation>) {
-    val writer = Files.newBufferedWriter(Paths.get("${configFilePath}backups/backup-${LocalTime.now()}.csv"))
+    val writer = withContext(Dispatchers.IO) {
+        Files.newBufferedWriter(Paths.get("${configFilePath}backups/backup-${LocalTime.now()}.csv"))
+    }
 
     val csvPrinter = CSVPrinter(
         writer, CSVFormat.DEFAULT
@@ -55,8 +59,9 @@ suspend fun dumpCurrentDatabase(members: List<Member>, messages: List<Message>, 
         csvPrinter.printRecord(
             it.id,
             it.date,
-            it.userIds,
-            it.userIdsExam
+            it.memberId,
+            it.note,
+            it.exam
         )
     }
     //csvPrinter.printRecords(teilnahme)

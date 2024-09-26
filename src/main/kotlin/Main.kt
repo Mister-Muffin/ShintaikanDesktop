@@ -23,6 +23,7 @@ import dialogs.*
 import kotlinx.serialization.json.Json
 import model.Member
 import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.transactions.TransactionManager
 import pages.MemberSelector
 import pages.StartPage
 import pages.SuccessPage
@@ -30,6 +31,7 @@ import pages.TrainerSelector
 import viewmodel.ViewModel
 import java.io.File
 import java.nio.file.Path
+import java.sql.Connection
 
 const val configFileName = "config.toml"
 val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
@@ -60,20 +62,13 @@ fun main(args: Array<String>) = application {
     val datastoreFileText = datastoreFile.readText()
     val datastore = Json.decodeFromString<Datastore>(datastoreFileText)
 
-    val ip: String = config.settings.ip
-    val port: String = config.settings.port
-    val user: String = config.settings.user
-    val dbPassword: String = config.settings.password
-    val database: String = config.settings.database
+    val database: String = "database.db" // config.settings.database
     val appPassword: String = config.settings.appPassword
     val drivePath: String = config.settings.exportPath
 
-    Database.connect(
-        "jdbc:postgresql://${ip}:${port}/${database}",
-        driver = "org.postgresql.Driver",
-        user = user,
-        password = dbPassword
-    )
+    Database.connect("jdbc:sqlite://${configFilePath}/${database}", "org.sqlite.JDBC")
+    // https://jetbrains.github.io/Exposed/working-with-database.html#sqlite
+    TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
 
     val scope = rememberCoroutineScope()
     val viewModel = remember { ViewModel(scope) }
@@ -110,16 +105,23 @@ fun main(args: Array<String>) = application {
                     "Trainer verwalten",
                     onClick = { fallBackScreenId = screenID; screenID = PASSWORD; forwardedScreenId = MANAGE_TRAINER })
                 Item(
-                    "Daten holen",
+                    "Daten importieren",
                     onClick = { fallBackScreenId = screenID; screenID = PASSWORD; forwardedScreenId = FETCH_DATA })
                 Item(
                     "Programm aktualisieren",
                     onClick = { fallBackScreenId = screenID; screenID = PASSWORD; forwardedScreenId = UPDATER })
-                Item("Hilfe/Info", onClick = { screenID = HELP })
+                Item(
+                    "Datenbank migrieren",
+                    onClick = {
+                        viewModel.migrateTable()
+                    })
             }
             Menu("Mitglieder", mnemonic = 'P', enabled = !viewModel.dataLoading) {
-                Item("Daten abfragen", onClick = { screenID = EXAMS })
+                Item("Daten abfragen", onClick = { screenID = MEMBER_STATS })
                 Item("Daten exportieren", onClick = { screenID = EXPORT_MEMBERS })
+            }
+            Menu("Hilfe", mnemonic = 'H') {
+                Item("Info", onClick = { screenID = HELP })
             }
         }
 
@@ -137,7 +139,7 @@ fun main(args: Array<String>) = application {
                 body1 = TextStyle(fontSize = 18.sp), // All 'Text' use this as default as it seems
                 caption = TextStyle(fontSize = 13.sp, color = Color(0xFF666666))
             ),
-            shapes = Shapes(RoundedCornerShape(0.dp)),
+            shapes = Shapes(RoundedCornerShape(4.dp)),
             colors = lightColors(
                 primary = Color(0xFF212121),
                 secondary = Color(0xFF212121)
@@ -155,7 +157,6 @@ fun main(args: Array<String>) = application {
                     viewModel::addMessage,
                     viewModel::deleteMessage,
                     viewModel::updateMessage,
-                    viewModel::loadTime
                 ) { screenID = it }
 
                 SELECT_TRAINER -> TrainerSelector(trainers) { screen, selectedTrainer ->
@@ -192,7 +193,10 @@ fun main(args: Array<String>) = application {
                     viewModel::setTrainerStatus,
                     onDismiss = { screenID = HOME })
 
-                EXAMS -> ExamsDialog(viewModel.members, viewModel.participations, onDismiss = { screenID = HOME })
+                MEMBER_STATS -> MemberStatsDialog(
+                    viewModel.members,
+                    viewModel.participations,
+                    onDismiss = { screenID = HOME })
 
                 FETCH_DATA -> FetchDataWindow(this.window, viewModel::fetchData) {
                     screenID = HOME
@@ -214,5 +218,5 @@ fun main(args: Array<String>) = application {
 }
 
 enum class Screen {
-    HOME, SELECT_TRAINER, MANAGE_TRAINER, SELECT_MEMBER, SUCCESS, PASSWORD, EXAMS, FETCH_DATA, EXPORT_MEMBERS, UPDATER, HELP
+    HOME, SELECT_TRAINER, MANAGE_TRAINER, SELECT_MEMBER, SUCCESS, PASSWORD, MEMBER_STATS, FETCH_DATA, EXPORT_MEMBERS, UPDATER, HELP
 }
