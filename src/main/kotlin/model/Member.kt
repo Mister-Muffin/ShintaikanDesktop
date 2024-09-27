@@ -51,7 +51,7 @@ data class Member(
         val level = text("level")
         val total = integer("total")
         val birthday = date("birthday")
-        val lastExamDate = date("date_last_exam")
+        val lastExamDate = date("date_last_exam").nullable()
         val isTrainer = bool("is_trainer")
         val stickerAnimal = text("sticker_animal")
         val stickerReceived = integer("sticker_recieved") // DB Typo received
@@ -61,7 +61,7 @@ data class Member(
         val trainerUnits = integer("trainer_units")
         val unitsSinceLastExam = integer("add_units_since_last_exam") // TODO: Please confirm
 
-        fun fromRow(row: ResultRow, getLastExamDate: (Int) -> LocalDate?) = Member(
+        fun fromRow(row: ResultRow, getLastExamDate: (Int, LocalDate?) -> LocalDate?) = Member(
             id = row[id].value,
             surname = row[surname],
             prename = row[prename],
@@ -69,7 +69,7 @@ data class Member(
             level = row[level],
             total = row[total],
             birthday = row[birthday],
-            lastExamDate = getLastExamDate(row[id].value),
+            lastExamDate = getLastExamDate(row[id].value, row[lastExamDate]),
             isTrainer = row[isTrainer],
             stickerAnimal = row[stickerAnimal],
             receivedStickerNumber = row[stickerReceived],

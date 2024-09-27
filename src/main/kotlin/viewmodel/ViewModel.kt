@@ -40,7 +40,8 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
 
     private val mutableParticipations = mutableStateListOf<Participation>()
     val participations: List<Participation> by lazy {
-        coroutineScope.launch {
+        // runBlocking because with coroutine, lastExamDate cannot be calculated
+        runBlocking {
             mutableParticipations.addAll(database.loadParticipations())
         }
         mutableParticipations
@@ -136,9 +137,19 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         return members.filter(Member::isTrainer)
     }
 
-    fun getLastExamDate(id: Int): LocalDate? {
-        return participations.filter { id == it.memberId && it.exam }.takeIf { it.isNotEmpty() }
-            ?.maxBy { it.date }?.date // TODO: Return date from member table if newer or existant
+    fun getLastExamDate(id: Int, memberLastExamDate: LocalDate?): LocalDate? {
+        // Filtert alle Participation-Einträge, die der memberId entsprechen und eine Prüfung haben
+        val participationExams = participations.filter { it.memberId == id && it.exam }
+
+        // Findet das größte Datum in participationExams, falls vorhanden
+        val latestParticipationExam = participationExams.maxByOrNull { it.date }?.date
+
+        // Gibt das größte der beiden Daten zurück oder null, falls beide null sind
+        return when {
+            memberLastExamDate == null -> latestParticipationExam  // Wenn memberLastExamDate null ist, returne participationExam (kann auch null sein)
+            latestParticipationExam == null -> memberLastExamDate  // Wenn participationExam null ist, returne memberLastExamDate
+            else -> maxOf(memberLastExamDate, latestParticipationExam)  // Ansonsten das größere Datum der beiden
+        }
     }
     //</editor-fold>
 
@@ -345,7 +356,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         suspend fun loadMembers(): List<Member> {
             return suspendedTransactionAsync(Dispatchers.IO) {
                 Member.selectAll().map {
-                    Member.fromRow(it, getLastExamDate = { getLastExamDate(it) })
+                    Member.fromRow(it, ::getLastExamDate)
                 }
             }.await()
         }
