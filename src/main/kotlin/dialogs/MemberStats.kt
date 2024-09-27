@@ -113,7 +113,11 @@ private fun StudentStats(
         if (member.lastExamDate != null) {
             Text("Letzte Prüfung am: ${(member.lastExamDate.format())}")
 
-            Text("Einheiten seit der letzten Prüfung: ${countId(member, teilnahme, member.lastExamDate)}")
+            Text(
+                "Einheiten seit der letzten Prüfung: ${
+                    countId(member, teilnahme, member.lastExamDate) + member.unitsSinceLastExam
+                }"
+            )
 
             // Zeitraum zwischen der letzten Prüfung und dem heutigen Datum
             val period = Period.between(member.lastExamDate, LocalDate.now())

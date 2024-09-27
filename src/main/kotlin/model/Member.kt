@@ -23,7 +23,7 @@ data class Member(
     val stickerReceivedBy: String?,
     val isActive: Boolean,
     val trainerUnits: Int,
-    val unitsSinceLastExam: Int,
+    val unitsSinceLastExam: Int, // TODO: Please confirm
     val radioClicked: Boolean = false, // for sticker dialog (all radio buttons must be clicked before button activated). Ooof, s.u.
     val stickerReceived: Boolean = false, // for sticker dialog, if radio button is checked or not. Ooof, there surely exists a better modelling for this
     val stickerShowAgain: Boolean = true, // for sticker dialog, if student is still missing stickers and the dialog should open again with this student
@@ -59,7 +59,7 @@ data class Member(
         val stickerReceivedBy = text("sticker_recieved_by")
         val isActive = bool("is_active")
         val trainerUnits = integer("trainer_units")
-        val unitsSinceLastExam = integer("add_units_since_last_exam") // TODO: Please confirm
+        val unitsSinceLastExam = integer("add_units_since_last_exam")
 
         fun fromRow(row: ResultRow, getLastExamDate: (Int, LocalDate?) -> LocalDate?) = Member(
             id = row[id].value,
