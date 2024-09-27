@@ -92,7 +92,7 @@ fun StartPage(
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }
-                    items(birthdays) {
+                    items(birthdays.sortedByDescending { Period.between(LocalDate.now(), it.birthday).days }) {
                         Row {
                             val birthday = it.birthday.plusYears(((LocalDate.now().year - it.birthday.year).toLong()))
                             val period = Period.between(LocalDate.now(), birthday).days
