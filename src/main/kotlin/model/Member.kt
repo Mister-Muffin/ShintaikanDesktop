@@ -53,10 +53,10 @@ data class Member(
         val birthday = date("birthday")
         val lastExamDate = date("date_last_exam").nullable()
         val isTrainer = bool("is_trainer")
-        val stickerAnimal = text("sticker_animal")
+        val stickerAnimal = text("sticker_animal").nullable()
         val stickerReceived = integer("sticker_recieved") // DB Typo received
-        val stickerDateReceived = date("sticker_date_recieved")
-        val stickerReceivedBy = text("sticker_recieved_by")
+        val stickerDateReceived = date("sticker_date_recieved").nullable()
+        val stickerReceivedBy = text("sticker_recieved_by").nullable()
         val isActive = bool("is_active")
         val trainerUnits = integer("trainer_units")
         val unitsSinceLastExam = integer("add_units_since_last_exam")
