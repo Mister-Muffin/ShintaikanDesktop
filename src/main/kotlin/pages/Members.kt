@@ -32,9 +32,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dialogs.NoteDialog
+import dialogs.AddNoteDialog
 import dialogs.PasswordPrompt
 import dialogs.StickerDialog
+import dialogs.ViewNotesDialog
 import getTotalTrainingSessions
 import gretting
 import model.Member
@@ -76,6 +77,7 @@ fun MemberSelector(
 
     var showStickerDialog by remember { mutableStateOf(false) }
     var studentNoteEdit: Member? by remember { mutableStateOf(null) }
+    var studentNoteView: Member? by remember { mutableStateOf(null) }
     var showCheckboxPasswordDialog by remember { mutableStateOf(false) }
 
     val studentNotesMap = remember { mutableMapOf<Member, String>() }
@@ -120,11 +122,16 @@ fun MemberSelector(
         }
 
         if (studentNoteEdit != null) {
-            NoteDialog(studentNotesMap[studentNoteEdit!!] ?: "") { note, save ->
+            AddNoteDialog(studentNotesMap[studentNoteEdit!!] ?: "") { note, save ->
                 if (save) {
                     studentNotesMap[studentNoteEdit!!] = note
                 }
                 studentNoteEdit = null
+            }
+        }
+        if (studentNoteView != null) {
+            ViewNotesDialog(studentNoteView, participations.withNotesForMember(studentNoteView!!)) {
+                studentNoteView = null
             }
         }
 
@@ -165,7 +172,7 @@ fun MemberSelector(
                     )
                     { /* linke spalte */ student ->
                         val notes = participations.withNotesForMember(student)
-                        ListBox(student, notes, {}) {
+                        ListBox(student, notes, { studentNoteView = student }) {
                             newMembers.add(student)
                             allMembers.remove(student)
                             searchQuery.value = ""

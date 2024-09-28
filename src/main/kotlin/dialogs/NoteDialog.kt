@@ -1,11 +1,9 @@
 package dialogs
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.*
@@ -17,9 +15,12 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.rememberDialogState
+import format
+import model.Member
+import model.Participation
 
 @Composable
-fun NoteDialog(note: String, onDismiss: (note: String, save: Boolean) -> Unit) {
+fun AddNoteDialog(note: String, onDismiss: (note: String, save: Boolean) -> Unit) {
 
     var noteFieldText by remember { mutableStateOf(note) }
 
@@ -51,6 +52,42 @@ fun NoteDialog(note: String, onDismiss: (note: String, save: Boolean) -> Unit) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Outlined.Info, null, modifier = Modifier.padding(end = 4.dp))
                 Text("Die Notizen können unter Mitglieder -> Daten abfragen angezeigt werden.")
+            }
+        }
+    }
+}
+
+@Composable
+fun ViewNotesDialog(member: Member?, participationsWithNotes: List<Participation>, onDismiss: () -> Unit) {
+    DialogWindow(
+        state = rememberDialogState(position = WindowPosition(Alignment.Center), width = 750.dp, height = 600.dp),
+        title = "Notizen anzeigen",
+        onCloseRequest = { onDismiss() },
+    ) {
+        if (member == null) onDismiss()
+        else {
+            Column(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("Notizen zu ${member.prename}:", style = MaterialTheme.typography.subtitle1)
+                Spacer(modifier = Modifier.height(8.dp))
+                participationsWithNotes.forEach { participation ->
+                    val formattedDate = participation.date.format()
+                    Text("$formattedDate: ${participation.note}")
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                Button(
+                    onClick = onDismiss
+                ) {
+                    Text("Schließen")
+                    Icon(Icons.Default.Close, "", modifier = Modifier.padding(start = 8.dp))
+                }
+                Divider(modifier = Modifier.padding(vertical = 16.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Outlined.Info, null, modifier = Modifier.padding(end = 4.dp))
+                    Text("Neue Notizen auf der rechten Seite der Teilnehmerliste hinzufügen.")
+                }
             }
         }
     }
