@@ -7,8 +7,6 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyShortcut
 import androidx.compose.ui.res.loadImageBitmap
 import androidx.compose.ui.res.useResource
 import androidx.compose.ui.text.TextStyle
@@ -16,9 +14,13 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.*
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPlacement
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
 import cc.ekblad.toml.decode
 import cc.ekblad.toml.tomlMapper
+import composables.AppMenuBar
 import dialogs.*
 import kotlinx.serialization.json.Json
 import model.Member
@@ -90,40 +92,15 @@ fun main(args: Array<String>) = application {
 
         var activeTrainer: Member? by remember { mutableStateOf(null) }
 
-        MenuBar {
-            Menu("Datei", mnemonic = 'F', enabled = !viewModel.dataLoading) {
-                Item(
-                    "Startseite",
-                    onClick = { screenID = HOME },
-                    shortcut = KeyShortcut(Key.Escape),
-                    enabled = screenID != HOME
-                )
-                Item("Beenden", onClick = { exitApplication() }, mnemonic = 'E')
-            }
-            Menu("Administration", mnemonic = 'A', enabled = screenID == HOME && !viewModel.dataLoading) {
-                Item(
-                    "Trainer verwalten",
-                    onClick = { fallBackScreenId = screenID; screenID = PASSWORD; forwardedScreenId = MANAGE_TRAINER })
-                Item(
-                    "Daten importieren",
-                    onClick = { fallBackScreenId = screenID; screenID = PASSWORD; forwardedScreenId = FETCH_DATA })
-                Item(
-                    "Programm aktualisieren",
-                    onClick = { fallBackScreenId = screenID; screenID = PASSWORD; forwardedScreenId = UPDATER })
-                Item(
-                    "Datenbank migrieren",
-                    onClick = {
-                        viewModel.migrateTable()
-                    })
-            }
-            Menu("Mitglieder", mnemonic = 'P', enabled = !viewModel.dataLoading) {
-                Item("Daten abfragen", onClick = { screenID = MEMBER_STATS })
-                Item("Daten exportieren", onClick = { screenID = EXPORT_MEMBERS })
-            }
-            Menu("Hilfe", mnemonic = 'H') {
-                Item("Info", onClick = { screenID = HELP })
-            }
-        }
+        AppMenuBar(
+            screenID,
+            { screenID = it },
+            { fallBackScreenId = it },
+            { forwardedScreenId = it },
+            viewModel.dataLoading,
+            viewModel::migrateTable,
+            ::exitApplication
+        )
 
         MaterialTheme(
             typography = Typography(
