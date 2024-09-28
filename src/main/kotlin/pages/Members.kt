@@ -370,7 +370,9 @@ private fun ListBox(
             } else if (!notes.isNullOrEmpty()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.clickable { onButtonClicked() }) {
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier.clickable { onButtonClicked() }.width(40.dp)
+                ) {
                     IconButton(onClick = onButtonClicked, modifier = Modifier.size(22.dp).padding(0.dp)) {
                         Icon(Icons.Outlined.Description, null)
                     }
