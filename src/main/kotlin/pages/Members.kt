@@ -1,6 +1,11 @@
 package pages
 
 import Screen
+import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -44,6 +49,7 @@ import model.withNotesForMember
 import next
 import stickerUnits
 import java.util.*
+import kotlin.random.Random
 
 private const val CHECKBOX_PADDING = 16
 
@@ -111,6 +117,14 @@ fun MemberSelector(
     val rightLazyState = rememberLazyListState()
 
     val greeting = remember { gretting() }
+    val infiniteTransition = rememberInfiniteTransition()
+    val showEasterEgg by remember {
+        mutableStateOf(
+            activeTrainer.prename == "Rüdiger" &&
+                    activeTrainer.surname == "Walz" &&
+                    Random.nextInt(1, 10 + 1) == 1
+        )
+    }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(all = 8.dp)) {
 
@@ -145,8 +159,23 @@ fun MemberSelector(
                 } // if password correct, set requirePasswort to false
             )
         }
-
-        Text("$greeting ${activeTrainer.prename}, bitte Teilnehmer auswählen", style = MaterialTheme.typography.h1)
+        if (showEasterEgg) {
+            // Infinite transition to animate color back and forth
+            val animatedColor by infiniteTransition.animateColor(
+                initialValue = MaterialTheme.typography.h1.color,
+                targetValue = Color.Red,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = 10000),  // Duration of one color transition
+                    repeatMode = RepeatMode.Reverse  // Animate back and forth
+                )
+            )
+            Text(
+                "$greeting ${activeTrainer.prename}, du hast's drauf!",
+                style = MaterialTheme.typography.h1,
+                color = animatedColor
+            )
+        } else
+            Text("$greeting ${activeTrainer.prename}, bitte Teilnehmer auswählen", style = MaterialTheme.typography.h1)
         Divider(modifier = Modifier.padding(vertical = 16.dp))
         Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
             Row {
