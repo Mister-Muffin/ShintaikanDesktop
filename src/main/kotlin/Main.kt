@@ -157,9 +157,7 @@ fun main(args: Array<String>) = application {
                     viewModel::addParticipation
                 ) { screenID = it }
 
-                SUCCESS -> SuccessPage {
-                    screenID = it
-                }
+                SUCCESS -> SuccessPage { screenID = it }
                 // needed because dialog windows don't work on Raspberry Pi
                 PASSWORD -> PasswordPrompt(
                     password = appPassword,
