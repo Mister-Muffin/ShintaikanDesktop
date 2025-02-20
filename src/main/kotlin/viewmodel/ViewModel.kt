@@ -170,7 +170,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         val participation = tmpParticipation.copy(id = id)
         mutableParticipations.add(participation)
 
-        if (!isExam) increaseUnitsSinceLastExam(participant)
+        // if (!isExam) increaseUnitsSinceLastExam(participant)
     }
     //</editor-fold>
 
