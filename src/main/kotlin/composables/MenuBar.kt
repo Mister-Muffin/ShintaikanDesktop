@@ -15,6 +15,7 @@ fun FrameWindowScope.AppMenuBar(
     setFallBackScreenId: (Screen) -> Unit,
     setForwardedScreenId: (Screen) -> Unit,
     dataLoading: Boolean,
+    migrateEnabled: Boolean,
     onMigrateTable: () -> Unit,
     exitApplication: () -> Unit
 ) {
@@ -40,6 +41,7 @@ fun FrameWindowScope.AppMenuBar(
                 onClick = { setFallBackScreenId(screenID); setScreenId(PASSWORD); setForwardedScreenId(UPDATER) })
             Item(
                 "Datenbank migrieren",
+                enabled = migrateEnabled,
                 onClick = { onMigrateTable() })
         }
         Menu("Mitglieder", mnemonic = 'P', enabled = !dataLoading) {

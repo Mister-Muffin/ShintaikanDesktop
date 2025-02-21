@@ -1,14 +1,9 @@
 package viewmodel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import kotlinx.coroutines.*
-import model.Member
-import model.Message
-import model.OldParticipation
-import model.Participation
+import latestDbVersion
+import model.*
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.jetbrains.exposed.sql.*
@@ -45,6 +40,14 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
             mutableParticipations.addAll(database.loadParticipations())
         }
         mutableParticipations
+    }
+
+    private var mutableDbIntern = mutableStateOf(Intern())
+    val dbIntern: MutableState<Intern> by lazy {
+        runBlocking {
+            mutableDbIntern.value = database.loadDbIntern()
+        }
+        mutableDbIntern
     }
 
     //<editor-fold desc="Message operations">
@@ -153,9 +156,14 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
     }
     //</editor-fold>
 
-    fun migrateTable() {
-        runBlocking {
-            database.migrateTable()
+    fun migrateTable(dbVersion: Int) {
+        for (i in dbVersion until latestDbVersion) {
+            runBlocking {
+                database.migrateTable(i)
+                val newDbIntern = dbIntern.value.copy(dbVersion = i + 1)
+                database.updateDbIntern(newDbIntern)
+                mutableDbIntern.value = newDbIntern
+            }
         }
     }
 
@@ -299,33 +307,49 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         }
         //</editor-fold>
 
-        suspend fun migrateTable() {
-            return suspendedTransactionAsync(Dispatchers.IO) {
-                val parts = loadOldParticipations()
-                parts.forEach outer@{ part ->
-                    val ids = part.userIds.split(',')
-                    val examIds = part.userIdsExam.split(',')
-
-                    ids.forEach { id ->
-                        if (id.isBlank()) return@forEach
-                        if (id == "null") return@forEach
-
-                        val tmpPre = Participation(-1, id.toInt(), part.date, "", false, null)
-                        Participation.insertAndGetId {
-                            tmpPre.insertInto(it)
-                        }.value
-                    }
-
-                    examIds.forEach { id ->
-                        if (id.isBlank()) return@forEach
-                        if (id == "null") return@forEach
-
-                        val tmpPre = Participation(-1, id.toInt(), part.date, "", true, null)
-                        Participation.insertAndGetId {
-                            tmpPre.insertInto(it)
-                        }.value
-                    }
+        suspend fun updateDbIntern(intern: Intern) {
+            suspendedTransactionAsync(Dispatchers.IO) {
+                Intern.update {
+                    intern.updateInto(it)
                 }
+            }.await()
+        }
+
+        suspend fun migrateTable(dbVersion: Int) {
+            if (dbVersion == 0) {
+                return suspendedTransactionAsync(Dispatchers.IO) {
+                    val parts = loadOldParticipations()
+                    parts.forEach outer@{ part ->
+                        val ids = part.userIds.split(',')
+                        val examIds = part.userIdsExam.split(',')
+
+                        ids.forEach { id ->
+                            if (id.isBlank()) return@forEach
+                            if (id == "null") return@forEach
+
+                            val tmpPre = Participation(-1, id.toInt(), part.date, "", false, null)
+                            Participation.insertAndGetId {
+                                tmpPre.insertInto(it)
+                            }.value
+                        }
+
+                        examIds.forEach { id ->
+                            if (id.isBlank()) return@forEach
+                            if (id == "null") return@forEach
+
+                            val tmpPre = Participation(-1, id.toInt(), part.date, "", true, null)
+                            Participation.insertAndGetId {
+                                tmpPre.insertInto(it)
+                            }.value
+                        }
+                    }
+                }.await()
+            }
+        }
+
+        suspend fun loadDbIntern(): Intern {
+            return suspendedTransactionAsync(Dispatchers.IO) {
+                Intern.selectAll().map(Intern::fromRow).first()
             }.await()
         }
 

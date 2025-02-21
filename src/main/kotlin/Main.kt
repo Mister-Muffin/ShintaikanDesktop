@@ -38,6 +38,7 @@ import java.sql.Connection
 const val configFileName = "config.toml"
 val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
 const val dataStoreFileName = "datastore.json"
+const val latestDbVersion = 2
 
 //NOTE: Archivgröße zur Vorherigen release version 28mb -> 69mb...
 fun main(args: Array<String>) = application {
@@ -98,7 +99,8 @@ fun main(args: Array<String>) = application {
             { fallBackScreenId = it },
             { forwardedScreenId = it },
             viewModel.dataLoading,
-            viewModel::migrateTable,
+            viewModel.dbIntern.value.dbVersion < latestDbVersion,
+            { viewModel.migrateTable(viewModel.dbIntern.value.dbVersion) },
             ::exitApplication
         )
 
@@ -131,6 +133,7 @@ fun main(args: Array<String>) = application {
                     viewModel.messages,
                     birthdayMembers,
                     datastore.lastImportPretty,
+                    viewModel.dbIntern.value.dbVersion,
                     viewModel::addMessage,
                     viewModel::deleteMessage,
                     viewModel::updateMessage,

@@ -39,6 +39,7 @@ fun StartPage(
     messages: List<Message>,
     birthdays: List<Member>,
     lastImport: String,
+    dbVersion: Int,
     addMessage: (newMessage: String) -> Unit,
     deleteMessage: (id: Int) -> Unit,
     updateMessage: (Message) -> Unit,
@@ -184,9 +185,10 @@ fun StartPage(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxSize().padding(8.dp)
             ) {
-                Text(
-                    "Letzter Datenimport: $lastImport"
-                )
+                Column {
+                    Text("Letzter Datenimport: $lastImport")
+                    Text("Datenbankversion: $dbVersion")
+                }
 
                 Text(
                     try {
