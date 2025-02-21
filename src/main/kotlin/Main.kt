@@ -99,8 +99,8 @@ fun main(args: Array<String>) = application {
             { fallBackScreenId = it },
             { forwardedScreenId = it },
             viewModel.dataLoading,
-            viewModel.dbIntern.value.dbVersion < latestDbVersion,
-            { viewModel.migrateTable(viewModel.dbIntern.value.dbVersion) },
+            viewModel.dbIntern.dbVersion < latestDbVersion,
+            { viewModel.migrateTable(viewModel.dbIntern.dbVersion) },
             ::exitApplication
         )
 
@@ -133,7 +133,7 @@ fun main(args: Array<String>) = application {
                     viewModel.messages,
                     birthdayMembers,
                     datastore.lastImportPretty,
-                    viewModel.dbIntern.value.dbVersion,
+                    viewModel.dbIntern.dbVersion,
                     viewModel::addMessage,
                     viewModel::deleteMessage,
                     viewModel::updateMessage,

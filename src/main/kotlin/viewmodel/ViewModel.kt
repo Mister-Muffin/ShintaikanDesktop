@@ -1,9 +1,13 @@
 package viewmodel
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import kotlinx.coroutines.*
 import latestDbVersion
 import model.*
+import mutableLazyStateOf
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.jetbrains.exposed.sql.*
@@ -42,13 +46,12 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         mutableParticipations
     }
 
-    private var mutableDbIntern = mutableStateOf(Intern())
-    val dbIntern: MutableState<Intern> by lazy {
+    var dbIntern by mutableLazyStateOf {
         runBlocking {
-            mutableDbIntern.value = database.loadDbIntern()
+            database.loadDbIntern()
         }
-        mutableDbIntern
     }
+
 
     //<editor-fold desc="Message operations">
     fun addMessage(newMessage: String): Message {
@@ -160,9 +163,9 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         for (i in dbVersion until latestDbVersion) {
             runBlocking {
                 database.migrateTable(i)
-                val newDbIntern = dbIntern.value.copy(dbVersion = i + 1)
+                val newDbIntern = dbIntern.copy(dbVersion = i + 1)
                 database.updateDbIntern(newDbIntern)
-                mutableDbIntern.value = newDbIntern
+                dbIntern = newDbIntern
             }
         }
     }
