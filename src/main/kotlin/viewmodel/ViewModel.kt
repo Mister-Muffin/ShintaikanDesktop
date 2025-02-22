@@ -13,6 +13,7 @@ import org.apache.commons.csv.CSVParser
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
@@ -52,6 +53,11 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         }
     }
 
+    fun createTables() {
+        runBlocking {
+            database.createTables()
+        }
+    }
 
     //<editor-fold desc="Message operations">
     fun addMessage(newMessage: String): Message {
@@ -278,6 +284,12 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
     }
 
     private val database = object {
+        fun createTables() {
+            transaction {
+                SchemaUtils.create(Intern, Participation, Member)
+            }
+        }
+
         //<editor-fold desc="Message operations">
         suspend fun loadMessages(): List<Message> {
             return suspendedTransactionAsync(Dispatchers.IO) {
@@ -352,7 +364,12 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
 
         suspend fun loadDbIntern(): Intern {
             return suspendedTransactionAsync(Dispatchers.IO) {
-                Intern.selectAll().map(Intern::fromRow).first()
+                var intern = Intern.selectAll().map(Intern::fromRow).firstOrNull()
+                if (intern == null) {
+                    intern = Intern()
+                    Intern.insert { intern.insertInto(it) }
+                }
+                return@suspendedTransactionAsync intern
             }.await()
         }
 

@@ -16,4 +16,8 @@ data class Intern(
     fun <T : Any> updateInto(insert: UpdateBuilder<T>) {
         insert[Intern.dbVersion] = dbVersion
     }
+
+    fun <T : Any> insertInto(insert: UpdateBuilder<T>) {
+        insert[Intern.dbVersion] = dbVersion
+    }
 }
