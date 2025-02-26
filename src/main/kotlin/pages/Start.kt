@@ -32,7 +32,6 @@ import model.Message
 import java.time.LocalDate
 import java.time.Period
 import java.time.format.DateTimeFormatter
-import kotlin.time.Duration
 
 @Composable
 fun StartPage(
@@ -40,10 +39,10 @@ fun StartPage(
     messages: List<Message>,
     birthdays: List<Member>,
     lastImport: String,
+    dbVersion: Int,
     addMessage: (newMessage: String) -> Unit,
     deleteMessage: (id: Int) -> Unit,
     updateMessage: (Message) -> Unit,
-    startupTime: () -> Duration,
     changeScreen: (id: Screen) -> Unit
 ) {
 
@@ -94,7 +93,7 @@ fun StartPage(
                             modifier = Modifier.padding(vertical = 4.dp)
                         )
                     }
-                    items(birthdays) {
+                    items(birthdays.sortedByDescending { Period.between(LocalDate.now(), it.birthday).days }) {
                         Row {
                             val birthday = it.birthday.plusYears(((LocalDate.now().year - it.birthday.year).toLong()))
                             val period = Period.between(LocalDate.now(), birthday).days
@@ -125,7 +124,7 @@ fun StartPage(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Kurznachrichten",
+                        text = "Kurznachrichten:",
                         style = MaterialTheme.typography.subtitle1,
                         modifier = Modifier.padding(vertical = 4.dp)
                     )
@@ -186,11 +185,10 @@ fun StartPage(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxSize().padding(8.dp)
             ) {
-                Text(
-                    "Letzter Datenimport: $lastImport"
-                )
-
-                Text(startupTime().toString())
+                Column {
+                    Text("Letzter Datenimport: $lastImport")
+                    Text("Datenbankversion: $dbVersion")
+                }
 
                 Text(
                     try {

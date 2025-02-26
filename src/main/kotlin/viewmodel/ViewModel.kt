@@ -5,9 +5,9 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import kotlinx.coroutines.*
-import model.Member
-import model.Message
-import model.Participation
+import latestDbVersion
+import model.*
+import mutableLazyStateOf
 import org.apache.commons.csv.CSVFormat
 import org.apache.commons.csv.CSVParser
 import org.jetbrains.exposed.sql.*
@@ -16,12 +16,10 @@ import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionA
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
-import kotlin.time.Duration
 
 class ViewModel(private val coroutineScope: CoroutineScope) {
 
     var dataLoading by mutableStateOf(false)
-    var loadTime = Duration.ZERO
 
     private val mutableMembers = mutableStateListOf<Member>()
     val members: List<Member> by lazy {
@@ -41,11 +39,19 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
 
     private val mutableParticipations = mutableStateListOf<Participation>()
     val participations: List<Participation> by lazy {
-        coroutineScope.launch {
+        // runBlocking because with coroutine, lastExamDate cannot be calculated
+        runBlocking {
             mutableParticipations.addAll(database.loadParticipations())
         }
         mutableParticipations
     }
+
+    var dbIntern by mutableLazyStateOf {
+        runBlocking {
+            database.loadDbIntern()
+        }
+    }
+
 
     //<editor-fold desc="Message operations">
     fun addMessage(newMessage: String): Message {
@@ -120,10 +126,10 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         mutableMembers.add(member.copy(trainerUnits = member.trainerUnits + 1))
     }
 
-    fun increaseUnitsSinceLastExam(member: Member, count: Int) {
+    private fun increaseUnitsSinceLastExam(member: Member, count: Int = 1) {
         coroutineScope.launch { database.increaseUnitsSinceLastExam(member, count) }
         mutableMembers.remove(member)
-        mutableMembers.add(member.copy(trainerUnits = member.unitsSinceLastExam + count))
+        mutableMembers.add(member.copy(unitsSinceLastExam = member.unitsSinceLastExam + count))
     }
 
     fun getBirthdayMembers(): List<Member> {
@@ -137,40 +143,45 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         return members.filter(Member::isTrainer)
     }
 
-    fun getLastExamDate(id: Int): LocalDate? {
-        return participations.filter { id.toString() in it.userIdsExam }.takeIf { it.isNotEmpty() }
-            ?.maxBy { it.date }?.date
+    fun getLastExamDate(id: Int, memberLastExamDate: LocalDate?): LocalDate? {
+        // Filtert alle Participation-Einträge, die der memberId entsprechen und eine Prüfung haben
+        val participationExams = participations.filter { it.memberId == id && it.exam }
+
+        // Findet das größte Datum in participationExams, falls vorhanden
+        val latestParticipationExam = participationExams.maxByOrNull { it.date }?.date
+
+        // Gibt das größte der beiden Daten zurück oder null, falls beide null sind
+        return when {
+            memberLastExamDate == null -> latestParticipationExam  // Wenn memberLastExamDate null ist, returne participationExam (kann auch null sein)
+            latestParticipationExam == null -> memberLastExamDate  // Wenn participationExam null ist, returne memberLastExamDate
+            else -> maxOf(memberLastExamDate, latestParticipationExam)  // Ansonsten das größere Datum der beiden
+        }
     }
     //</editor-fold>
 
+    fun migrateTable(dbVersion: Int) {
+        for (i in dbVersion until latestDbVersion) {
+            runBlocking {
+                database.migrateTable(i)
+                val newDbIntern = dbIntern.copy(dbVersion = i + 1)
+                database.updateDbIntern(newDbIntern)
+                dbIntern = newDbIntern
+            }
+        }
+    }
+
     //<editor-fold desc="Participation operations">
-    fun addParticipation(participants: String, isExam: Boolean): Participation {
-        // TODO: Heilige Scheiße, ist das schlimm...
+    fun addParticipation(participant: Member, isExam: Boolean, note: String, trainerId: Int) {
         val today = LocalDate.now()
-        val participationToday = participations.firstOrNull { it.date == today }
-        val participantsString = (participationToday?.userIds?.let { "$it," } ?: "") + if (!isExam) participants else ""
-        val examParticipantString =
-            (participationToday?.userIdsExam?.let { "$it," } ?: "") + if (isExam) participants else ""
-        val temporaryParticipation =
-            Participation(-1, participantsString.trim(','), examParticipantString.trim(','), today)
-        val id = runBlocking { database.addParticipation(temporaryParticipation) }
-        val participation = temporaryParticipation.copy(id = id)
 
-        if (participationToday != null) {
-            mutableParticipations.remove(participationToday)
-        }
+        val tmpParticipation = Participation(-1, participant.id, today, note, isExam, trainerId)
 
-        val updates = members.filter { member -> member.id.toString() in participants }.map { member ->
-            val count = participants.split(',').count { it == member.id.toString() }
-            member to count
-        }
+        val id = runBlocking { database.addParticipation(tmpParticipation) }
 
-        for ((member, count) in updates) {
-            increaseUnitsSinceLastExam(member, count)
-        }
-
+        val participation = tmpParticipation.copy(id = id)
         mutableParticipations.add(participation)
-        return participation
+
+        // if (!isExam) increaseUnitsSinceLastExam(participant)
     }
     //</editor-fold>
 
@@ -246,7 +257,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
                             0,
                             null,
                             null,
-                            true, // TODO: Confirm
+                            true,
                             0,
                             0
                         )
@@ -299,6 +310,52 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         }
         //</editor-fold>
 
+        suspend fun updateDbIntern(intern: Intern) {
+            suspendedTransactionAsync(Dispatchers.IO) {
+                Intern.update {
+                    intern.updateInto(it)
+                }
+            }.await()
+        }
+
+        suspend fun migrateTable(dbVersion: Int) {
+            if (dbVersion == 0) {
+                return suspendedTransactionAsync(Dispatchers.IO) {
+                    val parts = loadOldParticipations()
+                    parts.forEach outer@{ part ->
+                        val ids = part.userIds.split(',')
+                        val examIds = part.userIdsExam.split(',')
+
+                        ids.forEach { id ->
+                            if (id.isBlank()) return@forEach
+                            if (id == "null") return@forEach
+
+                            val tmpPre = Participation(-1, id.toInt(), part.date, "", false, null)
+                            Participation.insertAndGetId {
+                                tmpPre.insertInto(it)
+                            }.value
+                        }
+
+                        examIds.forEach { id ->
+                            if (id.isBlank()) return@forEach
+                            if (id == "null") return@forEach
+
+                            val tmpPre = Participation(-1, id.toInt(), part.date, "", true, null)
+                            Participation.insertAndGetId {
+                                tmpPre.insertInto(it)
+                            }.value
+                        }
+                    }
+                }.await()
+            }
+        }
+
+        suspend fun loadDbIntern(): Intern {
+            return suspendedTransactionAsync(Dispatchers.IO) {
+                Intern.selectAll().map(Intern::fromRow).first()
+            }.await()
+        }
+
         //<editor-fold desc="Participation operations">
         suspend fun loadParticipations(): List<Participation> {
             return suspendedTransactionAsync(Dispatchers.IO) {
@@ -306,19 +363,17 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
             }.await()
         }
 
+        suspend fun loadOldParticipations(): List<OldParticipation> {
+            return suspendedTransactionAsync(Dispatchers.IO) {
+                OldParticipation.selectAll().map(OldParticipation::fromRow)
+            }.await()
+        }
+
         suspend fun addParticipation(temporaryParticipation: Participation): Int {
             return suspendedTransactionAsync(Dispatchers.IO) {
-                if (temporaryParticipation.id < 0) {
-                    Participation.insertAndGetId {
-                        temporaryParticipation.insertInto(it)
-                    }.value
-                } else {
-                    val today = LocalDate.now()
-                    Participation.update({ Participation.date eq today }) {
-                        temporaryParticipation.updateInto(it)
-                    }
-                    temporaryParticipation.id
-                }
+                Participation.insertAndGetId {
+                    temporaryParticipation.insertInto(it)
+                }.value
             }.await()
         }
         //</editor-fold>
@@ -328,7 +383,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         suspend fun loadMembers(): List<Member> {
             return suspendedTransactionAsync(Dispatchers.IO) {
                 Member.selectAll().map {
-                    Member.fromRow(it, getLastExamDate = { getLastExamDate(it) })
+                    Member.fromRow(it, ::getLastExamDate)
                 }
             }.await()
         }

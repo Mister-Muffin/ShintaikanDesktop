@@ -1,5 +1,6 @@
 package dialogs
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,11 +17,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import composables.StudentList
 import countId
+import dbDateFormat
 import format
 import getTotalTrainingSessions
-import net.time4j.PrettyTime
 import model.Member
 import model.Participation
+import model.withNotesForMember
+import net.time4j.PrettyTime
 import next
 import stickerUnits
 import java.time.LocalDate
@@ -29,7 +32,7 @@ import java.time.format.DateTimeFormatter
 import java.util.*
 
 @Composable
-fun ExamsDialog(members: List<Member>, teilnahme: List<Participation>, onDismiss: () -> Unit) {
+fun MemberStatsDialog(members: List<Member>, teilnahme: List<Participation>, onDismiss: () -> Unit) {
 
     var searchFieldVal by remember { mutableStateOf("") }
 
@@ -76,12 +79,16 @@ fun ExamsDialog(members: List<Member>, teilnahme: List<Participation>, onDismiss
 private fun StudentStats(
     member: Member, members: List<Member>, teilnahme: List<Participation>
 ) { //datum letzte prüfung | wie lange her y m d | einheiten seit l prüf | einheiten gesamt
+    var showNotes by remember { mutableStateOf(false) }
+
+    val participationsWithNotes = teilnahme.withNotesForMember(member)
+
     return Column(horizontalAlignment = Alignment.Start, modifier = Modifier.fillMaxWidth()) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
             val nameString: String = member.prename + " " + member.surname // Join pre- and surname
-            // Name of the member
+            // Name of the member adding "(Trainer)" to the name string if the member is also a trainer
             Text(
-                "$nameString${if (member.isTrainer) " (Trainer)" else ""}", // This adds "(Trainer)" to the name string if the member is also a trainer
+                "$nameString${if (member.isTrainer) " (Trainer)" else ""}",
                 style = MaterialTheme.typography.h6,
                 textDecoration = TextDecoration.Underline,
                 modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
@@ -106,7 +113,11 @@ private fun StudentStats(
         if (member.lastExamDate != null) {
             Text("Letzte Prüfung am: ${(member.lastExamDate.format())}")
 
-            Text("Einheiten seit der letzten Prüfung: ${countId(member, teilnahme, member.lastExamDate)}")
+            Text(
+                "Einheiten seit der letzten Prüfung: ${
+                    countId(member, teilnahme, member.lastExamDate) + member.unitsSinceLastExam
+                }"
+            )
 
             // Zeitraum zwischen der letzten Prüfung und dem heutigen Datum
             val period = Period.between(member.lastExamDate, LocalDate.now())
@@ -143,11 +154,11 @@ private fun StudentStats(
                 val stickerByTrainerName: String = if (stickerByTrainer != null) {
                     "${stickerByTrainer.prename} ${stickerByTrainer.surname}"
                 } else {
-                    "[Nicht gefunden]"
+                    "[nicht gefunden]"
                 }
 
                 val stickerDate = singleStats[2]
-                val stickerDateFormatted = LocalDate.parse(stickerDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"))
+                val stickerDateFormatted = LocalDate.parse(stickerDate, DateTimeFormatter.ofPattern(dbDateFormat))
                     .format(DateTimeFormatter.ofPattern("dd.MM.yyyy"))
                 Text("Sticker $stickerName ($stickerUnit) bekommen von $stickerByTrainerName am $stickerDateFormatted")
             }
@@ -159,5 +170,25 @@ private fun StudentStats(
             val nextStickerName = stickerUnits[nextStickerCount]
             Text("Nächster Sticker: $nextStickerName ($nextStickerCount)")
         }
+
+        Divider()
+
+        if (participationsWithNotes.isNotEmpty()) {
+            if (showNotes) {
+                Text("Notizen:")
+                participationsWithNotes.forEach { participation ->
+                    val formattedDate = participation.date.format()
+                    val trainerName =
+                        members.firstOrNull { it.id == participation.trainerId }?.prename ?: "[nicht gefunden]"
+                    Text("$formattedDate von $trainerName: ${participation.note}")
+                }
+            } else {
+                Text(
+                    "Notizen anzeigen",
+                    textDecoration = TextDecoration.Underline,
+                    modifier = Modifier.clickable { showNotes = true })
+            }
+        }
+
     }
 }

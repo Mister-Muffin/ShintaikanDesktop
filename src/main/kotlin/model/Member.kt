@@ -1,13 +1,11 @@
 package model
 
 import org.jetbrains.exposed.dao.id.IntIdTable
-import org.jetbrains.exposed.sql.*
+import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.javatime.date
 import org.jetbrains.exposed.sql.statements.UpdateBuilder
 import java.time.LocalDate
 import java.time.Period
-
-object MemberTable
 
 data class Member(
     val id: Int,
@@ -15,7 +13,7 @@ data class Member(
     val prename: String,
     val group: String,
     val level: String,
-    val total: Int, // TODO: Shit name
+    val total: Int, // Trainingseinheiten vor Einführung der Software
     val birthday: LocalDate,
     val lastExamDate: LocalDate?,
     val isTrainer: Boolean,
@@ -25,7 +23,7 @@ data class Member(
     val stickerReceivedBy: String?,
     val isActive: Boolean,
     val trainerUnits: Int,
-    val unitsSinceLastExam: Int,
+    val unitsSinceLastExam: Int, // TODO: Please confirm
     val radioClicked: Boolean = false, // for sticker dialog (all radio buttons must be clicked before button activated). Ooof, s.u.
     val stickerReceived: Boolean = false, // for sticker dialog, if radio button is checked or not. Ooof, there surely exists a better modelling for this
     val stickerShowAgain: Boolean = true, // for sticker dialog, if student is still missing stickers and the dialog should open again with this student
@@ -53,17 +51,17 @@ data class Member(
         val level = text("level")
         val total = integer("total")
         val birthday = date("birthday")
-        val lastExamDate = date("date_last_exam")
+        val lastExamDate = date("date_last_exam").nullable()
         val isTrainer = bool("is_trainer")
-        val stickerAnimal = text("sticker_animal")
-        val stickerReceived = integer("sticker_recieved") // TODO: So schreibt man received nicht
-        val stickerDateReceived = date("sticker_date_recieved")
-        val stickerReceivedBy = text("sticker_recieved_by")
+        val stickerAnimal = text("sticker_animal").nullable()
+        val stickerReceived = integer("sticker_recieved") // DB Typo received
+        val stickerDateReceived = date("sticker_date_recieved").nullable()
+        val stickerReceivedBy = text("sticker_recieved_by").nullable()
         val isActive = bool("is_active")
         val trainerUnits = integer("trainer_units")
-        val unitsSinceLastExam = integer("add_units_since_last_exam") // TODO: Pls confirm
+        val unitsSinceLastExam = integer("add_units_since_last_exam")
 
-        fun fromRow(row: ResultRow, getLastExamDate: (Int) -> LocalDate?) = Member(
+        fun fromRow(row: ResultRow, getLastExamDate: (Int, LocalDate?) -> LocalDate?) = Member(
             id = row[id].value,
             surname = row[surname],
             prename = row[prename],
@@ -71,7 +69,7 @@ data class Member(
             level = row[level],
             total = row[total],
             birthday = row[birthday],
-            lastExamDate = getLastExamDate(row[id].value),
+            lastExamDate = getLastExamDate(row[id].value, row[lastExamDate]),
             isTrainer = row[isTrainer],
             stickerAnimal = row[stickerAnimal],
             receivedStickerNumber = row[stickerReceived],
@@ -84,7 +82,7 @@ data class Member(
 
     }
 
-    fun <T: Any> upsertInto(insert: UpdateBuilder<T>) {
+    fun <T : Any> upsertInto(insert: UpdateBuilder<T>) {
         insert[Member.surname] = surname
         insert[Member.prename] = prename
         insert[Member.group] = group
@@ -102,8 +100,3 @@ data class Member(
         insert[Member.unitsSinceLastExam] = unitsSinceLastExam
     }
 }
-
-data class MemberWithIdAndString( // TODO: Kernsanierung
-    val id: Int,
-    val sticker_recieved_by: String?,
-)

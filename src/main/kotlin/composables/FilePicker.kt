@@ -12,6 +12,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.awt.ComposeWindow
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import showFileDialog
 
 
@@ -38,7 +40,7 @@ fun FilePicker(
                 Icon(
                     Icons.Outlined.FolderOpen,
                     "",
-                    modifier = Modifier.onClick {
+                    modifier = Modifier.pointerHoverIcon(PointerIcon.Default).onClick {
                         showFileDialog(window) { directory, name ->
                             if (!directory.isNullOrEmpty() && !name.isNullOrEmpty()) {
                                 path = directory + name
