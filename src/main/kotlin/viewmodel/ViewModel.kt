@@ -17,6 +17,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 class ViewModel(private val coroutineScope: CoroutineScope) {
 
@@ -232,6 +233,8 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
                     .withTrim()
             )
 
+            val dateFormatter = DateTimeFormatter.ofPattern("M/d/yyyy")
+
             dumpCurrentDatabase(members, messages, participations)
             exMembers(
                 setText,
@@ -256,7 +259,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
                             group,
                             level,
                             0,
-                            LocalDate.parse(birthday),
+                            LocalDate.parse(birthday, dateFormatter),
                             null,
                             false,
                             null,
@@ -272,7 +275,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
                             it,
                             group,
                             level,
-                            LocalDate.parse(birthday)
+                            LocalDate.parse(birthday, dateFormatter)
                         )
                     } // Es besteht Hoffnung, dass das mit dem Date einfach so funktioniert
                 }, csvParser3
