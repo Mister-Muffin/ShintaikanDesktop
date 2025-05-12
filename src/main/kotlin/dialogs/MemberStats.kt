@@ -145,6 +145,7 @@ private fun StudentStats(
         } else {
             val stickerHistoryList = member.stickerReceivedBy.toString().trim(',').split(",")
             stickerHistoryList.forEach {
+                if (it == "null") return@forEach
                 val singleStats = it.split(":")
                 val stickerUnit: Int = singleStats[0].toInt()
                 val stickerName = stickerUnits[stickerUnit]
