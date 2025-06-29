@@ -141,10 +141,10 @@ private fun NameText(member: Member, isReadyString: String?) {
 
 @Composable
 private fun OldLevel(member: Member) {
-    var level: String = member.level
-    if (member.level.contains("Dan")) {
+    var level: String = member.levelTrim
+    if (member.levelTrim.contains("Dan")) {
         level = level.drop(2) // drop the first two letters
-    } else if (member.level == "z Kyu weiss") {
+    } else if (member.levelTrim == "z Kyu weiss") {
         level = level.drop(2)
     }
     Text(level, modifier = Modifier.width(levelWidth))
@@ -152,7 +152,7 @@ private fun OldLevel(member: Member) {
 
 @Composable
 private fun NewLevel(member: Member) {
-    Text(levels.next(member.level).first, modifier = Modifier.width(levelWidth))
+    Text(levels.next(member.levelTrim).first, modifier = Modifier.width(levelWidth))
 }
 
 @Composable
@@ -212,7 +212,7 @@ fun isReadyForExam(member: Member, teilnahme: List<Participation>): Pair<String,
     var returnString = ""
     var returnString2 = ""
 
-    val key = levels.next(member.level).first
+    val key = levels.next(member.levelTrim).first
     val level = levels[key] ?: throw Exception()
 
 //    if (key == levels.next(member.level).first)

@@ -28,6 +28,7 @@ data class Member(
     val stickerReceived: Boolean = false, // for sticker dialog, if radio button is checked or not. Ooof, there surely exists a better modelling for this
     val stickerShowAgain: Boolean = true, // for sticker dialog, if student is still missing stickers and the dialog should open again with this student
 ) {
+    val levelTrim: String get() = level.replace("  ", " ") // trim double spaces in level
     val age: Int = Period.between(birthday, LocalDate.now()).years
 
     /**
