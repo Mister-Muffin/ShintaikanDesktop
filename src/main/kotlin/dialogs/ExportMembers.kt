@@ -37,7 +37,12 @@ private val monthWidth = 90.dp
 private val readyWidth = 500.dp
 
 @Composable
-fun ExportMembersDialog(members: List<Member>, participations: List<Participation>, drivePath: String, onDismiss: () -> Unit) {
+fun ExportMembersDialog(
+    members: List<Member>,
+    participations: List<Participation>,
+    drivePath: String,
+    onDismiss: () -> Unit
+) {
     var searchFieldValue by remember { mutableStateOf("") }
     var showTimedSuccessDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -153,8 +158,8 @@ private fun NewLevel(member: Member) {
 @Composable
 private fun UnitsSinceLastExam(member: Member, teilnahme: List<Participation>) {
     Text(
-        if (member.lastExamDate == null) "" else "${
-            countId(member, teilnahme, member.lastExamDate)
+        if (member.lastExamDate == null) getTotalTrainingSessions(member, teilnahme).toString() else "${
+            countId(member, teilnahme, member.lastExamDate) + member.unitsSinceLastExam
         }",
         modifier = Modifier.width(unitsWidth), textAlign = TextAlign.Center
     )
@@ -278,12 +283,15 @@ private suspend fun exportMembers(drivePath: String, members: List<Member>, part
     csvPrinter.printRecord("Name", "Dat. lzt. Prüf.", "Einh. s. l. Prüf.")
     members.forEach { member ->
         if (!member.isActive) return@forEach
-        if (member.lastExamDate == null) return@forEach
 
         csvPrinter.printRecord(
             member.surname + " " + member.prename,
             member.lastExamDate,
-            countId(member, participations, member.lastExamDate)
+            if (member.lastExamDate != null) countId(
+                member,
+                participations,
+                member.lastExamDate
+            ) + member.unitsSinceLastExam else getTotalTrainingSessions(member, participations)
         )
 
     }
