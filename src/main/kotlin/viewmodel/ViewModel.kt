@@ -254,8 +254,8 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
                     members.find { it.prename == first && it.surname == last }.let {
                         it ?: Member(
                             -1,
-                            first,
                             last,
+                            first,
                             group,
                             level,
                             0,
