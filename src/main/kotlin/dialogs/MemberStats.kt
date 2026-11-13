@@ -37,7 +37,7 @@ fun MemberStatsDialog(members: List<Member>, teilnahme: List<Participation>, onD
     var searchFieldVal by remember { mutableStateOf("") }
 
     val studentFilter = members.filter {
-        (it.prename + it.surname).lowercase().contains(searchFieldVal.lowercase().replace(" ", ""))
+        (it.prename + it.surname).lowercase().replace(" ", "").contains(searchFieldVal.lowercase().replace(" ", ""))
     }
 
     Column(
@@ -61,7 +61,8 @@ fun MemberStatsDialog(members: List<Member>, teilnahme: List<Participation>, onD
             if (searchFieldVal.length > 2) {
                 if (studentFilter.size >= 2) {
                     items(members.filter {
-                        (it.prename + it.surname).lowercase().contains(searchFieldVal.lowercase().replace(" ", ""))
+                        (it.prename + it.surname).lowercase().replace(" ", "")
+                            .contains(searchFieldVal.lowercase().replace(" ", ""))
                     }) {
                         StudentList(it.id, members, onClick = { nameString -> searchFieldVal = nameString })
                     }
@@ -145,6 +146,7 @@ private fun StudentStats(
         } else {
             val stickerHistoryList = member.stickerReceivedBy.toString().trim(',').split(",")
             stickerHistoryList.forEach {
+                if (it == "null" || it.isEmpty()) return@forEach
                 val singleStats = it.split(":")
                 val stickerUnit: Int = singleStats[0].toInt()
                 val stickerName = stickerUnits[stickerUnit]

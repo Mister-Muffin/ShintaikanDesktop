@@ -37,7 +37,12 @@ private val monthWidth = 90.dp
 private val readyWidth = 500.dp
 
 @Composable
-fun ExportMembersDialog(members: List<Member>, participations: List<Participation>, drivePath: String, onDismiss: () -> Unit) {
+fun ExportMembersDialog(
+    members: List<Member>,
+    participations: List<Participation>,
+    drivePath: String,
+    onDismiss: () -> Unit
+) {
     var searchFieldValue by remember { mutableStateOf("") }
     var showTimedSuccessDialog by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -136,10 +141,10 @@ private fun NameText(member: Member, isReadyString: String?) {
 
 @Composable
 private fun OldLevel(member: Member) {
-    var level: String = member.level
-    if (member.level.contains("Dan")) {
+    var level: String = member.levelTrim
+    if (member.levelTrim.contains("Dan")) {
         level = level.drop(2) // drop the first two letters
-    } else if (member.level == "z Kyu weiss") {
+    } else if (member.levelTrim == "z Kyu weiss") {
         level = level.drop(2)
     }
     Text(level, modifier = Modifier.width(levelWidth))
@@ -147,14 +152,14 @@ private fun OldLevel(member: Member) {
 
 @Composable
 private fun NewLevel(member: Member) {
-    Text(levels.next(member.level).first, modifier = Modifier.width(levelWidth))
+    Text(levels.next(member.levelTrim).first, modifier = Modifier.width(levelWidth))
 }
 
 @Composable
 private fun UnitsSinceLastExam(member: Member, teilnahme: List<Participation>) {
     Text(
-        if (member.lastExamDate == null) "" else "${
-            countId(member, teilnahme, member.lastExamDate)
+        if (member.lastExamDate == null) getTotalTrainingSessions(member, teilnahme).toString() else "${
+            countId(member, teilnahme, member.lastExamDate) + member.unitsSinceLastExam
         }",
         modifier = Modifier.width(unitsWidth), textAlign = TextAlign.Center
     )
@@ -207,7 +212,7 @@ fun isReadyForExam(member: Member, teilnahme: List<Participation>): Pair<String,
     var returnString = ""
     var returnString2 = ""
 
-    val key = levels.next(member.level).first
+    val key = levels.next(member.levelTrim).first
     val level = levels[key] ?: throw Exception()
 
 //    if (key == levels.next(member.level).first)
@@ -278,12 +283,15 @@ private suspend fun exportMembers(drivePath: String, members: List<Member>, part
     csvPrinter.printRecord("Name", "Dat. lzt. Prüf.", "Einh. s. l. Prüf.")
     members.forEach { member ->
         if (!member.isActive) return@forEach
-        if (member.lastExamDate == null) return@forEach
 
         csvPrinter.printRecord(
             member.surname + " " + member.prename,
             member.lastExamDate,
-            countId(member, participations, member.lastExamDate)
+            if (member.lastExamDate != null) countId(
+                member,
+                participations,
+                member.lastExamDate
+            ) + member.unitsSinceLastExam else getTotalTrainingSessions(member, participations)
         )
 
     }

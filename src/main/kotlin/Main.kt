@@ -34,6 +34,7 @@ import viewmodel.ViewModel
 import java.io.File
 import java.nio.file.Path
 import java.sql.Connection
+import java.util.*
 
 const val configFileName = "config.toml"
 val configFilePath = System.getProperty("user.home") + "/.local/share/shintaikan-desktop/"
@@ -46,6 +47,8 @@ fun main(args: Array<String>) = application {
     if (args.isNotEmpty()) {
         production = args[0] != "--development"
     }
+
+    TimeZone.setDefault(TimeZone.getTimeZone("Europe/Berlin"))
 
     // create file/directories in case the config file does not exist
     createConfigFile()
@@ -75,6 +78,7 @@ fun main(args: Array<String>) = application {
 
     val scope = rememberCoroutineScope()
     val viewModel = remember { ViewModel(scope) }
+    viewModel.createTables()
 
     val imageBitmap = remember { useResource("pelli2.jpg") { loadImageBitmap(it) } }
 

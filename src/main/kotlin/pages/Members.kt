@@ -197,7 +197,7 @@ fun MemberSelector(
                             ).joinToString(" ") // "prename surname"
                                 .contains(searchQuery.value)
                             // <- filter again for search
-                        }.sortedBy { it.prename }.sortedByDescending { it.level }.toList()
+                        }.sortedBy { it.prename }.sortedByDescending { it.levelTrim }.toList()
                     )
                     { /* linke spalte */ student ->
                         val notes = participations.withNotesForMember(student)
