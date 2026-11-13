@@ -20,8 +20,8 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.MedicalInformation
 import androidx.compose.material.icons.outlined.NoteAdd
-import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -395,7 +395,7 @@ private fun ListBox(
                     horizontalArrangement = Arrangement.Start,
                     modifier = Modifier.clickable { }
                 ) {
-                    Icon(Icons.Outlined.WarningAmber, null, tint = Color.Red, modifier = Modifier.padding(0.dp))
+                    Icon(Icons.Outlined.MedicalInformation, null, tint = Color.Red, modifier = Modifier.padding(0.dp))
                 }
             }
 
