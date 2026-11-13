@@ -289,7 +289,7 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
     private val database = object {
         fun createTables() {
             transaction {
-                SchemaUtils.create(Intern, Participation, Member)
+                SchemaUtils.createMissingTablesAndColumns(Intern, Participation, Member)
             }
         }
 

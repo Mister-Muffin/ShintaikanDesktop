@@ -27,6 +27,7 @@ data class Member(
     val radioClicked: Boolean = false, // for sticker dialog (all radio buttons must be clicked before button activated). Ooof, s.u.
     val stickerReceived: Boolean = false, // for sticker dialog, if radio button is checked or not. Ooof, there surely exists a better modelling for this
     val stickerShowAgain: Boolean = true, // for sticker dialog, if student is still missing stickers and the dialog should open again with this student
+    val healthCondition: String? = null
 ) {
     val levelTrim: String get() = level.replace("  ", " ").replace("  ", " ") // trim double spaces in level
     val age: Int = Period.between(birthday, LocalDate.now()).years
@@ -61,7 +62,7 @@ data class Member(
         val isActive = bool("is_active")
         val trainerUnits = integer("trainer_units")
         val unitsSinceLastExam = integer("add_units_since_last_exam")
-
+        val healthCondition = text("health_condition").nullable()
         fun fromRow(row: ResultRow, getLastExamDate: (Int, LocalDate?) -> LocalDate?) = Member(
             id = row[id].value,
             surname = row[surname],
@@ -78,6 +79,7 @@ data class Member(
             stickerReceivedBy = row[stickerReceivedBy],
             isActive = row[isActive],
             trainerUnits = row[trainerUnits],
+            healthCondition = row[healthCondition],
             unitsSinceLastExam = row[unitsSinceLastExam]
         )
 
@@ -99,5 +101,6 @@ data class Member(
         insert[Member.isActive] = isActive
         insert[Member.trainerUnits] = trainerUnits
         insert[Member.unitsSinceLastExam] = unitsSinceLastExam
+        if (healthCondition != null) insert[Member.healthCondition] = healthCondition
     }
 }
