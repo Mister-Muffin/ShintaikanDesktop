@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.luminance
@@ -26,6 +27,13 @@ fun BeltIcon(
         // Kontrast-Rand für helle Gürtel (Weiß/Gelb) – löst das Sichtbarkeitsproblem
         val needsBorder = beltColor.first().luminance() > 0.65f
         val border = if (needsBorder) Color.Gray.copy(alpha = 0.75f) else null
+
+        // Gradient for middle knot in case of multicolor belts
+        val gradient = Brush.horizontalGradient(
+            colors = if (beltColor.size < 2) listOf(beltColor.first(), beltColor.last()) else beltColor,
+            startX = w * 0.40f,
+            endX = w * 0.60f
+        )
 
         fun drawLeg(left: Float, color: Color) {
             if (border != null) {
@@ -60,7 +68,7 @@ fun BeltIcon(
             )
         }
         drawRoundRect(
-            beltColor.first(),
+            gradient,
             topLeft = Offset(w * 0.30f, h * 0.25f),
             size = Size(w * 0.40f, h * 0.50f),
             cornerRadius = CornerRadius(h * 0.13f),
