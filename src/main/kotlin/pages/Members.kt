@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.NoteAdd
+import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -51,6 +52,7 @@ import java.util.*
 import kotlin.random.Random
 
 private const val CHECKBOX_PADDING = 16
+private const val COLUMN_WIDTH = 350
 
 @Composable
 fun MemberSelector(
@@ -178,7 +180,7 @@ fun MemberSelector(
         Divider(modifier = Modifier.padding(vertical = 16.dp))
         Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
             Row {
-                LazyColumn(state = leftLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
+                LazyColumn(state = leftLazyState, modifier = Modifier.fillMaxHeight().width(COLUMN_WIDTH.dp)) {
                     items(
                         allMembers.asSequence()
                             .filter { s ->
@@ -206,7 +208,7 @@ fun MemberSelector(
                             allMembers.remove(student)
                             searchQuery.value = ""
                         }
-                        Divider(modifier = Modifier.width(250.dp))
+                        Divider(modifier = Modifier.fillMaxWidth())
                     }
                 }
                 VerticalScrollbar(
@@ -292,7 +294,7 @@ fun MemberSelector(
             }
 
             Row {
-                LazyColumn(state = rightLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
+                LazyColumn(state = rightLazyState, modifier = Modifier.fillMaxHeight().width(COLUMN_WIDTH.dp)) {
                     items(
                         newMembers.asSequence()
                             .sortedBy { it.prename }
@@ -302,7 +304,7 @@ fun MemberSelector(
                             allMembers.add(student)
                             newMembers.remove(student)
                         }
-                        Divider(modifier = Modifier.width(250.dp))
+                        Divider(modifier = Modifier.fillMaxWidth())
                     }
                 }
                 VerticalScrollbar(
@@ -359,8 +361,8 @@ private fun ListBox(
 
     Box(
         modifier = Modifier
-            .width(250.dp)
-            .height(25.dp)
+            .fillMaxWidth()
+            .height(30.dp)
             .clickable { onBoxClicked() }
             .onPointerEvent(PointerEventType.Enter) {
                 pointerHover = true
@@ -371,11 +373,11 @@ private fun ListBox(
         contentAlignment = Alignment.CenterStart,
     ) {
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
         ) {
-            BeltIcon(DegreeColor.getColorList(member.level))
+            BeltIcon(DegreeColor.getColorList(member.level), modifier = Modifier.padding(end = 8.dp))
             Text(
                 fontSize = 12.sp,
                 fontFamily = FontFamily.SansSerif,
@@ -384,12 +386,29 @@ private fun ListBox(
                 modifier = Modifier,
                 text = "${member.prename} ${member.surname}"
             )
+            // push buttons to the right
+            Spacer(modifier = Modifier.weight(1f))
+
+            if (member.healthCondition != null) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier.clickable { }
+                ) {
+                    Icon(Icons.Outlined.WarningAmber, null, tint = Color.Red, modifier = Modifier.padding(0.dp))
+                }
+            }
+
             // if "notes" is null, the Box is on the right side, and the add note button should show on hover.
             // Otherwise, the list would at least be empty, meaning the Box is on the left side
             // and the note icon will be shown if necessary
             if (pointerHover && notes == null) {
-                IconButton(onClick = onButtonClicked, modifier = Modifier.size(22.dp).padding(0.dp)) {
-                    Icon(Icons.Outlined.NoteAdd, null)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier.clickable { onButtonClicked() }
+                ) {
+                    Icon(Icons.Outlined.NoteAdd, null, modifier = Modifier.padding(0.dp))
                 }
             } else if (!notes.isNullOrEmpty()) {
                 Row(
@@ -397,10 +416,8 @@ private fun ListBox(
                     horizontalArrangement = Arrangement.Start,
                     modifier = Modifier.clickable { onButtonClicked() }.width(40.dp)
                 ) {
-                    IconButton(onClick = onButtonClicked, modifier = Modifier.size(22.dp).padding(0.dp)) {
-                        Icon(Icons.Outlined.Description, null)
-                    }
-                    Text(notes.size.toString().takeUnless { notes.size > 3 } ?: "3+", fontSize = 10.sp)
+                    Icon(Icons.Outlined.Description, null, modifier = Modifier.padding(0.dp))
+                    Text(notes.size.toString().takeUnless { notes.size > 3 } ?: "3+", fontSize = 12.sp)
                 }
             }
         }
