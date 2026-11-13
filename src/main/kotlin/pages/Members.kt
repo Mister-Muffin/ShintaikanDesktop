@@ -25,8 +25,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
@@ -37,6 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import composables.BeltIcon
 import dialogs.AddNoteDialog
 import dialogs.PasswordPrompt
 import dialogs.StickerDialog
@@ -180,24 +179,25 @@ fun MemberSelector(
         Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
             Row {
                 LazyColumn(state = leftLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
-                    items(allMembers.asSequence()
-                        .filter { s ->
-                            // filter color checkboxes
-                            if (checkedColors.isEmpty()) true
-                            else findMatch(s.level, checkedColors, false)
-                        }.filter { s ->
-                            // filter group checkboxes on top
-                            if (checkedGroups.isEmpty()) true
-                            else findMatch(s.group, checkedGroups, true)
-                        }.filter {
-                            // filter again for search ->
-                            arrayListOf(
-                                it.prename.lowercase(Locale.getDefault()),
-                                it.surname.lowercase(Locale.getDefault())
-                            ).joinToString(" ") // "prename surname"
-                                .contains(searchQuery.value)
-                            // <- filter again for search
-                        }.sortedBy { it.prename }.sortedByDescending { it.levelTrim }.toList()
+                    items(
+                        allMembers.asSequence()
+                            .filter { s ->
+                                // filter color checkboxes
+                                if (checkedColors.isEmpty()) true
+                                else findMatch(s.level, checkedColors, false)
+                            }.filter { s ->
+                                // filter group checkboxes on top
+                                if (checkedGroups.isEmpty()) true
+                                else findMatch(s.group, checkedGroups, true)
+                            }.filter {
+                                // filter again for search ->
+                                arrayListOf(
+                                    it.prename.lowercase(Locale.getDefault()),
+                                    it.surname.lowercase(Locale.getDefault())
+                                ).joinToString(" ") // "prename surname"
+                                    .contains(searchQuery.value)
+                                // <- filter again for search
+                            }.sortedBy { it.prename }.sortedByDescending { it.levelTrim }.toList()
                     )
                     { /* linke spalte */ student ->
                         val notes = participations.withNotesForMember(student)
@@ -244,7 +244,8 @@ fun MemberSelector(
                         CustomFilter(Group.entries.toTypedArray(), checkedGroups)
                     }
                     Column {
-                        Row(verticalAlignment = Alignment.CenterVertically,
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center,
                             modifier = Modifier.fillMaxWidth().height(60.dp)
                                 .clickable {
@@ -292,10 +293,11 @@ fun MemberSelector(
 
             Row {
                 LazyColumn(state = rightLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
-                    items(newMembers.asSequence()
-                        .sortedBy { it.prename }
-                        .sortedByDescending { it.level }
-                        .toList()) { student ->
+                    items(
+                        newMembers.asSequence()
+                            .sortedBy { it.prename }
+                            .sortedByDescending { it.level }
+                            .toList()) { student ->
                         ListBox(student, null, { studentNoteEdit = student }) {
                             allMembers.add(student)
                             newMembers.remove(student)
@@ -324,7 +326,8 @@ private fun <T : FilterOption> CustomFilter(filterOptions: Array<T>, checked: Mu
                 if (checked.contains(option)) checked.remove(option) else checked.add(option)
             }
 
-            Row(verticalAlignment = Alignment.CenterVertically,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.width(200.dp)
                     .clickable { handleChecked() }) {
@@ -358,19 +361,6 @@ private fun ListBox(
         modifier = Modifier
             .width(250.dp)
             .height(25.dp)
-            .drawWithCache {
-                val gradient = Brush.horizontalGradient(
-                    colors = DegreeColor.getColorList(member.level).let { list ->
-                        if (list.size < 2) list + list
-                        else list
-                    },
-                    startX = size.width / 2 - 1,
-                    endX = size.width / 2 + 1,
-                )
-                onDrawBehind {
-                    drawRect(gradient)
-                }
-            }
             .clickable { onBoxClicked() }
             .onPointerEvent(PointerEventType.Enter) {
                 pointerHover = true
@@ -385,14 +375,12 @@ private fun ListBox(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
         ) {
+            BeltIcon(DegreeColor.getColorList(member.level))
             Text(
                 fontSize = 12.sp,
                 fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.W500,
-                color = if (DegreeColor.getDegreeList(member.level).first()?.isDark == true)
-                    Color.White
-                else
-                    Color.Black,
+                color = Color.Black,
                 modifier = Modifier,
                 text = "${member.prename} ${member.surname}"
             )
@@ -428,7 +416,7 @@ enum class DegreeColor(
     WHITE(color = Color.White, optionName = "Weiß", false, checkmarkColor = Color.Black) {
         override val databaseName = "Weiss"
     },
-    YELLOW(color = Color(0xffffff35), optionName = "Gelb", isDark = false, checkmarkColor = Color.Black),
+    YELLOW(color = Color(0xFFFFFF00), optionName = "Gelb", isDark = false, checkmarkColor = Color.Black),
     RED(color = Color(0xffff0004), optionName = "Rot", isDark = false),
     ORANGE(color = Color(0xffffaa00), optionName = "Orange", isDark = false),
     GREEN(color = Color(0xff00aa00), optionName = "Grün", isDark = false),
