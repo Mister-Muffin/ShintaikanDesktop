@@ -37,10 +37,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import composables.BeltIcon
-import dialogs.AddNoteDialog
-import dialogs.PasswordPrompt
-import dialogs.StickerDialog
-import dialogs.ViewNotesDialog
+import dialogs.*
 import getTotalTrainingSessions
 import gretting
 import model.Member
@@ -85,6 +82,7 @@ fun MemberSelector(
     var showStickerDialog by remember { mutableStateOf(false) }
     var studentNoteEdit: Member? by remember { mutableStateOf(null) }
     var studentNoteView: Member? by remember { mutableStateOf(null) }
+    var studentMedicalView: Member? by remember { mutableStateOf(null) }
     var showCheckboxPasswordDialog by remember { mutableStateOf(false) }
 
     val studentNotesMap = remember { mutableMapOf<Member, String>() }
@@ -149,6 +147,11 @@ fun MemberSelector(
                 studentNoteView = null
             }
         }
+        if (studentMedicalView != null) {
+            ViewMedicalDialog(studentMedicalView) {
+                studentMedicalView = null
+            }
+        }
 
         if (showCheckboxPasswordDialog) {
             PasswordPrompt(
@@ -203,7 +206,7 @@ fun MemberSelector(
                     )
                     { /* linke spalte */ student ->
                         val notes = participations.withNotesForMember(student)
-                        ListBox(student, notes, { studentNoteView = student }) {
+                        ListBox(student, notes, { studentNoteView = student }, { studentMedicalView = student }) {
                             newMembers.add(student)
                             allMembers.remove(student)
                             searchQuery.value = ""
@@ -300,7 +303,7 @@ fun MemberSelector(
                             .sortedBy { it.prename }
                             .sortedByDescending { it.level }
                             .toList()) { student ->
-                        ListBox(student, null, { studentNoteEdit = student }) {
+                        ListBox(student, null, { studentNoteEdit = student }, { studentMedicalView = student }) {
                             allMembers.add(student)
                             newMembers.remove(student)
                         }
@@ -355,6 +358,7 @@ private fun ListBox(
     member: Member,
     notes: List<Participation>? = null,
     onButtonClicked: () -> Unit,
+    onMedicalClicked: () -> Unit,
     onBoxClicked: () -> Unit
 ) {
     var pointerHover by remember { mutableStateOf(false) }
@@ -393,7 +397,7 @@ private fun ListBox(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start,
-                    modifier = Modifier.clickable { }
+                    modifier = Modifier.clickable { onMedicalClicked() }
                 ) {
                     Icon(Icons.Outlined.MedicalInformation, null, tint = Color.Red, modifier = Modifier.padding(0.dp))
                 }
