@@ -102,11 +102,18 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
         mutableMembers.add(member.copy(prename = firstName, surname = lastName))
     }
 
-    fun upsertMemberData(member: Member, group: String, level: String, birthday: LocalDate) {
+    fun upsertMemberData(member: Member, group: String, level: String, birthday: LocalDate, medical: String) {
         if (member.id >= 0) {
-            coroutineScope.launch { database.updateMemberData(member, group, level, birthday) }
+            coroutineScope.launch { database.updateMemberData(member, group, level, birthday, medical) }
             mutableMembers.remove(member)
-            mutableMembers.add(member.copy(group = group, level = level, birthday = birthday))
+            mutableMembers.add(
+                member.copy(
+                    group = group,
+                    level = level,
+                    birthday = birthday,
+                    healthCondition = medical
+                )
+            )
         } else {
             val id = runBlocking { database.insertMember(member) }
             mutableMembers.add(member.copy(id = id))
@@ -193,64 +200,50 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
     //</editor-fold>
 
     /**
-     * csv structure: Name;Gruppe;Grad;Geb.Dat;e;f;g
+     * csv structure: Name;Gruppe;Grad;Geb.Dat.;Medizinisches;alterName;neuerName;Exmitglied
      *
-     *                0   ;  1   ; 2  ; 3     ;4;5;6
+     *                0   ;  1   ; 2  ; 3      ;4            ;5        ;6        ;7
      *
      * // exMembers(csvParser)
      */
     fun fetchData(csvPath: String, setText: (String) -> Unit, onComplete: () -> Unit) {
         dataLoading = true
         coroutineScope.launch {
-            val reader1 = withContext(Dispatchers.IO) {
-                Files.newBufferedReader(Paths.get(csvPath))
+            val records = withContext(Dispatchers.IO) {
+                Files.newBufferedReader(Paths.get(csvPath)).use { reader ->
+                    CSVParser(
+                        reader, CSVFormat.DEFAULT.builder()
+                            .setDelimiter(';')
+                            .setHeader()
+                            .setSkipHeaderRecord(true)
+                            .setIgnoreHeaderCase(true)
+                            .setTrim(true)
+                            .build()
+                    ).use { parser ->
+                        parser.records.toList()
+                    }
+                }
             }
-            val reader2 = withContext(Dispatchers.IO) {
-                Files.newBufferedReader(Paths.get(csvPath))
-            }
-            val reader3 = withContext(Dispatchers.IO) {
-                Files.newBufferedReader(Paths.get(csvPath))
-            }
-            val csvParser1 = CSVParser(
-                reader1, CSVFormat.DEFAULT
-                    .withDelimiter(';')
-                    .withFirstRecordAsHeader()
-                    .withIgnoreHeaderCase()
-                    .withTrim()
-            )
-            val csvParser2 = CSVParser(
-                reader2, CSVFormat.DEFAULT
-                    .withDelimiter(';')
-                    .withFirstRecordAsHeader()
-                    .withIgnoreHeaderCase()
-                    .withTrim()
-            )
-            val csvParser3 = CSVParser(
-                reader3, CSVFormat.DEFAULT
-                    .withDelimiter(';')
-                    .withFirstRecordAsHeader()
-                    .withIgnoreHeaderCase()
-                    .withTrim()
-            )
 
             val dateFormatter = DateTimeFormatter.ofPattern("M/d/yyyy")
 
+            backupDatabase()
             dumpCurrentDatabase(members, messages, participations)
             exMembers(
                 setText,
                 { f, l -> members.find { it.prename == f && it.surname == l }?.let { deactivateMember(it) } },
-                csvParser1
+                records
             )
             renameMembers(
                 setText,
                 { (oldFirst, oldLast), (newFirst, newLast) ->
                     members.find { it.prename == oldFirst && it.surname == oldLast }
                         ?.let { updateMemberName(it, newFirst, newLast) }
-                }, csvParser2
+                }, records
             )
             updateMembers(
                 setText,
-                { (first, last), group, level, birthday ->
+                { (first, last), group, level, birthday, medical ->
                     members.find { it.prename == first && it.surname == last }.let {
                         it ?: Member(
                             -1,
@@ -268,17 +261,19 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
                             null,
                             true,
                             0,
-                            0
+                            0,
+                            healthCondition = medical
                         )
                     }.let {
                         upsertMemberData(
                             it,
                             group,
                             level,
-                            LocalDate.parse(birthday, dateFormatter)
+                            LocalDate.parse(birthday, dateFormatter),
+                            medical
                         )
                     } // Es besteht Hoffnung, dass das mit dem Date einfach so funktioniert
-                }, csvParser3
+                }, records
             )
 
             dataLoading = false
@@ -441,12 +436,19 @@ class ViewModel(private val coroutineScope: CoroutineScope) {
             }.await()
         }
 
-        suspend fun updateMemberData(member: Member, group: String, level: String, birthday: LocalDate) {
+        suspend fun updateMemberData(
+            member: Member,
+            group: String,
+            level: String,
+            birthday: LocalDate,
+            medical: String
+        ) {
             suspendedTransactionAsync(Dispatchers.IO) {
                 Member.update(where = { Member.id eq member.id }) {
                     it[Member.group] = group
                     it[Member.level] = level
                     it[Member.birthday] = birthday
+                    it[Member.healthCondition] = medical
                 }
             }.await()
         }
