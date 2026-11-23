@@ -20,13 +20,12 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.MedicalInformation
 import androidx.compose.material.icons.outlined.NoteAdd
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawWithCache
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.onPointerEvent
@@ -37,10 +36,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dialogs.AddNoteDialog
-import dialogs.PasswordPrompt
-import dialogs.StickerDialog
-import dialogs.ViewNotesDialog
+import composables.BeltIcon
+import dialogs.*
 import getTotalTrainingSessions
 import gretting
 import model.Member
@@ -52,6 +49,7 @@ import java.util.*
 import kotlin.random.Random
 
 private const val CHECKBOX_PADDING = 16
+private const val COLUMN_WIDTH = 350
 
 @Composable
 fun MemberSelector(
@@ -84,6 +82,7 @@ fun MemberSelector(
     var showStickerDialog by remember { mutableStateOf(false) }
     var studentNoteEdit: Member? by remember { mutableStateOf(null) }
     var studentNoteView: Member? by remember { mutableStateOf(null) }
+    var studentMedicalView: Member? by remember { mutableStateOf(null) }
     var showCheckboxPasswordDialog by remember { mutableStateOf(false) }
 
     val studentNotesMap = remember { mutableMapOf<Member, String>() }
@@ -148,6 +147,11 @@ fun MemberSelector(
                 studentNoteView = null
             }
         }
+        if (studentMedicalView != null) {
+            ViewMedicalDialog(studentMedicalView) {
+                studentMedicalView = null
+            }
+        }
 
         if (showCheckboxPasswordDialog) {
             PasswordPrompt(
@@ -179,34 +183,35 @@ fun MemberSelector(
         Divider(modifier = Modifier.padding(vertical = 16.dp))
         Row(horizontalArrangement = Arrangement.SpaceAround, modifier = Modifier.fillMaxSize()) {
             Row {
-                LazyColumn(state = leftLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
-                    items(allMembers.asSequence()
-                        .filter { s ->
-                            // filter color checkboxes
-                            if (checkedColors.isEmpty()) true
-                            else findMatch(s.level, checkedColors, false)
-                        }.filter { s ->
-                            // filter group checkboxes on top
-                            if (checkedGroups.isEmpty()) true
-                            else findMatch(s.group, checkedGroups, true)
-                        }.filter {
-                            // filter again for search ->
-                            arrayListOf(
-                                it.prename.lowercase(Locale.getDefault()),
-                                it.surname.lowercase(Locale.getDefault())
-                            ).joinToString(" ") // "prename surname"
-                                .contains(searchQuery.value)
-                            // <- filter again for search
-                        }.sortedBy { it.prename }.sortedByDescending { it.levelTrim }.toList()
+                LazyColumn(state = leftLazyState, modifier = Modifier.fillMaxHeight().width(COLUMN_WIDTH.dp)) {
+                    items(
+                        allMembers.asSequence()
+                            .filter { s ->
+                                // filter color checkboxes
+                                if (checkedColors.isEmpty()) true
+                                else findMatch(s.level, checkedColors, false)
+                            }.filter { s ->
+                                // filter group checkboxes on top
+                                if (checkedGroups.isEmpty()) true
+                                else findMatch(s.group, checkedGroups, true)
+                            }.filter {
+                                // filter again for search ->
+                                arrayListOf(
+                                    it.prename.lowercase(Locale.getDefault()),
+                                    it.surname.lowercase(Locale.getDefault())
+                                ).joinToString(" ") // "prename surname"
+                                    .contains(searchQuery.value)
+                                // <- filter again for search
+                            }.sortedBy { it.prename }.sortedByDescending { it.levelTrim }.toList()
                     )
                     { /* linke spalte */ student ->
                         val notes = participations.withNotesForMember(student)
-                        ListBox(student, notes, { studentNoteView = student }) {
+                        ListBox(student, notes, { studentNoteView = student }, { studentMedicalView = student }) {
                             newMembers.add(student)
                             allMembers.remove(student)
                             searchQuery.value = ""
                         }
-                        Divider(modifier = Modifier.width(250.dp))
+                        Divider(modifier = Modifier.fillMaxWidth())
                     }
                 }
                 VerticalScrollbar(
@@ -244,7 +249,8 @@ fun MemberSelector(
                         CustomFilter(Group.entries.toTypedArray(), checkedGroups)
                     }
                     Column {
-                        Row(verticalAlignment = Alignment.CenterVertically,
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center,
                             modifier = Modifier.fillMaxWidth().height(60.dp)
                                 .clickable {
@@ -291,16 +297,17 @@ fun MemberSelector(
             }
 
             Row {
-                LazyColumn(state = rightLazyState, modifier = Modifier.fillMaxHeight().width(250.dp)) {
-                    items(newMembers.asSequence()
-                        .sortedBy { it.prename }
-                        .sortedByDescending { it.level }
-                        .toList()) { student ->
-                        ListBox(student, null, { studentNoteEdit = student }) {
+                LazyColumn(state = rightLazyState, modifier = Modifier.fillMaxHeight().width(COLUMN_WIDTH.dp)) {
+                    items(
+                        newMembers.asSequence()
+                            .sortedBy { it.prename }
+                            .sortedByDescending { it.level }
+                            .toList()) { student ->
+                        ListBox(student, null, { studentNoteEdit = student }, { studentMedicalView = student }) {
                             allMembers.add(student)
                             newMembers.remove(student)
                         }
-                        Divider(modifier = Modifier.width(250.dp))
+                        Divider(modifier = Modifier.fillMaxWidth())
                     }
                 }
                 VerticalScrollbar(
@@ -324,7 +331,8 @@ private fun <T : FilterOption> CustomFilter(filterOptions: Array<T>, checked: Mu
                 if (checked.contains(option)) checked.remove(option) else checked.add(option)
             }
 
-            Row(verticalAlignment = Alignment.CenterVertically,
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
                 modifier = Modifier.width(200.dp)
                     .clickable { handleChecked() }) {
@@ -350,27 +358,15 @@ private fun ListBox(
     member: Member,
     notes: List<Participation>? = null,
     onButtonClicked: () -> Unit,
+    onMedicalClicked: () -> Unit,
     onBoxClicked: () -> Unit
 ) {
     var pointerHover by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
-            .width(250.dp)
-            .height(25.dp)
-            .drawWithCache {
-                val gradient = Brush.horizontalGradient(
-                    colors = DegreeColor.getColorList(member.level).let { list ->
-                        if (list.size < 2) list + list
-                        else list
-                    },
-                    startX = size.width / 2 - 1,
-                    endX = size.width / 2 + 1,
-                )
-                onDrawBehind {
-                    drawRect(gradient)
-                }
-            }
+            .fillMaxWidth()
+            .height(30.dp)
             .clickable { onBoxClicked() }
             .onPointerEvent(PointerEventType.Enter) {
                 pointerHover = true
@@ -381,27 +377,42 @@ private fun ListBox(
         contentAlignment = Alignment.CenterStart,
     ) {
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp)
         ) {
+            BeltIcon(DegreeColor.getColorList(member.level), modifier = Modifier.padding(end = 8.dp))
             Text(
                 fontSize = 12.sp,
                 fontFamily = FontFamily.SansSerif,
                 fontWeight = FontWeight.W500,
-                color = if (DegreeColor.getDegreeList(member.level).first()?.isDark == true)
-                    Color.White
-                else
-                    Color.Black,
+                color = Color.Black,
                 modifier = Modifier,
                 text = "${member.prename} ${member.surname}"
             )
+            // push buttons to the right
+            Spacer(modifier = Modifier.weight(1f))
+
+            if (!member.healthCondition.isNullOrEmpty()) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier.clickable { onMedicalClicked() }
+                ) {
+                    Icon(Icons.Outlined.MedicalInformation, null, tint = Color.Red, modifier = Modifier.padding(0.dp))
+                }
+            }
+
             // if "notes" is null, the Box is on the right side, and the add note button should show on hover.
             // Otherwise, the list would at least be empty, meaning the Box is on the left side
             // and the note icon will be shown if necessary
             if (pointerHover && notes == null) {
-                IconButton(onClick = onButtonClicked, modifier = Modifier.size(22.dp).padding(0.dp)) {
-                    Icon(Icons.Outlined.NoteAdd, null)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier.clickable { onButtonClicked() }
+                ) {
+                    Icon(Icons.Outlined.NoteAdd, null, modifier = Modifier.padding(0.dp))
                 }
             } else if (!notes.isNullOrEmpty()) {
                 Row(
@@ -409,10 +420,8 @@ private fun ListBox(
                     horizontalArrangement = Arrangement.Start,
                     modifier = Modifier.clickable { onButtonClicked() }.width(40.dp)
                 ) {
-                    IconButton(onClick = onButtonClicked, modifier = Modifier.size(22.dp).padding(0.dp)) {
-                        Icon(Icons.Outlined.Description, null)
-                    }
-                    Text(notes.size.toString().takeUnless { notes.size > 3 } ?: "3+", fontSize = 10.sp)
+                    Icon(Icons.Outlined.Description, null, modifier = Modifier.padding(0.dp))
+                    Text(notes.size.toString().takeUnless { notes.size > 3 } ?: "3+", fontSize = 12.sp)
                 }
             }
         }
@@ -428,7 +437,7 @@ enum class DegreeColor(
     WHITE(color = Color.White, optionName = "Weiß", false, checkmarkColor = Color.Black) {
         override val databaseName = "Weiss"
     },
-    YELLOW(color = Color(0xffffff35), optionName = "Gelb", isDark = false, checkmarkColor = Color.Black),
+    YELLOW(color = Color(0xFFFFFF00), optionName = "Gelb", isDark = false, checkmarkColor = Color.Black),
     RED(color = Color(0xffff0004), optionName = "Rot", isDark = false),
     ORANGE(color = Color(0xffffaa00), optionName = "Orange", isDark = false),
     GREEN(color = Color(0xff00aa00), optionName = "Grün", isDark = false),

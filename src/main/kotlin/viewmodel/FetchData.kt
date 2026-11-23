@@ -7,8 +7,9 @@ import model.Member
 import model.Message
 import model.Participation
 import org.apache.commons.csv.CSVFormat
-import org.apache.commons.csv.CSVParser
 import org.apache.commons.csv.CSVPrinter
+import org.apache.commons.csv.CSVRecord
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.LocalTime
@@ -69,19 +70,28 @@ suspend fun dumpCurrentDatabase(members: List<Member>, messages: List<Message>, 
     csvPrinter.close()
 }
 
-suspend fun exMembers(
+suspend fun backupDatabase() {
+    withContext(Dispatchers.IO) {
+        File("${configFilePath}database.db").copyTo(
+            File("${"${configFilePath}backups"}/db-backup-${System.currentTimeMillis()}.db"),
+            overwrite = false
+        )
+    }
+}
+
+fun exMembers(
     setText: (String) -> Unit,
     deactivateMember: (String, String) -> Unit,
-    csvParser: CSVParser
+    records: List<CSVRecord>
 ) {
-    for (csvRecord in csvParser) {
+    for (csvRecord in records) {
         try {
             // Accessing Values by Column Index
             val name = csvRecord.get(0)
 
             if (name == "ZZähler") return // stop if end of csv file is reached
 
-            val exMember = csvRecord.get(6)
+            val exMember = csvRecord.get(7)
             // print the value to console
             println("Record No - " + csvRecord.recordNumber)
             println("---------------")
@@ -102,20 +112,20 @@ suspend fun exMembers(
     }
 }
 
-suspend fun renameMembers(
+fun renameMembers(
     setText: (String) -> Unit,
     renameMember: (Pair<String, String>, Pair<String, String>) -> Unit,
-    csvParser: CSVParser
+    records: List<CSVRecord>
 ) {
-    for (csvRecord in csvParser) {
+    for (csvRecord in records) {
         try {
             // Accessing Values by Column Index
             val name = csvRecord.get(0)
 
             if (name == "ZZähler") return // stop if end of csv file is reached
 
-            val oldName = csvRecord.get(4)
-            val newName = csvRecord.get(5)
+            val oldName = csvRecord.get(5)
+            val newName = csvRecord.get(6)
             // Print values to console
             println("Record No - " + csvRecord.recordNumber)
             println("---------------")
@@ -140,12 +150,12 @@ suspend fun renameMembers(
     }
 }
 
-suspend fun updateMembers(
+fun updateMembers(
     setText: (String) -> Unit,
-    updateMember: (Pair<String, String>, String, String, String) -> Unit,
-    csvParser: CSVParser
+    updateMember: (Pair<String, String>, String, String, String, String) -> Unit,
+    records: List<CSVRecord>
 ) {
-    for (csvRecord in csvParser) {
+    for (csvRecord in records) {
         try {
             // Accessing Values by Column Index
             val name = csvRecord.get(0)
@@ -155,6 +165,7 @@ suspend fun updateMembers(
             val group = csvRecord.get(1)
             val level = csvRecord.get(2)
             val birthday = csvRecord.get(3)
+            val medical = csvRecord.get(4)
             // Print values to console
             println("Record No - " + csvRecord.recordNumber)
             println("---------------")
@@ -162,13 +173,14 @@ suspend fun updateMembers(
             println("Group : $group")
             println("Level : $level")
             println("Birthday : $birthday")
+            println("Medical : $medical")
             println("---------------")
 
             if (!name.isNullOrEmpty()) {
                 val namePair = splitName(name)
 
                 setText(name)
-                updateMember(namePair, group, level, birthday)
+                updateMember(namePair, group, level, birthday, medical)
             }
 
         } catch (_: ArrayIndexOutOfBoundsException) {
