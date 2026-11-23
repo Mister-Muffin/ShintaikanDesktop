@@ -393,7 +393,7 @@ private fun ListBox(
             // push buttons to the right
             Spacer(modifier = Modifier.weight(1f))
 
-            if (member.healthCondition != null) {
+            if (!member.healthCondition.isNullOrEmpty()) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Start,
