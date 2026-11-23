@@ -25,9 +25,16 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
     }
 }
 
+val targetArch = providers.gradleProperty("targetArch").orElse("x64").get()
+require(targetArch in setOf("x64", "arm64")) {
+    "targetArch must be x64 or arm64 (received: $targetArch)"
+}
+
 dependencies {
-    implementation(compose.desktop.linux_x64)
-    implementation(compose.desktop.linux_arm64)
+    when (targetArch) {
+        "x64" -> implementation(compose.desktop.linux_x64)
+        "arm64" -> implementation(compose.desktop.linux_arm64)
+    }
     // https://youtrack.jetbrains.com/issue/KTIJ-22262/Compose-IDE-False-positive-Cannot-access-class-androidxcomposeuigeometrySize-error#focus=Comments-27-6447983.0-0
     implementation("org.jetbrains.compose.ui:ui-graphics-desktop:${project.extra["compose.version"] as String}")
     implementation("org.jetbrains.compose.ui:ui-geometry-desktop:${project.extra["compose.version"] as String}")
@@ -61,7 +68,7 @@ compose.desktop {
 }
 
 tasks.register<WriteDateFile>("writeDateFile") {
-    projectDir = getProjectDir()
+    outputFile.set(layout.projectDirectory.file("src/main/resources/buildDate.txt"))
 }
 
 tasks.register<WriteDateFileAndBuild>("writeDateFileAndBuild") {
@@ -73,18 +80,17 @@ tasks.register<WriteDateFileAndBuild>("writeDateFileAndBuild") {
 abstract class WriteDateFileAndBuild : DefaultTask()
 
 abstract class WriteDateFile : DefaultTask() {
+    @get:OutputFile
+    abstract val outputFile: RegularFileProperty
 
-    @InputDirectory
-    var projectDir: File? = null
+    init {
+        outputs.upToDateWhen { false }
+    }
 
     @TaskAction
     fun createBuildDateFile() {
-        val formatter = SimpleDateFormat("EEEE, dd.MM.yyyy HH:mm:ss")
-        val dateString = formatter.format(Date()).toString()
-        val dateFilePath = "$projectDir/src/main/resources"
-        val dateFileName = "buildDate.txt"
-
-        File("$dateFilePath/$dateFileName").writeText(dateString)
+        val dateString = SimpleDateFormat("EEEE, dd.MM.yyyy HH:mm:ss").format(Date())
+        outputFile.get().asFile.writeText(dateString)
         println(dateString)
     }
 }
